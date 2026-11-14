@@ -1,0 +1,207 @@
+﻿Task Name,Description,Status,Priority,Tipo,Agente,Worktree,Branch,Modelo,Blocked By,Source Issue
+01: Esqueleto andante,"**What to build:** Um usuário consegue se cadastrar com e-mail, confirmar por código, entrar e chegar a uma home autenticada — com o app instalável e as abas do MVP visíveis conforme o papel. É a primeira fatia que atravessa banco, API, UI, testes e deploy de uma vez.
+
+
+
+- [ ] Cadastro por e-mail com código de uso único, sem senha, e sessão persistente por cookie
+- [ ] Home autenticada com estado vazio, navegação inferior no celular e lateral no desktop
+- [ ] Manifesto PWA instalável com `display: standalone` e service worker mínimo
+- [ ] Banco com migrações versionadas e o primeiro head coach semeado
+- [ ] Testes nos dois seams: API via `app.inject` com Postgres efêmero e uma tela com MSW
+- [ ] Deploy no Railway com Postgres gerenciado, variáveis de ambiente documentadas
+- [ ] Datas e prazos exibidos no fuso `America/Sao_Paulo`",Backlog,Normal,Infraestrutura,Backend + Frontend,api,,,None (can start immediately),.scratch/playbook/issues/01-esqueleto-andante.md
+"02: Cadastro com papel, subpapel e posições","**What to build:** Quem se cadastra informa o código do time, escolhe se é jogador ou staff e, sendo jogador, escolhe a unidade e as posições que ocupa. Staff fica pendente até aprovação; jogador entra direto e já vê o playbook da sua unidade.
+
+
+
+- [ ] Código do time obrigatório no cadastro; código inválido é recusado com mensagem clara
+- [ ] Jogador escolhe ofensiva, defesa ou ambas e uma ou mais posições; unidades são derivadas das posições
+- [ ] Staff escolhe subpapel (head coach, coordenador ofensivo, defensivo ou de special teams) e nasce pendente
+- [ ] Staff pendente entra no app, mas não edita nada e vê a própria situação
+- [ ] Jogador não acessa nenhuma tela de edição
+- [ ] Testes da matriz de autorização nos dois caminhos de cadastro",Backlog,Normal,Feature,Backend + Frontend,api,,,01 (Esqueleto andante),.scratch/playbook/issues/02-cadastro-papel-posicoes.md
+03: Login com Google,"**What to build:** O usuário entra com a conta Google em vez de esperar código por e-mail. O e-mail verificado pelo Google conta como confirmação, e uma conta já existente com o mesmo e-mail é vinculada em vez de duplicada.
+
+
+
+- [ ] Entrar e se cadastrar com Google, resultando na mesma sessão do login por e-mail
+- [ ] Primeiro acesso com Google segue para a escolha de papel, unidade e posições
+- [ ] E-mail já cadastrado é vinculado à conta existente, sem criar duplicata
+- [ ] Cancelamento ou falha no provedor volta ao login sem criar sessão
+- [ ] Testes cobrindo vínculo de conta e primeiro acesso",Backlog,Normal,Feature,Backend + Frontend,api,,,01 (Esqueleto andante),.scratch/playbook/issues/03-login-google.md
+04: Elenco e perfil,"**What to build:** Todo mundo vê o elenco do time com nome, posições, unidades e status do elenco. O jogador não vê a aba de gestão de elenco, e o perfil mostra como ele está registrado.
+
+
+
+- [ ] Lista do elenco com nome, posições, unidades e status do elenco
+- [ ] Aba Elenco oculta para jogador; staff acessa a versão de gestão
+- [ ] Perfil próprio mostra posições, unidades e status
+- [ ] Jogador sem posição cadastrada vê um estado que o orienta a completar o perfil
+- [ ] Testes de visibilidade por papel nas duas telas",Backlog,Normal,Feature,Backend + Frontend,api,,,"02 (Cadastro com papel, subpapel e posições)",.scratch/playbook/issues/04-elenco-e-perfil.md
+05: Status do elenco editável,"**What to build:** O staff mantém o status do elenco atualizado — `disponivel`, `indisponivel`, `lesionado` ou `reformado` — com observação e, na lesão, data prevista de retorno. O jogador vê o próprio status sem poder alterá-lo.
+
+
+
+- [ ] Staff altera o status de qualquer jogador entre os quatro valores
+- [ ] Observação livre em qualquer status; data prevista de retorno aceita quando lesionado
+- [ ] Jogador vê o próprio status e não encontra ação de edição
+- [ ] Suspensão é registrada como `indisponivel` com observação, sem status próprio
+- [ ] Filtros do elenco por unidade, posição e status
+- [ ] Testes de autorização e de validação da data de retorno",Backlog,Normal,Feature,Backend + Frontend,api,,,04 (Elenco e perfil),.scratch/playbook/issues/05-status-do-elenco.md
+06: Administração de staff,"**What to build:** O head coach controla quem é staff: aprova ou recusa cadastros pendentes, atribui e remove subpapéis, e revoga o papel de quem sair da comissão. Coordenador de special teams é acumulável por qualquer membro do staff.
+
+
+
+- [ ] Head coach lista cadastros pendentes e aprova ou recusa cada um
+- [ ] Aprovação libera edição; recusa impede o acesso de staff
+- [ ] Head coach atribui e remove subpapéis; ofensivo e defensivo são exclusivos por unidade
+- [ ] Coordenador de special teams pode ser acumulado com qualquer outro subpapel
+- [ ] Revogar staff devolve o usuário ao papel de jogador, sem apagar a conta
+- [ ] Ninguém aprova o próprio cadastro; staff sem ser head coach não administra papéis
+- [ ] Testes da matriz de autorização, incluindo tentativas de autoaprovação",Backlog,Normal,Feature,Backend + Frontend,api,,,"02 (Cadastro com papel, subpapel e posições)",.scratch/playbook/issues/06-administracao-de-staff.md
+07: Playbook — jogada com atribuições,"**What to build:** O coordenador publica jogadas com nome, unidade, formação, situação e atribuição por posição, e o jogador consulta o playbook da sua unidade. A visibilidade é por jogada, com default na unidade dona; jogadas de special teams são visíveis para todo o time.
+
+
+
+- [ ] Coordenador cria e edita jogadas da sua unidade; head coach edita qualquer unidade
+- [ ] Jogada contém nome, unidade, formação, situação e atribuição por posição
+- [ ] Jogada nasce visível apenas para a unidade dona
+- [ ] Staff libera uma jogada específica para outra unidade sem abrir o playbook inteiro
+- [ ] Jogador lista as jogadas visíveis agrupadas por unidade e vê todas as atribuições no detalhe
+- [ ] Jogadas de special teams aparecem para todo o jogador, independentemente da unidade dele
+- [ ] Coordenador lê, mas não edita, jogadas de outras unidades liberadas para ele
+- [ ] Testes de visibilidade cobrindo as três unidades e a exceção de special teams",Backlog,Normal,Feature,Backend + Frontend,api,,,06 (Administração de staff),.scratch/playbook/issues/07-playbook-jogada-com-atribuicoes.md
+08: Imagem da jogada,"**What to build:** O staff anexa a imagem que o coach já desenha a uma jogada, e ela aparece no detalhe para quem tem visibilidade da jogada. A imagem não vaza para quem não pode ver a jogada.
+
+
+
+- [ ] Staff com permissão de edição anexa, troca e remove a imagem de uma jogada
+- [ ] Imagem aparece no detalhe da jogada para quem tem visibilidade dela
+- [ ] Acesso à imagem exige a mesma visibilidade da jogada, não bastando conhecer o endereço
+- [ ] Formato e tamanho inválidos são recusados com mensagem clara
+- [ ] Testes de autorização no acesso à imagem",Backlog,Normal,Feature,Backend + Frontend,api,,,07 (Playbook — jogada com atribuições),.scratch/playbook/issues/08-imagem-da-jogada.md
+09: Histórico e novidade,"**What to build:** O jogador sabe o que mudou no playbook desde o último acesso, sem precisar de um novo PDF. Cada edição relevante vira uma revisão com autor e data, e o jogador pode marcar a jogada como estudada.
+
+
+
+- [ ] Cada edição relevante da jogada gera uma revisão com autor e data
+- [ ] Staff consulta o histórico de revisões de uma jogada
+- [ ] Jogada com versão posterior ao último acesso do jogador aparece com selo de novidade
+- [ ] Marcar como estudada remove o selo daquela jogada
+- [ ] Jogada fora da visibilidade do jogador nunca gera selo
+- [ ] Testes de cálculo de novidade por último acesso e por `play_read`",Backlog,Normal,Feature,Backend + Frontend,api,,,07 (Playbook — jogada com atribuições),.scratch/playbook/issues/09-historico-e-novidade.md
+10: Busca e filtros do playbook,"**What to build:** O jogador acha a jogada em segundos durante a reunião, buscando por nome e filtrando por formação e situação, sem nunca receber resultado fora da sua visibilidade.
+
+
+
+- [ ] Busca por nome com resultado atualizado a cada consulta
+- [ ] Filtros por formação e situação, combináveis entre si e com a busca
+- [ ] Resultados respeitam a visibilidade por unidade, incluindo special teams aberta a todos
+- [ ] Estado vazio explica que não há resultado em vez de mostrar tela em branco",Backlog,Normal,Feature,Frontend,web,,,07 (Playbook — jogada com atribuições),.scratch/playbook/issues/10-busca-e-filtros.md
+11: Arquivar jogada,"**What to build:** O staff tira uma jogada do playbook ativo sem apagar o histórico nem quebrar game plans já montados. A jogada arquivada deixa de ser oferecida em novas seleções.
+
+
+
+- [ ] Staff arquiva e desarquiva uma jogada da sua unidade
+- [ ] Jogada arquivada sai da listagem ativa do jogador
+- [ ] Jogada arquivada continua visível em game plans já montados, marcada como arquivada
+- [ ] Jogada arquivada não é oferecida ao montar um game plan novo
+- [ ] Histórico de revisões permanece acessível",Backlog,Normal,Feature,Backend + Frontend,api,,,07 (Playbook — jogada com atribuições),.scratch/playbook/issues/11-arquivar-jogada.md
+12: Evento de treino,"**What to build:** O staff cria o treino com data, local e prazo de resposta, e ele aparece na home de todos. O staff ajusta prazo, cancela ou remarca sem criar outro evento.
+
+
+
+- [ ] Staff cria evento do tipo treino com data, local e prazo de resposta (default 24h antes)
+- [ ] Próximos eventos aparecem na home de todos os usuários ativos
+- [ ] Staff ajusta o prazo de um evento existente
+- [ ] Staff cancela e remarca um evento; o cancelado continua visível com estado explícito
+- [ ] Jogador abre o detalhe do evento sem encontrar ações de edição
+- [ ] Testes de autorização na criação e na edição",Backlog,Normal,Feature,Backend + Frontend,api,,,"02 (Cadastro com papel, subpapel e posições)",.scratch/playbook/issues/12-evento-de-treino.md
+13: Presença com justificativa,"**What to build:** O jogador responde ""vou"" ou ""não vou"" a um treino; recusar exige justificativa. O staff vê de uma vez confirmados, ausentes com justificativa e sem resposta, e o jogador nunca vê a justificativa dos outros.
+
+
+
+- [ ] Jogador confirma presença e pode mudar a resposta antes do prazo
+- [ ] Recusa exige justificativa, escolhida de uma lista e complementada por texto livre opcional
+- [ ] Resposta sem justificativa na recusa é recusada com mensagem clara
+- [ ] Staff vê o consolidado em três grupos: confirmados, ausentes com justificativa, sem resposta
+- [ ] Staff vê a justificativa completa; outros jogadores veem apenas ""ausente""
+- [ ] Testes de autorização e de privacidade da justificativa",Backlog,Normal,Feature,Backend + Frontend,api,,,12 (Evento de treino),.scratch/playbook/issues/13-presenca-com-justificativa.md
+14: Prazo de resposta,"**What to build:** A resposta vale até o prazo do evento. Depois disso o jogador não altera mais nada, e só o staff ajusta — estendendo o prazo quando quiser reabrir a resposta.
+
+
+
+- [ ] Após o prazo, o jogador não altera a resposta e vê o motivo
+- [ ] Staff continua podendo alterar a resposta de um jogador depois do prazo
+- [ ] Staff estende o prazo e a resposta do jogador reabre
+- [ ] Prazo inválido (no passado, ao criar) é recusado
+- [ ] Testes com relógio controlado cobrindo antes, no limite e depois do prazo",Backlog,Normal,Feature,Backend + Frontend,api,,,13 (Presença com justificativa),.scratch/playbook/issues/14-prazo-de-resposta.md
+15: Presença real e comparecimento,"**What to build:** Depois do treino, o staff registra quem realmente apareceu, separado da resposta dada. Ao longo do tempo, o staff vê a taxa de comparecimento por jogador.
+
+
+
+- [ ] Staff registra presença real de cada jogador depois do evento
+- [ ] Presença real é independente da resposta: quem disse que ia e faltou fica registrado como falta
+- [ ] Jogador vê o próprio registro de presença real
+- [ ] Staff vê taxa de comparecimento por jogador ao longo dos treinos
+- [ ] Registro de presença só é aceito em evento do tipo treino já ocorrido",Backlog,Normal,Feature,Backend + Frontend,api,,,13 (Presença com justificativa),.scratch/playbook/issues/15-presenca-real.md
+16: Jogo e disponibilidade,"**What to build:** O staff cria o evento de jogo com adversário e a marcação de disponibilidade de cada jogador. O consolidado cruza a disponibilidade com o status do elenco, sem que a marcação altere o status.
+
+
+
+- [ ] Staff cria evento do tipo jogo com data, adversário, local e prazo de resposta (default 48h antes)
+- [ ] Jogador marca disponibilidade para o jogo, com a mesma mecânica e justificativa obrigatória da presença
+- [ ] Staff vê o consolidado do jogo cruzando disponibilidade com status do elenco
+- [ ] Jogadores lesionados ou reformados aparecem destacados no consolidado
+- [ ] Marcação de disponibilidade não altera o status do elenco
+- [ ] Testes de autorização e do cruzamento com status",Backlog,Normal,Feature,Backend + Frontend,api,,,"05 (Status do elenco editável), 13 (Presença com justificativa)",.scratch/playbook/issues/16-jogo-e-disponibilidade.md
+17: Game plan,"**What to build:** O staff monta o plano do confronto escolhendo jogadas do playbook, ordenando e anotando cada uma. O jogador vê o game plan do próximo jogo, e uma edição na jogada reflete no plano sem duplicar conteúdo.
+
+
+
+- [ ] Staff adiciona jogadas visíveis a ele ao game plan de um jogo
+- [ ] Staff ordena as jogadas do game plan e escreve uma nota por jogada
+- [ ] Editar a jogada no playbook reflete no game plan, sem cópia divergente
+- [ ] Jogador vê o game plan do próximo jogo, respeitando a visibilidade de cada jogada
+- [ ] Jogada arquivada continua no game plan, marcada como arquivada, e não é oferecida em novas seleções
+- [ ] Testes de ordenação e de visibilidade no game plan",Backlog,Normal,Feature,Backend + Frontend,api,,,"07 (Playbook — jogada com atribuições), 16 (Jogo e disponibilidade)",.scratch/playbook/issues/17-game-plan.md
+18: Push — base e evento novo,"**What to build:** O jogador instala o app e recebe push quando um evento novo exige resposta. No iOS, o app explica que a instalação na tela inicial é pré-requisito, sem insistir.
+
+
+
+- [ ] Inscrição de push por dispositivo, com permissão disparada por gesto do usuário
+- [ ] Aviso único de instalação na tela inicial quando o acesso é iOS e o app não está instalado
+- [ ] Push de evento novo chega a todos os usuários ativos
+- [ ] Preferências permitem desligar cada tipo de notificação
+- [ ] Inscrição inválida ou expirada é removida ao falhar o envio
+- [ ] Testes da decisão de quem notificar e da idempotência do registro, sem depender da entrega real",Backlog,Normal,Feature,Backend + Frontend,api,,,12 (Evento de treino),.scratch/playbook/issues/18-push-base-e-evento-novo.md
+19: Lembretes de prazo,"**What to build:** Quem não respondeu recebe lembrete antes do prazo e um segundo aviso perto do fim, sem duplicar mensagem. Quem não tem push recebe e-mail.
+
+
+
+- [ ] Primeiro lembrete enviado a quem não respondeu, antes do prazo
+- [ ] Segundo lembrete enviado conforme a regra definida, sem repetir o primeiro
+- [ ] Quem respondeu deixa de receber lembretes daquele evento
+- [ ] Fallback por e-mail quando o usuário não tem inscrição de push válida
+- [ ] Nenhum lembrete é enviado após o prazo vencido
+- [ ] Testes com relógio controlado e verificação de idempotência",Backlog,Normal,Feature,Backend + Frontend,api,,,"18 (Push — base e evento novo), 14 (Prazo de resposta)",.scratch/playbook/issues/19-lembretes-de-prazo.md
+20: Push de playbook e resposta,"**What to build:** O jogador é avisado quando uma jogada visível para ele muda, o staff é avisado quando um jogador responde, e o head coach é avisado quando há cadastro de staff aguardando aprovação.
+
+
+
+- [ ] Push de jogada atualizada apenas para quem vê a jogada e ainda não a marcou como estudada
+- [ ] Push de resposta recebida para head coach e para o coordenador da unidade envolvida
+- [ ] Push de staff pendente para todos os head coaches
+- [ ] Preferências desligadas suprimem o aviso correspondente
+- [ ] Nenhum aviso é enviado a staff pendente
+- [ ] Testes da decisão de destinatários por tipo de aviso",Backlog,Normal,Feature,Backend + Frontend,api,,,"18 (Push — base e evento novo), 09 (Histórico e novidade), 06 (Administração de staff)",.scratch/playbook/issues/20-push-playbook-e-resposta.md
+21: Conta e suporte,"**What to build:** O usuário sai da conta em qualquer tela, apaga a própria conta quando quiser sair do time e encontra um caminho para falar com o staff pelo app.
+
+
+
+- [ ] Sair da conta disponível em qualquer tela e encerra a sessão no dispositivo
+- [ ] Apagar conta remove identidade e dados pessoais após confirmação explícita
+- [ ] Registros de presença e disponibilidade já lançados permanecem sem identificar a pessoa
+- [ ] O último head coach não consegue apagar a própria conta sem antes nomear outro
+- [ ] Contato com o staff acessível a partir do perfil
+- [ ] Testes de autorização e do caso do último head coach",Backlog,Normal,Feature,Backend + Frontend,api,,,04 (Elenco e perfil),.scratch/playbook/issues/21-conta-e-suporte.md
