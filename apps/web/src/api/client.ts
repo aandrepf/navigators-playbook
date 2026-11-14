@@ -104,6 +104,20 @@ export const api = {
     logout: () => request<void>('POST', '/auth/logout'),
 
     googleLogin: () => request<void>('GET', '/auth/google'),
+
+    checkGoogleLogin: async (forceError?: string | null) => {
+      const query = forceError ? `?forceError=${forceError}` : ''
+      const response = await fetch(`${API_BASE}/auth/google${query}`, {
+        method: 'GET',
+        redirect: 'manual',
+        credentials: 'same-origin',
+      })
+      if (response.status === 503) {
+        const data = (await response.json().catch(() => ({}))) as ApiError
+        throw new ApiClientError(data.error || 'Login com Google não configurado', 503)
+      }
+      return response
+    },
   },
 
   staff: {

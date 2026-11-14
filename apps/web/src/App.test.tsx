@@ -4,6 +4,8 @@ import App from './App'
 import { renderWithAuth, server } from './test/test-utils'
 import { http, HttpResponse } from 'msw'
 
+const googleErrorSearch = '?error=access_denied'
+
 describe('App shell', () => {
   it('shows authentication screen when user is not logged in', async () => {
     server.use(
@@ -139,5 +141,39 @@ describe('Screen states', () => {
     renderWithAuth(<App />, { route: '/' })
 
     expect(await screen.findByRole('alert')).toBeInTheDocument()
+  })
+})
+
+describe('Google login regression', () => {
+  beforeEach(() => {
+    server.use(
+      http.get('/auth/session', () => {
+        return new HttpResponse(null, { status: 401 })
+      }),
+    )
+  })
+
+  it('shows accessible feedback when Google login is unavailable', async () => {
+    server.use(
+      http.get('/auth/google', () => {
+        return HttpResponse.json({ error: 'Login com Google não configurado' }, { status: 503 })
+      }),
+    )
+
+    const user = userEvent.setup()
+    renderWithAuth(<App />, { route: '/login' })
+
+    await user.click(screen.getByRole('button', { name: /continuar com google/i }))
+
+    const alert = await screen.findByRole('alert', {}, { timeout: 2000 })
+    expect(alert).toHaveTextContent(/login com google não configurado/i)
+  })
+
+  it('shows accessible feedback when Google returns an error parameter', async () => {
+    renderWithAuth(<App />, { route: `/auth/google/callback${googleErrorSearch}` })
+
+    const alert = await screen.findByRole('alert')
+    expect(alert).toHaveTextContent(/você cancelou o login com google/i)
+    expect(screen.getByRole('button', { name: /tentar novamente/i })).toBeInTheDocument()
   })
 })
