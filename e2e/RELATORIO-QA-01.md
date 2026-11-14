@@ -75,3 +75,25 @@ tela de entrada lê `login=erro&motivo=...`. Qualquer uma passa no teste.
 
 **Card 01 não pode ir para Concluído.** Dois de três achados resolvidos. O erro do
 Google continua reproduzível de ponta a ponta.
+
+## Reteste 3 — `main` com 8ef0823 (branch `qa` integrada em `86ddc7c`)
+
+- Suíte completa (`npm run test:e2e`), duas execuções seguidas com banco zerado:
+  **68 passam, 0 falham** (32 casos ativos × 2 projetos). Os 34 `fixme` seguem
+  marcados como *skipped*.
+- Lint, build e testes unitários: verdes (`web` 10 testes, `api` 9 testes).
+- Achado 3 (retorno do Google com erro): **resolvido.** `/?login=erro&motivo=access_denied`
+  mostra o alerta acessível "Você cancelou o login com Google..." (`LoginErrorScreen`).
+  O teste ponta a ponta, que parte do callback real da API, passa nos dois projetos.
+- Achados 1 e 2: seguem resolvidos (reteste 2).
+
+### Veredito QA
+
+Os três achados do card 01 estão resolvidos e a suíte está verde. **Do ponto de vista QA, o
+card 01 pode ser concluído.** Ressalvas que não bloqueiam este card:
+
+- Não há cobertura automatizada do manifesto PWA, do service worker nem do deploy no
+  Railway, que estão nos critérios do card 01 e ficam fora da suíte E2E.
+- O parâmetro de teste `forceError` no código de produção segue (não bloqueante).
+- Os `fixme` (posições no cadastro, acúmulo de special teams e as fatias de eventos,
+  jogo e playbook) pertencem aos cards seguintes.
