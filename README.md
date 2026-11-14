@@ -10,7 +10,16 @@ npm run dev      # http://localhost:5173
 npm run build    # tsc -b && vite build -> dist/
 npm run preview  # serve o dist/
 npm run lint     # oxlint
+npm test         # vitest run (uma passada, ideal para CI)
+npm run test:watch # vitest em modo watch durante o desenvolvimento
 ```
+
+### Testes
+
+Vitest + jsdom + React Testing Library, configurados em `vite.config.ts`
+(`test.environment`, `test.setupFiles`) e `src/test/setup.ts`.
+Testes ficam ao lado do código como `src/**/*.test.tsx`. `describe`/`it`/`expect`
+são globais — os tipos vêm de `vitest/globals` no `tsconfig.app.json`.
 
 ## Git e contas GitHub
 
