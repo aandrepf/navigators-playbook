@@ -1,25 +1,43 @@
 # Navigators Playbook
 
-Ponto de partida mínimo: React + TypeScript + Vite.
+App web mobile-first para um time de futebol americano: playbook, presença em
+treino, disponibilidade para jogo e status do elenco.
+
+## Estrutura
+
+```
+apps/web   React + TypeScript + Vite (front-end e PWA)
+apps/api   Fastify + Postgres (backend; contrato em docs/api/)
+docs/adr   decisões arquiteturais
+.scratch   spec e tickets (tracker local)
+```
+
+Workspaces npm na raiz. Cada app tem o próprio `package.json`; os comandos
+abaixo rodam na raiz e delegam para os workspaces.
 
 ## Desenvolvimento
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173
-npm run build    # tsc -b && vite build -> dist/
-npm run preview  # serve o dist/
-npm run lint     # oxlint
-npm test         # vitest run (uma passada, ideal para CI)
-npm run test:watch # vitest em modo watch durante o desenvolvimento
+npm run dev        # front em http://localhost:5173
+npm run dev:api    # backend (quando apps/api existir)
+npm run build      # build de todos os workspaces
+npm run preview    # serve o build do front
+npm run lint       # oxlint
+npm test           # testes de todos os workspaces
+npm run test:watch # vitest em modo watch (front)
 ```
 
 ### Testes
 
-Vitest + jsdom + React Testing Library, configurados em `vite.config.ts`
-(`test.environment`, `test.setupFiles`) e `src/test/setup.ts`.
-Testes ficam ao lado do código como `src/**/*.test.tsx`. `describe`/`it`/`expect`
-são globais — os tipos vêm de `vitest/globals` no `tsconfig.app.json`.
+Vitest + jsdom + React Testing Library em `apps/web`, configurados em
+`apps/web/vite.config.ts` (`test.environment`, `test.setupFiles`) e
+`apps/web/src/test/setup.ts`. Testes ficam ao lado do código como
+`src/**/*.test.tsx`. `describe`/`it`/`expect` são globais — os tipos vêm de
+`vitest/globals` no `apps/web/tsconfig.app.json`.
+
+O backend usa o mesmo Vitest, com os testes chamando a API por `app.inject`
+contra um Postgres efêmero.
 
 ## Git e contas GitHub
 
