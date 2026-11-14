@@ -13,9 +13,11 @@
     "test": "npm run test --workspaces --if-present",
     "test:watch": "npm run test:watch -w @playbook/web",
     "lint": "oxlint",
-    "preview": "npm run preview -w @playbook/web"
+    "preview": "npm run preview -w @playbook/web",
+    "test:e2e": "playwright test"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.1",
     "oxlint": "^1.90.0"
   }
 }
