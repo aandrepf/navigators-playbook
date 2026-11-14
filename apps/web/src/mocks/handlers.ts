@@ -62,8 +62,12 @@ export const handlers = [
     return new HttpResponse(null, { status: 204 })
   }),
 
-  http.get('/auth/google', () => {
-    return HttpResponse.json(null, { status: 302, headers: { Location: '/' } })
+  http.get('/auth/google', ({ request }) => {
+    const forceError = new URL(request.url).searchParams.get('forceError')
+    if (forceError === '503') {
+      return HttpResponse.json({ error: 'Login com Google não configurado' }, { status: 503 })
+    }
+    return HttpResponse.json(null, { status: 302, headers: { Location: '/auth/google/callback?code=abc' } })
   }),
 
   http.get('/staff/pending', () => {

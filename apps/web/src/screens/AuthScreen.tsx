@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
-import { ApiClientError } from '../api/client'
+import { api, ApiClientError } from '../api/client'
 
 type Step =
   | 'welcome'
@@ -34,6 +34,8 @@ const STAFF_ROLES = [
 export function AuthScreen() {
   const { requestEmailCode, loginWithEmail } = useAuth()
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const googleErrorFlag = searchParams.get('forceError')
 
   const [step, setStep] = useState<Step>('welcome')
   const [email, setEmail] = useState('')
@@ -126,8 +128,22 @@ export function AuthScreen() {
     })
   }
 
-  function handleGoogleLogin() {
-    window.location.href = '/auth/google'
+  async function handleGoogleLogin() {
+    setLoading(true)
+    setError(null)
+    try {
+      await api.auth.checkGoogleLogin(googleErrorFlag)
+      // Se o backend respondeu 302 manual, o fetch não segue; redirecionamos explicitamente.
+      window.location.href = `/auth/google${googleErrorFlag ? `?forceError=${googleErrorFlag}` : ''}`
+    } catch (err) {
+      setError(
+        err instanceof ApiClientError
+          ? err.message
+          : 'Login com Google não está disponível no momento. Use o código por e-mail.',
+      )
+    } finally {
+      setLoading(false)
+    }
   }
 
   if (step === 'welcome') {
@@ -139,8 +155,20 @@ export function AuthScreen() {
             <p className="auth-card__subtitle">Acesse o playbook, eventos e status do elenco do seu time.</p>
           </div>
 
-          <button type="button" className="btn btn--secondary btn--block" onClick={handleGoogleLogin}>
-            Continuar com Google
+          {error && (
+            <div className="field-error-msg" role="alert" style={{ marginBottom: 'var(--space-3)' }}>
+              ⚠ {error}
+            </div>
+          )}
+
+          <button
+            type="button"
+            className="btn btn--secondary btn--block"
+            onClick={handleGoogleLogin}
+            disabled={loading}
+            aria-busy={loading}
+          >
+            {loading ? 'Conectando...' : 'Continuar com Google'}
           </button>
 
           <div style={{ textAlign: 'center', margin: 'var(--space-4) 0', color: 'var(--color-text-muted)' }}>
