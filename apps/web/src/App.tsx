@@ -1,9 +1,10 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes, useSearchParams } from 'react-router-dom'
 import { AuthProvider } from './hooks/AuthProvider'
 import { useAuth } from './hooks/useAuth'
 import { AppShell } from './components/AppShell'
 import { AuthScreen } from './screens/AuthScreen'
 import { GoogleCallback } from './screens/GoogleCallback'
+import { LoginErrorScreen } from './screens/LoginErrorScreen'
 import { Home } from './screens/Home'
 import { Evento } from './screens/Evento'
 import { Playbook } from './screens/Playbook'
@@ -15,6 +16,7 @@ import { ErrorState } from './components/ErrorState'
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { state } = useAuth()
+  const [searchParams] = useSearchParams()
 
   if (state.status === 'loading') {
     return (
@@ -33,6 +35,9 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
   }
 
   if (state.status === 'unauthenticated') {
+    if (searchParams.get('login') === 'erro') {
+      return <LoginErrorScreen />
+    }
     return <Navigate to="/login" replace />
   }
 
