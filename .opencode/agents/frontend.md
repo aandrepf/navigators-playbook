@@ -10,7 +10,22 @@ permissions:
     effect: allow
   - action: shell
     resource: "*"
-    effect: ask
+    effect: allow
+  - action: shell
+    resource: "git push*"
+    effect: deny
+  - action: shell
+    resource: "git reset --hard*"
+    effect: deny
+  - action: shell
+    resource: "git clean*"
+    effect: deny
+  - action: shell
+    resource: "rm -rf*"
+    effect: deny
+  - action: shell
+    resource: "sudo*"
+    effect: deny
 ---
 
 You are a senior frontend engineer specializing in modern web applications,
