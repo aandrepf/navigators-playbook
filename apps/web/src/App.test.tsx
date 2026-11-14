@@ -176,4 +176,12 @@ describe('Google login regression', () => {
     expect(alert).toHaveTextContent(/você cancelou o login com google/i)
     expect(screen.getByRole('button', { name: /tentar novamente/i })).toBeInTheDocument()
   })
+
+  it('shows accessible feedback for access_denied redirect at root', async () => {
+    renderWithAuth(<App />, { route: '/?login=erro&motivo=access_denied' })
+
+    const alert = await screen.findByRole('alert')
+    expect(alert).toHaveTextContent(/você cancelou o login com google/i)
+    expect(screen.getByRole('button', { name: /tentar novamente/i })).toBeInTheDocument()
+  })
 })
