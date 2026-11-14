@@ -1,0 +1,1752 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0B111E" />
+  <title>Playbook do Time — Protótipo Navegável (Mobile-First & Desktop)</title>
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body data-role="jogador" data-state="default">
+  <a href="#conteudo-principal" class="skip-link">Pular para o conteúdo principal</a>
+
+  <!-- ====================================================================
+       BARRA DE SIMULAÇÃO DE HANDOFF (Papel, Estado da Tela e Viewport)
+       ==================================================================== -->
+  <aside class="proto-toolbar" aria-label="Controles de simulação do protótipo para handoff">
+    <div class="proto-toolbar__brand">
+      <span aria-hidden="true">🏈</span>
+      <span>Protótipo Handoff — Playbook do Time</span>
+    </div>
+
+    <div class="proto-toolbar__controls">
+      <div class="proto-control-group">
+        <label for="sim-role">Papel / Subpapel:</label>
+        <select id="sim-role" class="proto-select" onchange="setSimRole(this.value)">
+          <option value="jogador">Jogador (Ofensiva — WR / KR)</option>
+          <option value="head_coach">Staff — Head Coach (Todas as unidades)</option>
+          <option value="coordenador_ofensivo">Staff — Coordenador Ofensivo</option>
+          <option value="staff_pendente">Staff — Pendente (Aguardando Head Coach)</option>
+        </select>
+      </div>
+
+      <div class="proto-control-group">
+        <label for="sim-state">Estado da Tela:</label>
+        <select id="sim-state" class="proto-select" onchange="setSimState(this.value)">
+          <option value="default">Padrão / Sucesso</option>
+          <option value="loading">Carregando (Skeleton)</option>
+          <option value="empty">Vazio (Empty State)</option>
+          <option value="error">Erro (Falha de Rede / Validação)</option>
+        </select>
+      </div>
+
+      <div class="proto-control-group">
+        <label for="sim-viewport">Viewport:</label>
+        <select id="sim-viewport" class="proto-select" onchange="setSimViewport(this.value)">
+          <option value="auto">Responsivo Automático</option>
+          <option value="mobile">Simular Celular (390×844 iOS Safe Area)</option>
+        </select>
+      </div>
+
+      <button type="button" class="btn btn--secondary" style="min-height: 38px; padding: 4px 12px; font-size: 0.8125rem;" onclick="toggleOnboardingModal(true)">
+        Fluxo Cadastro &amp; Papel
+      </button>
+    </div>
+  </aside>
+
+  <!-- ====================================================================
+       PALCO DO VIEWPORT E SHELL DO APP
+       ==================================================================== -->
+  <div id="viewport-stage" class="viewport-stage">
+    <div id="app-shell" class="app-shell">
+
+      <!-- NAVEGAÇÃO LATERAL FIXA (DESKTOP >= 1024px) -->
+      <nav class="app-sidebar active-member-only" aria-label="Navegação principal desktop">
+        <div>
+          <div class="sidebar-team-header">
+            <div class="sidebar-team-name">
+              <span aria-hidden="true">⚓</span>
+              <span>Navigators FA</span>
+            </div>
+            <div id="sidebar-role-indicator" class="sidebar-user-meta">
+              Papel: Jogador • WR / KR (Ofensiva &amp; Special teams)
+            </div>
+          </div>
+
+          <ul class="sidebar-nav-list">
+            <li>
+              <button type="button" class="nav-item-btn" data-nav="home" aria-current="page" onclick="switchScreen('home')">
+                <span class="nav-item-btn__label"><span aria-hidden="true">🏠</span> Home</span>
+                <span class="badge badge--new tabular">2</span>
+              </button>
+            </li>
+            <li>
+              <button type="button" class="nav-item-btn" data-nav="evento" onclick="switchScreen('evento')">
+                <span class="nav-item-btn__label"><span aria-hidden="true">📋</span> Evento (Treino)</span>
+                <span class="badge badge--unavailable tabular">!</span>
+              </button>
+            </li>
+            <li>
+              <button type="button" class="nav-item-btn" data-nav="playbook" onclick="switchScreen('playbook')">
+                <span class="nav-item-btn__label"><span aria-hidden="true">📖</span> Playbook</span>
+                <span class="badge badge--new tabular">NOVO</span>
+              </button>
+            </li>
+            <li>
+              <button type="button" class="nav-item-btn" data-nav="jogo" onclick="switchScreen('jogo')">
+                <span class="nav-item-btn__label"><span aria-hidden="true">🏟️</span> Jogo &amp; Game Plan</span>
+              </button>
+            </li>
+            <!-- Aba Elenco: Oculta para Jogador por regra estrita do spec -->
+            <li class="staff-only">
+              <button type="button" class="nav-item-btn" data-nav="elenco" onclick="switchScreen('elenco')">
+                <span class="nav-item-btn__label"><span aria-hidden="true">👥</span> Elenco (Staff)</span>
+                <span class="badge badge--unavailable hc-only tabular">2</span>
+              </button>
+            </li>
+            <li>
+              <button type="button" class="nav-item-btn" data-nav="perfil" onclick="switchScreen('perfil')">
+                <span class="nav-item-btn__label"><span aria-hidden="true">⚙️</span> Perfil</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+
+        <div class="card" style="padding: var(--space-3); font-size: var(--text-xs);">
+          <div style="font-weight: 700; margin-bottom: 4px;">Status do elenco</div>
+          <span class="badge badge--available">✓ Disponível</span>
+          <div style="color: var(--color-text-muted); margin-top: 6px;">Fuso: America/Sao_Paulo</div>
+        </div>
+      </nav>
+
+      <!-- CONTEÚDO PRINCIPAL -->
+      <div class="app-main-wrapper">
+        <header class="mobile-topbar">
+          <div>
+            <h1 id="topbar-screen-title" class="mobile-topbar__title">Home — Navigators FA</h1>
+            <div id="topbar-role-subtitle" class="mobile-topbar__subtitle">
+              Jogador • Ofensiva &amp; Special teams (WR / KR)
+            </div>
+          </div>
+          <div class="badge-row">
+            <span class="badge badge--available active-member-only" title="Seu status do elenco atual">✓ Status: Disponível</span>
+            <span class="badge badge--unavailable pending-staff-only">! Cadastro Pendente</span>
+          </div>
+        </header>
+
+        <main id="conteudo-principal" class="app-main" tabindex="-1">
+
+          <!-- ==============================================================
+               ESTADO GLOBAL: STAFF PENDENTE (ADR-0005 / História 8)
+               ============================================================== -->
+          <section class="card card--warning pending-staff-only" aria-labelledby="pending-staff-heading">
+            <div class="badge-row" style="margin-bottom: var(--space-3);">
+              <span class="badge badge--unavailable">! Aguardando aprovação do Head Coach</span>
+            </div>
+            <h2 id="pending-staff-heading" class="section-title">Seu cadastro como Staff está pendente</h2>
+            <p class="section-subtitle" style="margin-top: var(--space-2); font-size: var(--text-base);">
+              Você solicitou acesso no papel de <strong>Staff (Coordenador Defensivo)</strong>. Por segurança do playbook e proteção das justificativas e status de lesão do elenco, seu acesso de edição e leitura restrita será liberado assim que um <strong>Head Coach</strong> aprovar sua conta.
+            </p>
+            <div class="btn-row" style="margin-top: var(--space-4);">
+              <button type="button" class="btn btn--secondary" onclick="alert('Mensagem enviada ao Head Coach solicitando revisão do cadastro.')">
+                Falar com o staff
+              </button>
+              <button type="button" class="btn btn--danger" onclick="setSimRole('jogador')">
+                Sair da conta
+              </button>
+            </div>
+          </section>
+
+          <!-- ==============================================================
+               PAINÉIS DE ESTADO SIMULADO (Carregando, Vazio, Erro)
+               ============================================================== -->
+          <div id="state-panel-loading" class="state-overlay-panel" aria-live="polite" aria-busy="true">
+            <div class="card stack-md">
+              <div class="skeleton-line skeleton-line--lg"></div>
+              <div class="skeleton-line"></div>
+              <div class="skeleton-line skeleton-line--sm"></div>
+            </div>
+            <div class="card stack-md" style="margin-top: var(--space-4);">
+              <div class="skeleton-line skeleton-line--lg"></div>
+              <div class="skeleton-line"></div>
+              <div class="skeleton-line"></div>
+            </div>
+          </div>
+
+          <div id="state-panel-empty" class="state-overlay-panel" aria-live="polite">
+            <div class="empty-state-box">
+              <div style="font-size: 2.25rem; margin-bottom: var(--space-2);" aria-hidden="true">🏈</div>
+              <h2 class="section-title">Nenhum item pendente nesta visualização</h2>
+              <p class="section-subtitle" style="max-width: 440px; margin: var(--space-2) auto var(--space-4);">
+                Você está em dia com as respostas de eventos e todas as jogadas visíveis para a sua unidade já foram estudadas.
+              </p>
+              <button type="button" class="btn btn--primary" onclick="setSimState('default')">
+                Restaurar dados de demonstração
+              </button>
+            </div>
+          </div>
+
+          <div id="state-panel-error" class="state-overlay-panel" role="alert">
+            <div class="error-state-box">
+              <div style="font-weight: 700; font-size: var(--text-lg); margin-bottom: var(--space-1);">
+                ⚠ Não foi possível sincronizar os dados com o servidor
+              </div>
+              <p style="margin: 0 0 var(--space-3) 0; color: var(--color-text-secondary);">
+                Verifique sua conexão no campo. Suas alterações não enviadas foram preservadas na tela para nova tentativa.
+              </p>
+              <button type="button" class="btn btn--secondary" onclick="setSimState('default')">
+                ↻ Tentar novamente
+              </button>
+            </div>
+          </div>
+
+          <!-- ==============================================================
+               CONTEÚDO DAS 6 TELAS (Visível quando membro está ativo)
+               ============================================================== -->
+          <div id="active-screens-container" class="active-member-only">
+
+            <!-- ============================================================
+                 TELA 1: HOME
+                 ============================================================ -->
+            <section id="screen-home" class="screen-section is-active" aria-labelledby="home-title">
+              <div class="stack-md">
+
+                <!-- Convite de instalação do PWA na tela inicial (exibido uma vez — História 74 / ADR-0002) -->
+                <div id="pwa-install-banner" class="card card--highlight" role="region" aria-label="Instalação do aplicativo na tela inicial">
+                  <div class="card__header">
+                    <div>
+                      <span class="badge badge--new">📲 PWA + WEB PUSH</span>
+                      <h2 class="card__title" style="margin-top: var(--space-2);">
+                        Instale o Playbook na tela inicial para receber avisos push
+                      </h2>
+                    </div>
+                    <button type="button" class="btn btn--secondary" style="min-height: 44px; padding: 4px 12px;" onclick="document.getElementById('pwa-install-banner').style.display='none'">
+                      Não mostrar novamente
+                    </button>
+                  </div>
+                  <p class="card__meta" style="margin: 0 0 var(--space-3) 0;">
+                    No iPhone/iOS (16.4+), o Web Push exige que o app esteja na Tela de Início (toque em <strong>Compartilhar ↑</strong> &rarr; <strong>Adicionar à Tela de Início</strong>). Enquanto o push não estiver ativo, os avisos chegam por <strong>e-mail</strong>.
+                  </p>
+                  <div class="btn-row">
+                    <button type="button" class="btn btn--primary" onclick="alert('Permissão de Web Push solicitada por gesto explícito do usuário!')">
+                      🔔 Ativar notificações push neste aparelho
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Card Prioritário Exclusivo Head Coach: Cadastros de Staff Pendentes (Histórias 9, 76) -->
+                <div class="card card--warning hc-only">
+                  <div class="card__header">
+                    <div>
+                      <span class="badge badge--unavailable">! APROVAÇÃO DE STAFF PENDENTE</span>
+                      <h2 class="card__title" style="margin-top: var(--space-1);">
+                        2 cadastros de staff aguardam sua aprovação
+                      </h2>
+                    </div>
+                    <button type="button" class="btn btn--primary" onclick="switchScreen('elenco')">
+                      Revisar no Elenco &rarr;
+                    </button>
+                  </div>
+                  <p class="card__meta" style="margin: 0;">
+                    Carlos Eduardo Silva (Coordenador Defensivo) e Marcos Viana (Staff) permanecem bloqueados no estado <strong>pendente</strong> até sua decisão.
+                  </p>
+                </div>
+
+                <div class="grid-2col">
+                  <!-- Coluna 1: Próximos Eventos e Pendências de Resposta (História 45) -->
+                  <div class="stack-md">
+                    <div class="section-header" style="margin-bottom: 0;">
+                      <div>
+                        <h2 id="home-title" class="section-title">Próximos Eventos</h2>
+                        <p class="section-subtitle">Responda antes do prazo para atualizar presença e marcação</p>
+                      </div>
+                      <button type="button" class="btn btn--secondary staff-only" onclick="switchScreen('evento')">
+                        + Novo evento
+                      </button>
+                    </div>
+
+                    <!-- Card de Treino Pendente de Resposta -->
+                    <article class="card">
+                      <div class="card__header">
+                        <div class="badge-row">
+                          <span class="badge badge--offense">TREINO</span>
+                          <span class="badge badge--unavailable mono">⏳ Prazo: Sex 15/11 • 14:00</span>
+                        </div>
+                        <span id="home-treino-status" class="badge badge--unavailable">! Sem resposta</span>
+                      </div>
+                      <h3 class="card__title">Treino Tático — Instalação Red Zone</h3>
+                      <p class="card__meta">Sáb, 16/11/2026 • 14:00 às 17:00 • Campo Suplementar Sul</p>
+
+                      <!-- Contadores consolidados só para Staff -->
+                      <div class="staff-only card__meta tabular" style="margin: var(--space-2) 0; padding: var(--space-2); background: var(--color-bg-elevated); border-radius: var(--radius-sm);">
+                        <strong>Consolidado:</strong> 28 Confirmados • 5 Ausentes com justificativa • 7 Sem resposta
+                      </div>
+
+                      <div class="btn-row" style="margin-top: var(--space-3);">
+                        <button type="button" class="btn btn--success" onclick="quickConfirmHome('treino')">
+                          ✓ Vou ao treino
+                        </button>
+                        <button type="button" class="btn btn--danger" onclick="switchScreen('evento'); openJustificationPanel('evento')">
+                          ✕ Não vou (justificar)
+                        </button>
+                        <button type="button" class="btn btn--secondary" onclick="switchScreen('evento')">
+                          Detalhes
+                        </button>
+                      </div>
+                    </article>
+
+                    <!-- Card do Próximo Jogo (Marcação de Disponibilidade + Game Plan) -->
+                    <article class="card">
+                      <div class="card__header">
+                        <div class="badge-row">
+                          <span class="badge badge--st">JOGO OFICIAL</span>
+                          <span class="badge badge--available mono">Prazo: Sex 22/11 • 10:00</span>
+                        </div>
+                        <span class="badge badge--available">✓ Marcação: Disponível</span>
+                      </div>
+                      <h3 class="card__title">Navigators FA vs. Tritões FA</h3>
+                      <p class="card__meta">Dom, 24/11/2026 • Kickoff 10:00 • Estádio Municipal</p>
+                      <div class="btn-row" style="margin-top: var(--space-3);">
+                        <button type="button" class="btn btn--primary" onclick="switchScreen('jogo')">
+                          Ver Game Plan (4 jogadas) &amp; Marcação
+                        </button>
+                      </div>
+                    </article>
+                  </div>
+
+                  <!-- Coluna 2: Novidades do Playbook (Histórias 36, 37) -->
+                  <div class="stack-md">
+                    <div class="section-header" style="margin-bottom: 0;">
+                      <div>
+                        <h2 class="section-title">Novidades do Playbook</h2>
+                        <p class="section-subtitle">Jogadas visíveis atualizadas desde seu último estudo</p>
+                      </div>
+                      <button type="button" class="btn btn--secondary" onclick="switchScreen('playbook')">
+                        Abrir Playbook
+                      </button>
+                    </div>
+
+                    <article class="card">
+                      <div class="card__header">
+                        <div class="badge-row">
+                          <span id="badge-new-play-1" class="badge badge--new">★ NOVO • v3</span>
+                          <span class="badge badge--offense">OFENSIVA</span>
+                          <span class="badge badge--position">Shotgun Trips Right</span>
+                        </div>
+                        <span class="mono" style="font-size: var(--text-xs); color: var(--color-text-secondary);">3rd &amp; 6–10</span>
+                      </div>
+                      <h3 class="card__title">Flood Right Z-Post</h3>
+                      <p class="card__meta">
+                        Sua atribuição (<strong>WR-Z</strong>): Rota Post profunda (18–20 jardas) atacando o terço médio contra Cover 3.
+                      </p>
+                      <div class="btn-row" style="margin-top: var(--space-3);">
+                        <button type="button" class="btn btn--primary" onclick="switchScreen('playbook')">
+                          Estudar jogada e atribuições
+                        </button>
+                      </div>
+                    </article>
+
+                    <article class="card">
+                      <div class="card__header">
+                        <div class="badge-row">
+                          <span class="badge badge--new">★ NOVO • v2</span>
+                          <span class="badge badge--st">SPECIAL TEAMS</span>
+                          <span class="badge badge--position">Kickoff Return Left</span>
+                        </div>
+                        <span class="mono" style="font-size: var(--text-xs); color: var(--color-text-secondary);">Kickoff</span>
+                      </div>
+                      <h3 class="card__title">Return Left Wedge Wall</h3>
+                      <p class="card__meta">
+                        Visível para todo o time (ADR-0006). Sua atribuição (<strong>KR</strong>): Receber no hash esquerdo e seguir parede interna.
+                      </p>
+                      <div class="btn-row" style="margin-top: var(--space-3);">
+                        <button type="button" class="btn btn--secondary" onclick="switchScreen('playbook')">
+                          Ver no Playbook
+                        </button>
+                      </div>
+                    </article>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- ============================================================
+                 TELA 2: EVENTO (TREINO — PRESENÇA, JUSTIFICATIVA E CONSOLIDADO)
+                 ============================================================ -->
+            <section id="screen-evento" class="screen-section" aria-labelledby="evento-title">
+              <div class="stack-md">
+                <div class="section-header">
+                  <div>
+                    <div class="badge-row" style="margin-bottom: var(--space-1);">
+                      <span class="badge badge--offense">EVENTO: TREINO</span>
+                      <span class="badge badge--available">ESTADO: ATIVO</span>
+                      <span class="badge badge--unavailable mono">Prazo de resposta: 15/11 às 14:00 (24h antes)</span>
+                    </div>
+                    <h2 id="evento-title" class="section-title">Treino Tático — Instalação Red Zone</h2>
+                    <p class="section-subtitle">Sáb, 16/11/2026 • 14:00–17:00 (America/Sao_Paulo) • Campo Suplementar Sul</p>
+                  </div>
+
+                  <!-- Ações de edição do evento exclusivas para Staff (Histórias 41, 43, 44) -->
+                  <div class="btn-row staff-only">
+                    <button type="button" class="btn btn--secondary" onclick="alert('Prazo de resposta ajustado para 12h antes do treino.')">
+                      Ajustar prazo
+                    </button>
+                    <button type="button" class="btn btn--secondary" onclick="alert('Evento remarcado e notificação push enviada ao elenco.')">
+                      Remarcar
+                    </button>
+                    <button type="button" class="btn btn--danger" onclick="alert('Evento marcado como Cancelado.')">
+                      Cancelar evento
+                    </button>
+                  </div>
+                </div>
+
+                <div class="grid-2col">
+                  <!-- Coluna Esquerda: Resposta de Presença do Jogador + Justificativa (Histórias 46–50, 57, 78) -->
+                  <div class="stack-md">
+                    <div class="card">
+                      <h3 class="card__title">Minha Resposta de Presença</h3>
+                      <p class="card__meta" style="margin-top: var(--space-1);">
+                        Você pode mudar sua resposta livremente enquanto o prazo (15/11 às 14:00) não vencer. A recusa exige justificativa visível apenas para o staff.
+                      </p>
+
+                      <div class="btn-row" style="margin-top: var(--space-3);">
+                        <button type="button" id="btn-evento-vou" class="btn btn--success" aria-pressed="false" onclick="selectEventResponse('vou')">
+                          ✓ Vou ao treino
+                        </button>
+                        <button type="button" id="btn-evento-naovou" class="btn btn--danger" aria-pressed="false" onclick="selectEventResponse('nao_vou')">
+                          ✕ Não vou (Justificar)
+                        </button>
+                      </div>
+
+                      <div id="evento-feedback-banner" aria-live="polite" style="margin-top: var(--space-3); font-weight: 600; color: var(--color-status-available);"></div>
+
+                      <!-- Gaveta Expandida de Justificativa Obrigatória (Histórias 47, 48, 49) -->
+                      <form id="evento-justificativa-form" style="display: none; margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--color-border-subtle);" onsubmit="submitEventJustification(event)">
+                        <div class="form-group">
+                          <label for="justificativa-motivo" class="form-label">
+                            Motivo da ausência (obrigatório — escolha da lista):
+                          </label>
+                          <select id="justificativa-motivo" class="form-select" required>
+                            <option value="">Selecione um motivo...</option>
+                            <option value="Trabalho / Escala">Trabalho / Escala</option>
+                            <option value="Saúde / Lesão">Saúde / Lesão</option>
+                            <option value="Estudo / Prova">Estudo / Prova</option>
+                            <option value="Transporte / Deslocamento">Transporte / Deslocamento</option>
+                            <option value="Compromisso familiar">Compromisso familiar</option>
+                            <option value="Outro motivo">Outro motivo</option>
+                          </select>
+                        </div>
+
+                        <div class="form-group">
+                          <label for="justificativa-texto" class="form-label">
+                            Complemento em texto livre:
+                          </label>
+                          <textarea id="justificativa-texto" class="form-textarea" placeholder="Detalhe o motivo para o staff (ex.: plantão no hospital até 16h30)..."></textarea>
+                          <span class="form-hint">🔒 Privacidade protegida: apenas o staff vê sua justificativa. Outros jogadores veem somente "Ausente".</span>
+                        </div>
+
+                        <div id="justificativa-error" class="field-error-msg" role="alert" style="display: none; margin-bottom: var(--space-3);">
+                          ⚠ Selecione um motivo da lista antes de confirmar a ausência.
+                        </div>
+
+                        <button type="submit" class="btn btn--danger btn--block">
+                          Enviar justificativa e registrar ausência
+                        </button>
+                      </form>
+                    </div>
+
+                    <!-- Registro de Presença Real Pós-Treino vista pelo Jogador (História 57) -->
+                    <div class="card">
+                      <div class="card__header">
+                        <h3 class="card__title">Meu Registro de Comparecimento</h3>
+                        <span class="badge badge--available">✓ Contado como Presente (Último treino)</span>
+                      </div>
+                      <p class="card__meta" style="margin: 0 0 var(--space-3) 0;">
+                        No treino anterior (12/11), sua presença real foi confirmada em campo pelo staff. Sua taxa acumulada: <strong class="tabular">92% (11/12 treinos)</strong>.
+                      </p>
+                      <button type="button" class="btn btn--secondary" onclick="switchScreen('perfil')">
+                        Prazo encerrado ou problema para responder? Falar com o staff
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- Coluna Direita: Participantes (Visão Staff completa vs. Visão Jogador sem justificativa) -->
+                  <div class="stack-md">
+
+                    <!-- VISÃO EXCLUSIVA STAFF: Consolidado + Justificativas + Presença Real (Histórias 52, 53, 55, 56) -->
+                    <div class="card staff-only">
+                      <div class="card__header">
+                        <div>
+                          <h3 class="card__title">Consolidado de Presença (Visão Staff)</h3>
+                          <p class="card__meta">Justificativas completas e registro de presença real pós-treino</p>
+                        </div>
+                        <span class="badge badge--offense tabular">40 jogadores no elenco</span>
+                      </div>
+
+                      <div class="chip-bar" role="tablist" aria-label="Filtro de respostas consolidadas">
+                        <button type="button" class="chip is-active" aria-pressed="true">✓ Confirmados (28)</button>
+                        <button type="button" class="chip" aria-pressed="false">✕ Ausentes c/ justificativa (5)</button>
+                        <button type="button" class="chip" aria-pressed="false">! Sem resposta (7)</button>
+                      </div>
+
+                      <div class="stack-sm">
+                        <div class="assignment-item" style="grid-template-columns: 1fr auto;">
+                          <div>
+                            <strong>Rafael Costa (WR / KR)</strong>
+                            <span class="badge badge--available" style="margin-left: 6px;">✓ Respondeu: Vou</span>
+                            <div class="card__meta tabular">Taxa de comparecimento: 92% (11/12 treinos)</div>
+                          </div>
+                          <div>
+                            <label class="form-hint" for="real-1">Presença real pós-treino:</label>
+                            <select id="real-1" class="proto-select">
+                              <option value="presente" selected>✓ Presente em campo</option>
+                              <option value="ausente">✕ Faltou</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div class="assignment-item" style="grid-template-columns: 1fr auto; border-color: var(--color-status-injured);">
+                          <div>
+                            <strong>Diego Almeida (LB)</strong>
+                            <span class="badge badge--injured" style="margin-left: 6px;">✕ Respondeu: Não vou</span>
+                            <div style="margin-top: 6px; padding: 8px; background: var(--color-bg-canvas); border-radius: var(--radius-sm); font-size: var(--text-sm);">
+                              <strong>Justificativa (só staff vê):</strong> [Trabalho / Escala] — "Plantão obrigatório no hospital sábado das 12h às 20h."
+                            </div>
+                            <div class="card__meta tabular" style="margin-top: 4px;">Taxa de comparecimento: 83% (10/12 treinos)</div>
+                          </div>
+                          <div>
+                            <label class="form-hint" for="real-2">Presença real pós-treino:</label>
+                            <select id="real-2" class="proto-select">
+                              <option value="ausente" selected>✕ Ausente justificado</option>
+                              <option value="presente">✓ Compareceu</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div class="assignment-item" style="grid-template-columns: 1fr auto; border-color: var(--color-status-unavailable);">
+                          <div>
+                            <strong>Bruno Tavares (OL)</strong>
+                            <span class="badge badge--unavailable" style="margin-left: 6px;">! Sem resposta</span>
+                            <div class="card__meta tabular">Taxa de comparecimento: 67% (8/12 treinos)</div>
+                          </div>
+                          <div>
+                            <button type="button" class="btn btn--secondary" style="min-height: 44px; padding: 4px 12px;" onclick="alert('Lembrete push enviado para Bruno Tavares.')">
+                              Enviar lembrete
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- VISÃO JOGADOR: Lista de participantes SEM expor justificativas (História 54) -->
+                    <div class="card">
+                      <div class="card__header">
+                        <div>
+                          <h3 class="card__title">Participantes do Treino (Visão do Elenco)</h3>
+                          <p class="card__meta">Por privacidade, justificativas pessoais nunca aparecem para jogadores (História 54)</p>
+                        </div>
+                      </div>
+                      <div class="stack-sm">
+                        <div class="assignment-item" style="grid-template-columns: 1fr auto;">
+                          <div>
+                            <strong>Gabriel Rocha</strong> <span class="badge badge--position">QB</span>
+                          </div>
+                          <span class="badge badge--available">✓ Confirmado</span>
+                        </div>
+                        <div class="assignment-item" style="grid-template-columns: 1fr auto;">
+                          <div>
+                            <strong>Rafael Costa (Você)</strong> <span class="badge badge--position">WR / KR</span>
+                          </div>
+                          <span class="badge badge--available">✓ Confirmado</span>
+                        </div>
+                        <div class="assignment-item" style="grid-template-columns: 1fr auto;">
+                          <div>
+                            <strong>Diego Almeida</strong> <span class="badge badge--position">LB</span>
+                          </div>
+                          <!-- Apenas "Ausente", sem qualquer menção à justificativa -->
+                          <span class="badge badge--retired">✕ Ausente</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- ============================================================
+                 TELA 3: PLAYBOOK (UNIDADES, FILTROS, DETALHE E ATRIBUIÇÕES)
+                 ============================================================ -->
+            <section id="screen-playbook" class="screen-section" aria-labelledby="playbook-title">
+              <div class="stack-md">
+                <div class="section-header">
+                  <div>
+                    <h2 id="playbook-title" class="section-title">Playbook do Time</h2>
+                    <p class="section-subtitle">
+                      Jogadas estruturadas por unidade, formação, situação e atribuição por posição (ADR-0003 &amp; ADR-0006)
+                    </p>
+                  </div>
+                  <div class="btn-row staff-only">
+                    <button type="button" class="btn btn--primary" onclick="alert('Formulário de Nova Jogada aberto (Unidade padrão: visível apenas para a unidade dona).')">
+                      + Criar jogada
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Barra de Busca e Filtros de Unidade, Formação e Situação (Histórias 34, 38, 39) -->
+                <div class="card">
+                  <div class="grid-2col" style="gap: var(--space-3);">
+                    <div class="form-group" style="margin-bottom: 0;">
+                      <label for="playbook-search" class="form-label">Buscar jogada por nome:</label>
+                      <input type="search" id="playbook-search" class="form-input" placeholder="Ex.: Flood Right, Inside Zone, Return..." oninput="filterPlaybookCards(this.value)" />
+                    </div>
+                    <div class="grid-2col" style="gap: var(--space-2);">
+                      <div class="form-group" style="margin-bottom: 0;">
+                        <label for="filter-formacao" class="form-label">Formação:</label>
+                        <select id="filter-formacao" class="form-select">
+                          <option value="todas">Todas as formações</option>
+                          <option value="Shotgun Trips Right">Shotgun Trips Right</option>
+                          <option value="I-Formation Twins">I-Formation Twins</option>
+                          <option value="Kickoff Return Left">Kickoff Return Left</option>
+                          <option value="Nickel 4-2-5">Nickel 4-2-5</option>
+                        </select>
+                      </div>
+                      <div class="form-group" style="margin-bottom: 0;">
+                        <label for="filter-situacao" class="form-label">Situação (Down &amp; Distância):</label>
+                        <select id="filter-situacao" class="form-select">
+                          <option value="todas">Todas as situações</option>
+                          <option value="1st & 10">1st &amp; 10</option>
+                          <option value="3rd & 6-10">3rd &amp; 6–10</option>
+                          <option value="Red Zone">Red Zone</option>
+                          <option value="Kickoff">Special Teams — Kickoff</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="chip-bar" style="margin-top: var(--space-3); margin-bottom: 0;" role="tablist" aria-label="Filtrar por unidade">
+                    <button type="button" class="chip is-active" aria-pressed="true">Todas visíveis (4)</button>
+                    <button type="button" class="chip" aria-pressed="false">Ofensiva (2)</button>
+                    <button type="button" class="chip" aria-pressed="false">Special teams — Aberta a todos (1)</button>
+                    <button type="button" class="chip" aria-pressed="false">Defesa — Liberadas p/ estudo (1)</button>
+                    <button type="button" class="chip" aria-pressed="false">★ Apenas novidades</button>
+                    <button type="button" class="chip staff-only" aria-pressed="false">Arquivadas (Staff)</button>
+                  </div>
+                </div>
+
+                <!-- Layout Mestre-Detalhe: Lista de Jogadas + Detalhe Completo -->
+                <div class="split-master-detail">
+                  <!-- Lista de Jogadas -->
+                  <div id="playbook-card-list" class="stack-sm">
+                    <article class="card card--highlight" data-play-name="flood right z-post">
+                      <div class="card__header">
+                        <div class="badge-row">
+                          <span id="play-list-new-badge" class="badge badge--new">★ NOVO • v3</span>
+                          <span class="badge badge--offense">OFENSIVA</span>
+                        </div>
+                        <span class="mono" style="font-size: var(--text-xs); color: var(--color-text-secondary);">3rd &amp; 6–10</span>
+                      </div>
+                      <h3 class="card__title">Flood Right Z-Post</h3>
+                      <p class="card__meta">Formação: <strong>Shotgun Trips Right</strong> • 🖼 Imagem anexada</p>
+                      <div class="card__meta staff-only" style="margin-top: 4px;">
+                        🔒 Visibilidade: Somente <strong>Ofensiva</strong> (unidade dona)
+                      </div>
+                    </article>
+
+                    <article class="card" data-play-name="inside zone split">
+                      <div class="card__header">
+                        <div class="badge-row">
+                          <span class="badge badge--available">✓ Estudada • v2</span>
+                          <span class="badge badge--offense">OFENSIVA</span>
+                        </div>
+                        <span class="mono" style="font-size: var(--text-xs); color: var(--color-text-secondary);">1st &amp; 10</span>
+                      </div>
+                      <h3 class="card__title">Inside Zone Split</h3>
+                      <p class="card__meta">Formação: <strong>I-Formation Twins</strong> • 🖼 Imagem anexada</p>
+                    </article>
+
+                    <article class="card" data-play-name="return left wedge wall">
+                      <div class="card__header">
+                        <div class="badge-row">
+                          <span class="badge badge--new">★ NOVO • v2</span>
+                          <span class="badge badge--st">SPECIAL TEAMS</span>
+                        </div>
+                        <span class="mono" style="font-size: var(--text-xs); color: var(--color-text-secondary);">Kickoff</span>
+                      </div>
+                      <h3 class="card__title">Return Left Wedge Wall</h3>
+                      <p class="card__meta">Formação: <strong>Kickoff Return Left</strong> • Visível para todo o time</p>
+                    </article>
+
+                    <!-- Exemplo de jogada da Defesa liberada especificamente para estudo (ADR-0006 / Histórias 26, 32) -->
+                    <article class="card" data-play-name="nickel cover 3 buzz">
+                      <div class="card__header">
+                        <div class="badge-row">
+                          <span class="badge badge--defense">DEFESA (Liberada p/ estudo)</span>
+                          <span class="badge badge--position mono">v1</span>
+                        </div>
+                        <span class="mono" style="font-size: var(--text-xs); color: var(--color-text-secondary);">3rd &amp; Long</span>
+                      </div>
+                      <h3 class="card__title">Nickel Cover 3 Buzz (Conceito Compartilhado)</h3>
+                      <p class="card__meta">
+                        Formação: <strong>Nickel 4-2-5</strong> • Liberada pelo Coordenador Defensivo para estudo de reconhecimento do QB/WR.
+                      </p>
+                    </article>
+                  </div>
+
+                  <!-- Painel de Detalhe da Jogada Selecionada -->
+                  <div class="card">
+                    <div class="card__header">
+                      <div>
+                        <div class="badge-row" style="margin-bottom: var(--space-1);">
+                          <span id="detail-new-badge" class="badge badge--new">★ NOVIDADE NÃO ESTUDADA</span>
+                          <span class="badge badge--offense">UNIDADE DONA: OFENSIVA</span>
+                          <span class="badge badge--position mono">Versão atual: v3</span>
+                        </div>
+                        <h3 class="section-title">Flood Right Z-Post</h3>
+                        <p class="card__meta">
+                          <strong>Formação:</strong> Shotgun Trips Right &bull; <strong>Situação:</strong> 3rd &amp; 6–10 (Meio de campo / Red Zone Alta)
+                        </p>
+                      </div>
+
+                      <!-- Botão do Jogador para marcar que estudou (História 37) -->
+                      <button type="button" id="btn-mark-studied" class="btn btn--primary" onclick="markPlayStudied()">
+                        ✓ Marcar que estudei esta jogada
+                      </button>
+                    </div>
+
+                    <!-- Imagem da Jogada Anexada pelo Coach (Histórias 22, 40; ADR-0003) -->
+                    <div class="play-diagram-box" role="img" aria-label="Desenho tático anexado pelo coach para a jogada Flood Right Z-Post em formação Shotgun Trips Right">
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-2);">
+                        <span class="mono" style="font-size: var(--text-xs); color: #86EFAC;">🖼 IMAGEM ANEXADA PELO COACH (flood-right-v3.png)</span>
+                        <button type="button" class="btn btn--secondary" style="min-height: 36px; padding: 2px 10px; font-size: var(--text-xs);" onclick="alert('Lightbox da imagem aberto em tela cheia com suporte a zoom por pinça.')">
+                          🔍 Ampliar imagem
+                        </button>
+                      </div>
+                      <svg viewBox="0 0 500 190" width="100%" height="170" aria-hidden="true" style="display: block; background: #0B241B; border-radius: 6px;">
+                        <!-- Linhas de jarda do campo -->
+                        <line x1="0" y1="130" x2="500" y2="130" stroke="#1E4631" stroke-width="2" stroke-dasharray="6 4" />
+                        <line x1="0" y1="65" x2="500" y2="65" stroke="#1E4631" stroke-width="1" />
+                        <!-- Linha ofensiva (OL) -->
+                        <rect x="190" y="124" width="12" height="12" fill="#94A3B8" />
+                        <rect x="210" y="124" width="12" height="12" fill="#94A3B8" />
+                        <rect x="230" y="124" width="12" height="12" fill="#F8FAFC" />
+                        <rect x="250" y="124" width="12" height="12" fill="#94A3B8" />
+                        <rect x="270" y="124" width="12" height="12" fill="#94A3B8" />
+                        <!-- QB & RB -->
+                        <circle cx="236" cy="162" r="8" fill="#60A5FA" />
+                        <text x="230" y="182" fill="#CBD5E1" font-size="10" font-family="monospace">QB</text>
+                        <circle cx="270" cy="162" r="8" fill="#60A5FA" />
+                        <path d="M 278 162 Q 350 155 430 115" fill="none" stroke="#60A5FA" stroke-width="2.5" />
+                        <!-- WR-X (Esquerda - Dig) -->
+                        <circle cx="80" cy="130" r="8" fill="#38BDF8" />
+                        <path d="M 80 122 L 80 72 L 155 72" fill="none" stroke="#38BDF8" stroke-width="2.5" />
+                        <text x="68" y="148" fill="#F8FAFC" font-size="10" font-family="monospace">WR-X</text>
+                        <!-- Trips Right: Slot-Y, WR-H, WR-Z -->
+                        <circle cx="330" cy="138" r="8" fill="#60A5FA" />
+                        <path d="M 330 130 L 330 78 L 465 78" fill="none" stroke="#60A5FA" stroke-width="2.5" />
+                        <text x="316" y="156" fill="#CBD5E1" font-size="10" font-family="monospace">Slot-Y</text>
+
+                        <circle cx="435" cy="130" r="9" fill="#FACC15" />
+                        <path d="M 435 120 L 435 55 L 365 18" fill="none" stroke="#FACC15" stroke-width="3" />
+                        <text x="418" y="148" fill="#FACC15" font-weight="bold" font-size="11" font-family="monospace">WR-Z ★</text>
+                      </svg>
+                    </div>
+
+                    <!-- Todas as Atribuições por Posição (História 35: jogador vê todas, não só a dele) -->
+                    <h4 style="margin: var(--space-4) 0 var(--space-2) 0; font-size: var(--text-base);">
+                      Atribuições de Todas as Posições (História 35)
+                    </h4>
+                    <div class="assignment-list">
+                      <div class="assignment-item assignment-item--mine">
+                        <div>
+                          <span class="badge badge--position">WR-Z</span>
+                          <div style="font-size: 11px; color: var(--color-brand-primary); font-weight: 700; margin-top: 2px;">SUA POSIÇÃO</div>
+                        </div>
+                        <div>
+                          <strong>Rota Z-Post (18–20 jardas):</strong> Saída externa forçando o CB a abrir quadril; quebrar aos 14 jardas em Post atacando o terço profundo central na frente do Free Safety.
+                        </div>
+                      </div>
+
+                      <div class="assignment-item assignment-item--mine">
+                        <div>
+                          <span class="badge badge--position">WR-X</span>
+                          <div style="font-size: 11px; color: var(--color-brand-primary); font-weight: 700; margin-top: 2px;">SUA POSIÇÃO</div>
+                        </div>
+                        <div>
+                          <strong>Rota Backside Dig (12 jardas):</strong> Alinhado isolado à esquerda; haste vertical até 12 jardas e corte seco de 90° para dentro como válvula contra rotação de cobertura.
+                        </div>
+                      </div>
+
+                      <div class="assignment-item">
+                        <div><span class="badge badge--position">Slot-Y</span></div>
+                        <div>
+                          <strong>Rota Speed Out (10–12 jardas):</strong> Estressar o linebacker de flat verticalmente e quebrar para a sideline direita em 10 jardas (nível intermediário do Flood).
+                        </div>
+                      </div>
+
+                      <div class="assignment-item">
+                        <div><span class="badge badge--position">RB</span></div>
+                        <div>
+                          <strong>Check &amp; Release Flat Direito (4 jardas):</strong> Checar blitz interna do MLB; se livre, escapar imediatamente para o Flat direito (nível curto do Flood).
+                        </div>
+                      </div>
+
+                      <div class="assignment-item">
+                        <div><span class="badge badge--position">QB</span></div>
+                        <div>
+                          <strong>Drop de 5 passos + Roll leve à direita:</strong> Leitura alta-baixa na sideline direita (1º Z-Post &rarr; 2º Slot-Y Out &rarr; 3º RB Flat; Backside X-Dig se defesa girar toda para o Trips).
+                        </div>
+                      </div>
+
+                      <div class="assignment-item">
+                        <div><span class="badge badge--position">OL</span></div>
+                        <div>
+                          <strong>Proteção Half-Slide Left:</strong> LT, LG e C em slide para a esquerda; RG e RT em bloqueio homem-a-homem firme no lado do lançamento.
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Controles Exclusivos de Staff: Visibilidade por Unidade, Histórico de Versões e Arquivamento (Histórias 23–33) -->
+                    <div class="staff-only" style="margin-top: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--color-border-strong);">
+                      <h4 style="margin: 0 0 var(--space-2) 0;">Controle de Visibilidade e Versões (Exclusivo Staff)</h4>
+                      <div class="card__meta" style="margin-bottom: var(--space-3);">
+                        Regra ADR-0006: A jogada nasce visível apenas para a unidade dona (<strong>Ofensiva</strong>). Marque abaixo caso queira compartilhar esta jogada específica com outra unidade sem abrir o playbook inteiro:
+                      </div>
+                      <div class="chip-bar">
+                        <label class="chip is-active">
+                          <input type="checkbox" checked disabled /> Unidade Dona: Ofensiva (Padrão)
+                        </label>
+                        <label class="chip">
+                          <input type="checkbox" onchange="alert('Visibilidade da jogada atualizada para a Defesa!')" /> Liberar leitura para Defesa
+                        </label>
+                      </div>
+
+                      <div class="card__meta mono" style="margin-bottom: var(--space-3); padding: var(--space-2); background: var(--color-bg-canvas); border-radius: var(--radius-sm);">
+                        <strong>Histórico de revisões (play_revision):</strong><br />
+                        • v3 (Atual) — 14/11 10:15 — Ajustada profundidade do Z-Post para 18 jardas<br />
+                        • v2 — 08/11 19:40 — Adicionada imagem anexada do quadro tático<br />
+                        • v1 — 01/11 09:00 — Criação inicial da jogada
+                      </div>
+
+                      <div class="btn-row">
+                        <button type="button" class="btn btn--primary" onclick="alert('Modo de edição da jogada aberto (criará revisão v4).')">
+                          ✎ Editar jogada (v3 &rarr; v4)
+                        </button>
+                        <button type="button" class="btn btn--secondary" onclick="alert('Seletor de imagem aberto para anexar novo desenho do coach.')">
+                          🖼 Trocar imagem anexada
+                        </button>
+                        <button type="button" class="btn btn--danger" onclick="alert('Jogada arquivada: saiu do playbook ativo mantendo o histórico.')">
+                          Arquivar jogada
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- ============================================================
+                 TELA 4: JOGO (MARCAÇÃO DE DISPONIBILIDADE, CONSOLIDADO E GAME PLAN)
+                 ============================================================ -->
+            <section id="screen-jogo" class="screen-section" aria-labelledby="jogo-title">
+              <div class="stack-md">
+                <div class="section-header">
+                  <div>
+                    <div class="badge-row" style="margin-bottom: var(--space-1);">
+                      <span class="badge badge--st">EVENTO: JOGO OFICIAL</span>
+                      <span class="badge badge--available mono">Prazo de marcação: Sex 22/11 às 10:00 (48h antes)</span>
+                    </div>
+                    <h2 id="jogo-title" class="section-title">Navigators FA vs. Tritões FA</h2>
+                    <p class="section-subtitle">Dom, 24/11/2026 • Kickoff 10:00 (America/Sao_Paulo) • Estádio Municipal</p>
+                  </div>
+                </div>
+
+                <div class="split-master-detail">
+                  <!-- Coluna Esquerda: Marcação de Disponibilidade do Jogo + Cruzamento com Status do Elenco -->
+                  <div class="stack-md">
+                    <div class="card">
+                      <div class="card__header">
+                        <h3 class="card__title">Minha Marcação de Disponibilidade</h3>
+                        <span id="jogo-marcacao-badge" class="badge badge--available">✓ Disponível para o jogo</span>
+                      </div>
+                      <p class="card__meta">
+                        A <strong>marcação</strong> define sua disponibilidade para este confronto específico e não altera seu <strong>status do elenco</strong> cadastral (História 19). Recusar o jogo também exige justificativa.
+                      </p>
+                      <div class="btn-row" style="margin-top: var(--space-3);">
+                        <button type="button" class="btn btn--success" aria-pressed="true" onclick="alert('Marcação confirmada: Disponível para o jogo vs. Tritões FA!')">
+                          ✓ Estou disponível (Vou ao jogo)
+                        </button>
+                        <button type="button" class="btn btn--danger" aria-pressed="false" onclick="document.getElementById('jogo-justificativa-box').style.display='block'">
+                          ✕ Indisponível (Justificar)
+                        </button>
+                      </div>
+
+                      <div id="jogo-justificativa-box" style="display: none; margin-top: var(--space-3); padding-top: var(--space-3); border-top: 1px solid var(--color-border-subtle);">
+                        <label for="jogo-motivo" class="form-label">Justificativa para ausência no jogo (visível só ao staff):</label>
+                        <select id="jogo-motivo" class="form-select" style="margin: var(--space-2) 0;">
+                          <option value="Saúde / Lesão">Saúde / Lesão</option>
+                          <option value="Trabalho / Escala">Trabalho / Escala</option>
+                          <option value="Viagem / Compromisso familiar">Viagem / Compromisso familiar</option>
+                          <option value="Outro motivo">Outro motivo</option>
+                        </select>
+                        <textarea class="form-textarea" placeholder="Complemente sua justificativa para o staff..."></textarea>
+                        <button type="button" class="btn btn--danger btn--block" style="margin-top: var(--space-2);" onclick="alert('Indisponibilidade com justificativa registrada para o jogo.')">
+                          Confirmar indisponibilidade no jogo
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Exclusivo Staff: Disponibilidade Consolidada Cruzada com Status do Elenco (Histórias 60, 61) -->
+                    <div class="card staff-only">
+                      <h3 class="card__title">Escalação: Disponibilidade × Status do Elenco (Staff)</h3>
+                      <p class="card__meta" style="margin-bottom: var(--space-3);">
+                        Cruza a marcação deste jogo com o status do elenco para impedir escalar jogadores lesionados ou reformados (História 61).
+                      </p>
+
+                      <div class="stack-sm">
+                        <div class="assignment-item" style="grid-template-columns: 1fr auto;">
+                          <div>
+                            <strong>Rafael Costa (WR / KR)</strong>
+                            <div class="badge-row" style="margin-top: 4px;">
+                              <span class="badge badge--available">Status do elenco: Disponível</span>
+                              <span class="badge badge--available">Marcação do jogo: Vou</span>
+                            </div>
+                          </div>
+                          <span class="badge badge--available">Apto p/ Escalar</span>
+                        </div>
+
+                        <div class="assignment-item" style="grid-template-columns: 1fr auto; border-color: var(--color-status-injured);">
+                          <div>
+                            <strong>Lucas Mendes (RB)</strong>
+                            <div class="badge-row" style="margin-top: 4px;">
+                              <span class="badge badge--injured">+ Status do elenco: Lesionado (Retorno: 05/12)</span>
+                              <span class="badge badge--retired">Marcação: Não vou</span>
+                            </div>
+                            <div class="card__meta" style="margin-top: 4px;">
+                              ⚠ Alerta de status do elenco: estiramento de posterior — não escalar neste confronto.
+                            </div>
+                          </div>
+                          <span class="badge badge--injured">Inapto</span>
+                        </div>
+
+                        <div class="assignment-item" style="grid-template-columns: 1fr auto;">
+                          <div>
+                            <strong>Henrique Bastos (DL)</strong>
+                            <div class="badge-row" style="margin-top: 4px;">
+                              <span class="badge badge--retired">— Status do elenco: Reformado</span>
+                            </div>
+                          </div>
+                          <span class="badge badge--retired">Reformado</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Coluna Direita: Game Plan Ordenado por Referência (ADR-0004 / Histórias 62–66) -->
+                  <div class="card">
+                    <div class="card__header">
+                      <div>
+                        <span class="badge badge--new">GAME PLAN POR REFERÊNCIA (ADR-0004)</span>
+                        <h3 class="card__title" style="margin-top: var(--space-1);">
+                          Game Plan — vs. Tritões FA
+                        </h3>
+                        <p class="card__meta">
+                          Lista ordenada das jogadas escolhidas do playbook com notas específicas deste confronto. Editar uma jogada no playbook atualiza o game plan automaticamente (História 65).
+                        </p>
+                      </div>
+                      <button type="button" class="btn btn--primary staff-only" onclick="alert('Seletor do Playbook aberto para adicionar jogada por referência ao Game Plan.')">
+                        + Adicionar jogada do playbook
+                      </button>
+                    </div>
+
+                    <div id="gameplan-list" class="stack-sm">
+                      <!-- Item #01 -->
+                      <div class="gameplan-item" data-gp-title="Flood Right Z-Post">
+                        <div class="gameplan-order-num">#01</div>
+                        <div>
+                          <div class="badge-row">
+                            <span class="badge badge--offense">OFENSIVA</span>
+                            <span class="badge badge--position mono">Shotgun Trips Right • 3rd &amp; 6–10</span>
+                            <span class="badge badge--available mono">Ref: Playbook v3</span>
+                          </div>
+                          <h4 style="margin: 6px 0 2px 0; font-size: var(--text-lg);">Flood Right Z-Post</h4>
+                          <div class="gameplan-note">
+                            <strong>Nota do confronto (vs. Tritões):</strong> CB #21 joga em press agressivo sem ajuda de safety em 3rd &amp; médio; priorizar leitura alta no WR-Z Post se o Free Safety fechar no Slot-Y.
+                          </div>
+                          <div class="btn-row" style="margin-top: var(--space-2);">
+                            <button type="button" class="btn btn--secondary" style="min-height: 40px; padding: 4px 12px; font-size: var(--text-sm);" onclick="switchScreen('playbook')">
+                              Abrir atribuições no Playbook
+                            </button>
+                            <button type="button" class="btn btn--secondary staff-only" style="min-height: 40px; padding: 4px 12px; font-size: var(--text-sm);" onclick="alert('Editor de nota do confronto para #01 Flood Right Z-Post.')">
+                              ✎ Editar nota
+                            </button>
+                          </div>
+                        </div>
+                        <div class="stack-sm staff-only">
+                          <button type="button" class="btn btn--secondary" aria-label="Subir Flood Right Z-Post na ordem do game plan" onclick="moveGamePlanItem(this, -1)">↑</button>
+                          <button type="button" class="btn btn--secondary" aria-label="Descer Flood Right Z-Post na ordem do game plan" onclick="moveGamePlanItem(this, 1)">↓</button>
+                        </div>
+                      </div>
+
+                      <!-- Item #02 -->
+                      <div class="gameplan-item" data-gp-title="Inside Zone Split">
+                        <div class="gameplan-order-num">#02</div>
+                        <div>
+                          <div class="badge-row">
+                            <span class="badge badge--offense">OFENSIVA</span>
+                            <span class="badge badge--position mono">I-Formation Twins • 1st &amp; 10</span>
+                            <span class="badge badge--available mono">Ref: Playbook v2</span>
+                          </div>
+                          <h4 style="margin: 6px 0 2px 0; font-size: var(--text-lg);">Inside Zone Split</h4>
+                          <div class="gameplan-note">
+                            <strong>Nota do confronto (vs. Tritões):</strong> DE #91 fecha fechado no C-Gap; TE deve selar a borda traseira com ângulo curto.
+                          </div>
+                          <div class="btn-row" style="margin-top: var(--space-2);">
+                            <button type="button" class="btn btn--secondary" style="min-height: 40px; padding: 4px 12px; font-size: var(--text-sm);" onclick="switchScreen('playbook')">
+                              Abrir atribuições no Playbook
+                            </button>
+                            <button type="button" class="btn btn--secondary staff-only" style="min-height: 40px; padding: 4px 12px; font-size: var(--text-sm);" onclick="alert('Editor de nota do confronto para #02 Inside Zone Split.')">
+                              ✎ Editar nota
+                            </button>
+                          </div>
+                        </div>
+                        <div class="stack-sm staff-only">
+                          <button type="button" class="btn btn--secondary" aria-label="Subir Inside Zone Split na ordem do game plan" onclick="moveGamePlanItem(this, -1)">↑</button>
+                          <button type="button" class="btn btn--secondary" aria-label="Descer Inside Zone Split na ordem do game plan" onclick="moveGamePlanItem(this, 1)">↓</button>
+                        </div>
+                      </div>
+
+                      <!-- Item #03 -->
+                      <div class="gameplan-item" data-gp-title="Return Left Wedge Wall">
+                        <div class="gameplan-order-num">#03</div>
+                        <div>
+                          <div class="badge-row">
+                            <span class="badge badge--st">SPECIAL TEAMS</span>
+                            <span class="badge badge--position mono">Kickoff Return Left</span>
+                            <span class="badge badge--available mono">Ref: Playbook v2</span>
+                          </div>
+                          <h4 style="margin: 6px 0 2px 0; font-size: var(--text-lg);">Return Left Wedge Wall</h4>
+                          <div class="gameplan-note">
+                            <strong>Nota do confronto (vs. Tritões):</strong> Kicker #08 chuta sempre direcionado ao hash esquerdo; KR #14 preparar retorno imediato pela parede esquerda.
+                          </div>
+                        </div>
+                        <div class="stack-sm staff-only">
+                          <button type="button" class="btn btn--secondary" aria-label="Subir Return Left Wedge Wall na ordem do game plan" onclick="moveGamePlanItem(this, -1)">↑</button>
+                          <button type="button" class="btn btn--secondary" aria-label="Descer Return Left Wedge Wall na ordem do game plan" onclick="moveGamePlanItem(this, 1)">↓</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- ============================================================
+                 TELA 5: ELENCO (EXCLUSIVA STAFF — STATUS, FILTROS E APROVAÇÃO STAFF)
+                 ============================================================ -->
+            <section id="screen-elenco" class="screen-section staff-only" aria-labelledby="elenco-title">
+              <div class="stack-md">
+                <div class="section-header">
+                  <div>
+                    <span class="badge badge--offense">EXCLUSIVO STAFF (ABA OCULTA PARA JOGADOR)</span>
+                    <h2 id="elenco-title" class="section-title" style="margin-top: var(--space-1);">
+                      Gestão do Elenco e Status Cadastral
+                    </h2>
+                    <p class="section-subtitle">
+                      Filtre por unidade, posição e status do elenco; registre observação, data prevista de retorno e aprove cadastros de staff
+                    </p>
+                  </div>
+                  <button type="button" class="btn btn--primary" onclick="alert('Formulário aberto para pré-cadastrar no elenco um jogador que ainda não criou conta (História 77).')">
+                    + Registrar jogador no elenco
+                  </button>
+                </div>
+
+                <!-- Fila de Aprovação de Staff Pendente + Subpapéis (Exclusivo Head Coach — Histórias 9, 10, 75, 76) -->
+                <div class="card card--warning hc-only">
+                  <div class="card__header">
+                    <div>
+                      <span class="badge badge--unavailable">FILA DO HEAD COACH (ADR-0005)</span>
+                      <h3 class="card__title" style="margin-top: var(--space-1);">
+                        Cadastros de Staff Pendentes e Subpapéis Aditivos
+                      </h3>
+                    </div>
+                  </div>
+
+                  <div class="grid-2col">
+                    <div class="stack-sm">
+                      <h4 style="margin: 0; font-size: var(--text-sm); color: var(--color-text-secondary);">
+                        Solicitações Pendentes (Histórias 9 e 76)
+                      </h4>
+                      <div id="pending-staff-item-1" class="assignment-item" style="grid-template-columns: 1fr auto;">
+                        <div>
+                          <strong>Carlos Eduardo Silva</strong>
+                          <div class="card__meta">carlos.silva@navigators.com.br</div>
+                          <span class="badge badge--defense" style="margin-top: 4px;">Subpapel solicitado: Coordenador Defensivo</span>
+                        </div>
+                        <div class="btn-row">
+                          <button type="button" class="btn btn--success" style="min-height: 44px; padding: 4px 12px;" onclick="document.getElementById('pending-staff-item-1').innerHTML='<span class=\'badge badge--available\'>✓ Carlos Eduardo Silva aprovado como Coordenador Defensivo!</span>'">
+                            ✓ Aprovar
+                          </button>
+                          <button type="button" class="btn btn--danger" style="min-height: 44px; padding: 4px 12px;" onclick="document.getElementById('pending-staff-item-1').innerHTML='<span class=\'badge badge--injured\'>✕ Cadastro recusado pelo Head Coach</span>'">
+                            ✕ Recusar
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="stack-sm">
+                      <h4 style="margin: 0; font-size: var(--text-sm); color: var(--color-text-secondary);">
+                        Staff Ativo — Coordenador de Special Teams Aditivo e Revogação (Histórias 10 e 75)
+                      </h4>
+                      <div class="assignment-item" style="grid-template-columns: 1fr auto;">
+                        <div>
+                          <strong>André Figueiredo</strong>
+                          <div class="badge-row" style="margin-top: 4px;">
+                            <span class="badge badge--offense">Coordenador Ofensivo</span>
+                            <span id="st-role-badge" class="badge badge--st">✓ + Coordenador de Special Teams</span>
+                          </div>
+                        </div>
+                        <div class="btn-row">
+                          <button type="button" class="btn btn--secondary" style="min-height: 44px; padding: 4px 10px; font-size: var(--text-xs);" onclick="toggleStCoordinatorRole()">
+                            Alternar Special Teams
+                          </button>
+                          <button type="button" class="btn btn--danger" style="min-height: 44px; padding: 4px 10px; font-size: var(--text-xs);" onclick="alert('Confirmação: Remover papel de staff de André Figueiredo sem apagar a conta (História 75).')">
+                            Remover staff
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Filtros Combináveis do Elenco: Unidade, Posição e Status do Elenco (História 18) -->
+                <div class="card">
+                  <div class="grid-2col" style="gap: var(--space-3);">
+                    <div class="form-group" style="margin-bottom: 0;">
+                      <label for="roster-unit-filter" class="form-label">Filtrar por Unidade:</label>
+                      <select id="roster-unit-filter" class="form-select">
+                        <option value="todas">Todas as unidades (45)</option>
+                        <option value="ofensiva">Ofensiva (22)</option>
+                        <option value="defesa">Defesa (20)</option>
+                        <option value="special_teams">Special teams (18)</option>
+                      </select>
+                    </div>
+                    <div class="grid-2col" style="gap: var(--space-2);">
+                      <div class="form-group" style="margin-bottom: 0;">
+                        <label for="roster-pos-filter" class="form-label">Posição:</label>
+                        <select id="roster-pos-filter" class="form-select">
+                          <option value="todas">Todas as posições</option>
+                          <option value="QB">QB</option>
+                          <option value="RB">RB</option>
+                          <option value="WR">WR</option>
+                          <option value="OL">OL</option>
+                          <option value="DL">DL</option>
+                          <option value="LB">LB</option>
+                          <option value="CB/S">CB / S</option>
+                        </select>
+                      </div>
+                      <div class="form-group" style="margin-bottom: 0;">
+                        <label for="roster-status-filter" class="form-label">Status do elenco:</label>
+                        <select id="roster-status-filter" class="form-select">
+                          <option value="todos">Todos os status</option>
+                          <option value="disponivel">✓ Disponível (38)</option>
+                          <option value="indisponivel">! Indisponível (2)</option>
+                          <option value="lesionado">+ Lesionado (3)</option>
+                          <option value="reformado">— Reformado (2)</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Lista de Jogadores do Elenco + Edição de Status do Elenco, Observação e Data Prevista de Retorno (Histórias 15–17) -->
+                <div class="grid-2col">
+                  <div class="stack-sm">
+                    <article class="card">
+                      <div class="card__header">
+                        <div>
+                          <h3 class="card__title">Rafael Costa</h3>
+                          <div class="badge-row" style="margin-top: 4px;">
+                            <span class="badge badge--offense">OFENSIVA</span>
+                            <span class="badge badge--st">SPECIAL TEAMS</span>
+                            <span class="badge badge--position">WR</span>
+                            <span class="badge badge--position">KR</span>
+                          </div>
+                        </div>
+                        <span class="badge badge--available">✓ Disponível</span>
+                      </div>
+                      <p class="card__meta tabular" style="margin: 0;">
+                        Taxa de comparecimento em treinos: <strong>92% (11/12)</strong> • Observação: Sem restrições.
+                      </p>
+                    </article>
+
+                    <article class="card card--danger">
+                      <div class="card__header">
+                        <div>
+                          <h3 class="card__title">Lucas Mendes</h3>
+                          <div class="badge-row" style="margin-top: 4px;">
+                            <span class="badge badge--offense">OFENSIVA</span>
+                            <span class="badge badge--position">RB</span>
+                          </div>
+                        </div>
+                        <span id="lucas-status-badge" class="badge badge--injured">+ Lesionado</span>
+                      </div>
+                      <p id="lucas-status-details" class="card__meta tabular" style="margin: 0;">
+                        <strong>Data prevista de retorno:</strong> 05/12/2026 &bull; <strong>Observação:</strong> Estiramento grau 1 posterior da coxa direita; em fisioterapia. &bull; Comparecimento: <strong>90%</strong>
+                      </p>
+                    </article>
+
+                    <article class="card">
+                      <div class="card__header">
+                        <div>
+                          <h3 class="card__title">Matheus Nogueira</h3>
+                          <div class="badge-row" style="margin-top: 4px;">
+                            <span class="badge badge--defense">DEFESA</span>
+                            <span class="badge badge--position">CB</span>
+                          </div>
+                        </div>
+                        <span class="badge badge--unavailable">! Indisponível</span>
+                      </div>
+                      <p class="card__meta tabular" style="margin: 0;">
+                        <strong>Observação:</strong> Suspenso por 1 partida (regulamento do campeonato). &bull; Comparecimento: <strong>85%</strong>
+                      </p>
+                    </article>
+
+                    <article class="card">
+                      <div class="card__header">
+                        <div>
+                          <h3 class="card__title">Henrique Bastos</h3>
+                          <div class="badge-row" style="margin-top: 4px;">
+                            <span class="badge badge--defense">DEFESA</span>
+                            <span class="badge badge--position">DL</span>
+                          </div>
+                        </div>
+                        <span class="badge badge--retired">— Reformado</span>
+                      </div>
+                      <p class="card__meta" style="margin: 0;">
+                        Encerrou a prática em campo em 2026, permanece registrado no histórico do elenco.
+                      </p>
+                    </article>
+                  </div>
+
+                  <!-- Formulário de Edição de Status do Elenco (Histórias 15, 16, 17, 19) -->
+                  <div class="card">
+                    <h3 class="card__title">Editar Status do Elenco — Lucas Mendes (RB)</h3>
+                    <p class="card__meta" style="margin-bottom: var(--space-3);">
+                      O status do elenco é a condição cadastral do jogador (`disponivel`, `indisponivel`, `lesionado`, `reformado`), distinta da disponibilidade pontual de um jogo.
+                    </p>
+
+                    <form onsubmit="saveRosterStatus(event)">
+                      <div class="form-group">
+                        <label for="edit-roster-status" class="form-label">Status do elenco:</label>
+                        <select id="edit-roster-status" class="form-select">
+                          <option value="disponivel">✓ Disponível (disponivel)</option>
+                          <option value="indisponivel">! Indisponível (indisponivel)</option>
+                          <option value="lesionado" selected>+ Lesionado (lesionado)</option>
+                          <option value="reformado">— Reformado (reformado)</option>
+                        </select>
+                      </div>
+
+                      <div class="form-group">
+                        <label for="edit-return-date" class="form-label">
+                          Data prevista de retorno (opcional, aplicável quando Lesionado — História 17):
+                        </label>
+                        <input type="date" id="edit-return-date" class="form-input mono" value="2026-12-05" />
+                      </div>
+
+                      <div class="form-group">
+                        <label for="edit-roster-note" class="form-label">
+                          Observação no status (História 16):
+                        </label>
+                        <textarea id="edit-roster-note" class="form-textarea">Estiramento grau 1 posterior da coxa direita; liberado para estudo tático, retorno previsto para 05/12.</textarea>
+                      </div>
+
+                      <button type="submit" class="btn btn--primary btn--block">
+                        Salvar status do elenco
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- ============================================================
+                 TELA 6: PERFIL (UNIDADES, POSIÇÕES, STATUS, NOTIFICAÇÕES, SUPORTE E SAIR)
+                 ============================================================ -->
+            <section id="screen-perfil" class="screen-section" aria-labelledby="perfil-title">
+              <div class="stack-md">
+                <div class="section-header">
+                  <div>
+                    <h2 id="perfil-title" class="section-title">Meu Perfil e Preferências</h2>
+                    <p class="section-subtitle">
+                      Gerencie suas unidades e posições, veja seu status do elenco, controle notificações e acesse o suporte do staff
+                    </p>
+                  </div>
+                </div>
+
+                <div class="grid-2col">
+                  <!-- Coluna Esquerda: Identidade, Meu Status do Elenco e Unidades/Posições (Histórias 4, 5, 6, 13, 14, 20) -->
+                  <div class="stack-md">
+                    <div class="card">
+                      <div class="card__header">
+                        <div>
+                          <h3 class="card__title">Rafael Costa</h3>
+                          <p class="card__meta">rafael.costa@navigators.com.br • E-mail confirmado ✓</p>
+                        </div>
+                        <span class="badge badge--available">Sessão Ativa</span>
+                      </div>
+
+                      <!-- Status do Elenco no próprio Perfil do Jogador (História 20) -->
+                      <div style="padding: var(--space-3); background: var(--color-bg-elevated); border-radius: var(--radius-md); margin-top: var(--space-2);">
+                        <div style="font-size: var(--text-xs); color: var(--color-text-secondary); text-transform: uppercase; font-weight: 700;">
+                          Meu Status do Elenco (História 20)
+                        </div>
+                        <div class="badge-row" style="margin-top: var(--space-1);">
+                          <span class="badge badge--available">✓ Disponível (disponivel)</span>
+                        </div>
+                        <p class="form-hint" style="margin: var(--space-1) 0 0 0;">
+                          Registrado pelo staff. Caso esteja lesionado ou indisponível, avise o staff pelo canal abaixo.
+                        </p>
+                      </div>
+                    </div>
+
+                    <!-- Escolha e Correção de Unidades e Múltiplas Posições (Histórias 4, 5, 6) -->
+                    <div class="card">
+                      <h3 class="card__title">Minhas Unidades e Posições em Campo</h3>
+                      <p class="card__meta" style="margin-bottom: var(--space-3);">
+                        Corrija suas unidades e posições quando precisar (História 6). Jogadas de <strong>Special teams</strong> são sempre visíveis para todo o time.
+                      </p>
+
+                      <div class="form-group">
+                        <label for="perfil-unidade" class="form-label">Em qual unidade você joga? (História 4)</label>
+                        <select id="perfil-unidade" class="form-select">
+                          <option value="ofensiva" selected>Ofensiva (+ Special teams)</option>
+                          <option value="defesa">Defesa (+ Special teams)</option>
+                          <option value="ambas">Ambas — Ofensiva e Defesa (+ Special teams)</option>
+                        </select>
+                      </div>
+
+                      <div class="form-group">
+                        <span class="form-label">Minhas Posições (escolha uma ou mais — História 5):</span>
+                        <div class="chip-bar" style="margin-bottom: 0;">
+                          <button type="button" class="chip" aria-pressed="false" onclick="toggleChip(this)">QB</button>
+                          <button type="button" class="chip" aria-pressed="false" onclick="toggleChip(this)">RB</button>
+                          <button type="button" class="chip is-active" aria-pressed="true" onclick="toggleChip(this)">✓ WR</button>
+                          <button type="button" class="chip" aria-pressed="false" onclick="toggleChip(this)">TE</button>
+                          <button type="button" class="chip" aria-pressed="false" onclick="toggleChip(this)">OL</button>
+                          <button type="button" class="chip" aria-pressed="false" onclick="toggleChip(this)">DL</button>
+                          <button type="button" class="chip" aria-pressed="false" onclick="toggleChip(this)">LB</button>
+                          <button type="button" class="chip" aria-pressed="false" onclick="toggleChip(this)">CB / S</button>
+                          <button type="button" class="chip is-active" aria-pressed="true" onclick="toggleChip(this)">✓ KR / PR</button>
+                          <button type="button" class="chip" aria-pressed="false" onclick="toggleChip(this)">K / P / LS</button>
+                        </div>
+                      </div>
+
+                      <button type="button" class="btn btn--primary btn--block" onclick="alert('Suas unidades e posições (WR, KR/PR) foram salvas com sucesso!')">
+                        Salvar unidades e posições
+                      </button>
+                    </div>
+
+                    <!-- Consulta Somente Leitura dos Companheiros do Elenco pelo Jogador (Histórias 13 e 14) -->
+                    <div class="card">
+                      <h3 class="card__title">Companheiros do Time (Consulta de Unidades e Status)</h3>
+                      <p class="card__meta">
+                        Veja com quem você conta em cada unidade e posição (Histórias 13 e 14). Sem justificativas nem observações restritas.
+                      </p>
+                      <div class="stack-sm" style="margin-top: var(--space-3);">
+                        <div class="assignment-item" style="grid-template-columns: 1fr auto;">
+                          <div><strong>Gabriel Rocha</strong> • Ofensiva • <span class="mono">QB</span></div>
+                          <span class="badge badge--available">✓ Disponível</span>
+                        </div>
+                        <div class="assignment-item" style="grid-template-columns: 1fr auto;">
+                          <div><strong>Lucas Mendes</strong> • Ofensiva • <span class="mono">RB</span></div>
+                          <span class="badge badge--injured">+ Lesionado</span>
+                        </div>
+                        <div class="assignment-item" style="grid-template-columns: 1fr auto;">
+                          <div><strong>Matheus Nogueira</strong> • Defesa • <span class="mono">CB</span></div>
+                          <span class="badge badge--unavailable">! Indisponível</span>
+                        </div>
+                        <div class="assignment-item" style="grid-template-columns: 1fr auto;">
+                          <div><strong>Henrique Bastos</strong> • Defesa • <span class="mono">DL</span></div>
+                          <span class="badge badge--retired">— Reformado</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Coluna Direita: Notificações, Contato com Staff e Sessão / Exclusão de Conta (Histórias 11, 72–74, 78, 79) -->
+                  <div class="stack-md">
+                    <div class="card">
+                      <h3 class="card__title">Notificações (Web Push &amp; E-mail)</h3>
+                      <p class="card__meta" style="margin-bottom: var(--space-3);">
+                        Controle quais avisos você recebe (História 72). Quando o push não estiver disponível no aparelho, você recebe por e-mail (História 73).
+                      </p>
+
+                      <div class="stack-sm">
+                        <label class="assignment-item" style="grid-template-columns: 1fr auto; cursor: pointer;">
+                          <span><strong>Jogada atualizada no meu playbook</strong> (História 67)</span>
+                          <input type="checkbox" checked style="width: 22px; height: 22px;" />
+                        </label>
+                        <label class="assignment-item" style="grid-template-columns: 1fr auto; cursor: pointer;">
+                          <span><strong>Novo evento exigindo resposta</strong> (História 68)</span>
+                          <input type="checkbox" checked style="width: 22px; height: 22px;" />
+                        </label>
+                        <label class="assignment-item" style="grid-template-columns: 1fr auto; cursor: pointer;">
+                          <span><strong>Lembrete antes do prazo vencer</strong> (História 69)</span>
+                          <input type="checkbox" checked style="width: 22px; height: 22px;" />
+                        </label>
+                        <label class="assignment-item staff-only" style="grid-template-columns: 1fr auto; cursor: pointer;">
+                          <span><strong>[Staff] Jogador respondeu ou justificou ausência</strong> (História 70)</span>
+                          <input type="checkbox" checked style="width: 22px; height: 22px;" />
+                        </label>
+                        <label class="assignment-item hc-only" style="grid-template-columns: 1fr auto; cursor: pointer;">
+                          <span><strong>[Head Coach] Cadastro de staff pendente de aprovação</strong> (História 71)</span>
+                          <input type="checkbox" checked style="width: 22px; height: 22px;" />
+                        </label>
+                      </div>
+                    </div>
+
+                    <!-- Canal de Contato com o Staff pelo App (História 78) -->
+                    <div class="card">
+                      <h3 class="card__title">Falar com o Staff (História 78)</h3>
+                      <p class="card__meta" style="margin-bottom: var(--space-3);">
+                        Use este canal quando o prazo de um evento já tiver encerrado ou precisar comunicar uma atualização de status do elenco.
+                      </p>
+                      <div class="form-group">
+                        <label for="contato-staff-msg" class="form-label">Mensagem para o staff:</label>
+                        <textarea id="contato-staff-msg" class="form-textarea" placeholder="Ex.: Coach, meu turno de sábado mudou depois que o prazo fechou, consigo chegar às 14h30 no treino."></textarea>
+                      </div>
+                      <button type="button" class="btn btn--secondary btn--block" onclick="alert('Mensagem enviada ao staff do time!')">
+                        Enviar mensagem ao staff
+                      </button>
+                    </div>
+
+                    <!-- Sessão e Exclusão de Conta (Histórias 11, 12, 79) -->
+                    <div class="card card--danger">
+                      <h3 class="card__title">Sessão e Privacidade da Conta</h3>
+                      <p class="card__meta" style="margin-bottom: var(--space-3);">
+                        Sua sessão permanece ativa entre visitas neste aparelho (História 12). Em aparelho compartilhado, saia da conta ao terminar.
+                      </p>
+                      <div class="btn-row">
+                        <button type="button" class="btn btn--secondary" onclick="toggleOnboardingModal(true)">
+                          Sair da conta (História 11)
+                        </button>
+                        <button type="button" class="btn btn--danger" onclick="confirm('Tem certeza de que deseja apagar permanentemente sua conta e sair do time? (História 79)')">
+                          Apagar minha conta (História 79)
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+          </div>
+        </main>
+
+        <!-- BARRA DE NAVEGAÇÃO INFERIOR (MOBILE < 1024px — Respeita Safe Area iOS) -->
+        <nav class="app-bottom-nav active-member-only" aria-label="Navegação principal mobile">
+          <button type="button" class="bottom-nav-btn" data-nav="home" aria-current="page" onclick="switchScreen('home')">
+            <span class="bottom-nav-icon" aria-hidden="true">🏠</span>
+            <span>Home</span>
+          </button>
+          <button type="button" class="bottom-nav-btn" data-nav="evento" onclick="switchScreen('evento')">
+            <span class="bottom-nav-icon" aria-hidden="true">📋</span>
+            <span>Evento</span>
+          </button>
+          <button type="button" class="bottom-nav-btn" data-nav="playbook" onclick="switchScreen('playbook')">
+            <span class="bottom-nav-icon" aria-hidden="true">📖</span>
+            <span>Playbook</span>
+          </button>
+          <button type="button" class="bottom-nav-btn" data-nav="jogo" onclick="switchScreen('jogo')">
+            <span class="bottom-nav-icon" aria-hidden="true">🏟️</span>
+            <span>Jogo</span>
+          </button>
+          <!-- Aba Elenco: estritamente oculta para Jogador no mobile também -->
+          <button type="button" class="bottom-nav-btn staff-only" data-nav="elenco" onclick="switchScreen('elenco')">
+            <span class="bottom-nav-icon" aria-hidden="true">👥</span>
+            <span>Elenco</span>
+          </button>
+          <button type="button" class="bottom-nav-btn" data-nav="perfil" onclick="switchScreen('perfil')">
+            <span class="bottom-nav-icon" aria-hidden="true">⚙️</span>
+            <span>Perfil</span>
+          </button>
+        </nav>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MODAL INTERATIVO: FLUXO DE CADASTRO, CÓDIGO DO TIME E ESCOLHA DE PAPEL
+       (Histórias 1, 2, 3, 4, 5, 7, 8 — ADR-0005)
+       ==================================================================== -->
+  <div id="onboarding-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="onboarding-title">
+    <div class="modal-dialog">
+      <div class="card__header">
+        <div>
+          <span class="badge badge--new">FLUXO DE CADASTRO &amp; ACESSO (ADR-0005)</span>
+          <h2 id="onboarding-title" class="section-title" style="margin-top: var(--space-1);">
+            Entrar no Playbook do Time
+          </h2>
+        </div>
+        <button type="button" class="btn btn--secondary" style="min-height: 44px; padding: 4px 12px;" onclick="toggleOnboardingModal(false)">
+          ✕ Fechar
+        </button>
+      </div>
+
+      <div class="stack-md">
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="team-code-input" class="form-label">1. Código do time (História 1):</label>
+          <input type="text" id="team-code-input" class="form-input mono" value="NAVIGATORS-2026" autocapitalize="characters" />
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="auth-email-input" class="form-label">2. E-mail e código de verificação ou Conta Google (Histórias 2 e 3):</label>
+          <input type="email" id="auth-email-input" class="form-input" value="atleta@navigators.com.br" />
+          <div class="btn-row" style="margin-top: var(--space-2);">
+            <button type="button" class="btn btn--secondary" onclick="alert('Código de 6 dígitos enviado para o e-mail!')">
+              Receber código por e-mail
+            </button>
+            <button type="button" class="btn btn--secondary" onclick="alert('Autenticado com Google OAuth (sem senha)!')">
+              G Entrar com Google
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="onboarding-role-select" class="form-label">3. Escolha seu Papel no Time (Histórias 4, 5, 7, 8):</label>
+          <select id="onboarding-role-select" class="form-select" onchange="toggleOnboardingRoleFields(this.value)">
+            <option value="jogador">Jogador (entra direto e escolhe unidades e posições)</option>
+            <option value="staff">Staff (escolhe subpapel e fica Pendente até Head Coach aprovar)</option>
+          </select>
+        </div>
+
+        <div id="onboarding-jogador-fields" class="card" style="background: var(--color-bg-elevated);">
+          <strong>Configuração de Jogador:</strong>
+          <p class="card__meta" style="margin: 4px 0 8px 0;">
+            Unidades: Ofensiva, Defesa ou Ambas • Posições múltiplas (ex.: WR + KR).
+          </p>
+          <button type="button" class="btn btn--primary btn--block" onclick="setSimRole('jogador'); toggleOnboardingModal(false)">
+            Concluir cadastro como Jogador &rarr; Ir para Home
+          </button>
+        </div>
+
+        <div id="onboarding-staff-fields" class="card card--warning" style="display: none;">
+          <strong>Configuração de Subpapel do Staff (História 7):</strong>
+          <select class="form-select" style="margin: 8px 0;">
+            <option>Coordenador Defensivo</option>
+            <option>Coordenador Ofensivo</option>
+            <option>Head Coach</option>
+            <option>Coordenador de Special Teams (aditivo)</option>
+          </select>
+          <p class="card__meta" style="margin: 0 0 8px 0;">
+            🔒 Cadastros de staff nascem no estado <strong>Pendente</strong> até aprovação de um Head Coach (História 8 / ADR-0005).
+          </p>
+          <button type="button" class="btn btn--primary btn--block" onclick="setSimRole('staff_pendente'); toggleOnboardingModal(false)">
+            Solicitar cadastro como Staff &rarr; Ver Estado Pendente
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       SCRIPT LEVE DE INTERAÇÃO DO PROTÓTIPO (Zero dependências externas)
+       ==================================================================== -->
+  <script>
+    const screenTitles = {
+      home: 'Home — Navigators FA',
+      evento: 'Evento (Treino) — Presença e Justificativa',
+      playbook: 'Playbook — Jogadas por Unidade',
+      jogo: 'Jogo — Disponibilidade e Game Plan',
+      elenco: 'Elenco — Gestão de Status e Staff (Exclusivo Staff)',
+      perfil: 'Meu Perfil — Posições, Status e Notificações'
+    };
+
+    const roleLabels = {
+      jogador: 'Papel: Jogador • WR / KR (Ofensiva & Special teams)',
+      head_coach: 'Papel: Staff • Subpapel: Head Coach (Acesso Total)',
+      coordenador_ofensivo: 'Papel: Staff • Subpapel: Coordenador Ofensivo',
+      staff_pendente: 'Papel: Staff • Estado: Pendente de Aprovação'
+    };
+
+    function switchScreen(screenId) {
+      // Se jogador tentar abrir elenco, redireciona para home (aba Elenco não existe para jogador)
+      if (document.body.getAttribute('data-role') === 'jogador' && screenId === 'elenco') {
+        screenId = 'home';
+      }
+
+      document.querySelectorAll('.screen-section').forEach((sec) => {
+        sec.classList.toggle('is-active', sec.id === 'screen-' + screenId);
+      });
+
+      document.querySelectorAll('[data-nav]').forEach((btn) => {
+        if (btn.getAttribute('data-nav') === screenId) {
+          btn.setAttribute('aria-current', 'page');
+        } else {
+          btn.removeAttribute('aria-current');
+        }
+      });
+
+      document.getElementById('topbar-screen-title').textContent = screenTitles[screenId] || 'Playbook do Time';
+    }
+
+    function setSimRole(role) {
+      document.body.setAttribute('data-role', role);
+      document.getElementById('sim-role').value = role;
+      document.getElementById('sidebar-role-indicator').textContent = roleLabels[role];
+      document.getElementById('topbar-role-subtitle').textContent = roleLabels[role];
+
+      // Se mudou para jogador enquanto estava na tela Elenco, volta para Home
+      const activeElenco = document.getElementById('screen-elenco').classList.contains('is-active');
+      if (role === 'jogador' && activeElenco) {
+        switchScreen('home');
+      }
+    }
+
+    function setSimState(state) {
+      document.body.setAttribute('data-state', state);
+      document.getElementById('sim-state').value = state;
+      document.getElementById('state-panel-loading').classList.toggle('is-visible', state === 'loading');
+      document.getElementById('state-panel-empty').classList.toggle('is-visible', state === 'empty');
+      document.getElementById('state-panel-error').classList.toggle('is-visible', state === 'error');
+      document.getElementById('active-screens-container').style.display = state === 'default' ? '' : 'none';
+    }
+
+    function setSimViewport(mode) {
+      const stage = document.getElementById('viewport-stage');
+      const shell = document.getElementById('app-shell');
+      stage.classList.toggle('is-mobile-frame', mode === 'mobile');
+      shell.classList.toggle('force-mobile', mode === 'mobile');
+    }
+
+    function quickConfirmHome() {
+      const badge = document.getElementById('home-treino-status');
+      badge.className = 'badge badge--available';
+      badge.textContent = '✓ Presença: Vou';
+    }
+
+    function selectEventResponse(choice) {
+      const btnVou = document.getElementById('btn-evento-vou');
+      const btnNaoVou = document.getElementById('btn-evento-naovou');
+      const form = document.getElementById('evento-justificativa-form');
+      const feedback = document.getElementById('evento-feedback-banner');
+
+      if (choice === 'vou') {
+        btnVou.setAttribute('aria-pressed', 'true');
+        btnNaoVou.setAttribute('aria-pressed', 'false');
+        form.style.display = 'none';
+        feedback.style.color = 'var(--color-status-available)';
+        feedback.textContent = '✓ Presença confirmada ("Vou ao treino"). Você pode alterar sua resposta até 15/11 às 14:00.';
+        quickConfirmHome();
+      } else {
+        btnVou.setAttribute('aria-pressed', 'false');
+        btnNaoVou.setAttribute('aria-pressed', 'true');
+        form.style.display = 'block';
+        feedback.textContent = '';
+      }
+    }
+
+    function openJustificationPanel() {
+      selectEventResponse('nao_vou');
+    }
+
+    function submitEventJustification(e) {
+      e.preventDefault();
+      const motivo = document.getElementById('justificativa-motivo').value;
+      const errBox = document.getElementById('justificativa-error');
+      if (!motivo) {
+        errBox.style.display = 'flex';
+        return;
+      }
+      errBox.style.display = 'none';
+      document.getElementById('evento-justificativa-form').style.display = 'none';
+      const feedback = document.getElementById('evento-feedback-banner');
+      feedback.style.color = 'var(--color-status-unavailable)';
+      feedback.textContent = '✕ Ausência registrada com justificativa ("' + motivo + '"). Visível apenas para o staff.';
+      const badge = document.getElementById('home-treino-status');
+      badge.className = 'badge badge--injured';
+      badge.textContent = '✕ Ausente (Justificado)';
+    }
+
+    function markPlayStudied() {
+      const btn = document.getElementById('btn-mark-studied');
+      btn.textContent = '✓ Estudada na versão v3';
+      btn.className = 'btn btn--success';
+      document.getElementById('detail-new-badge').className = 'badge badge--available';
+      document.getElementById('detail-new-badge').textContent = '✓ ESTUDADA (v3)';
+      document.getElementById('play-list-new-badge').className = 'badge badge--available';
+      document.getElementById('play-list-new-badge').textContent = '✓ Estudada • v3';
+      const homeBadge = document.getElementById('badge-new-play-1');
+      if (homeBadge) {
+        homeBadge.className = 'badge badge--available';
+        homeBadge.textContent = '✓ Estudada • v3';
+      }
+    }
+
+    function filterPlaybookCards(query) {
+      const q = query.trim().toLowerCase();
+      document.querySelectorAll('#playbook-card-list [data-play-name]').forEach((card) => {
+        const match = card.getAttribute('data-play-name').includes(q);
+        card.style.display = match ? '' : 'none';
+      });
+    }
+
+    function moveGamePlanItem(btn, direction) {
+      const item = btn.closest('.gameplan-item');
+      const list = document.getElementById('gameplan-list');
+      if (direction === -1 && item.previousElementSibling) {
+        list.insertBefore(item, item.previousElementSibling);
+      } else if (direction === 1 && item.nextElementSibling) {
+        list.insertBefore(item.nextElementSibling, item);
+      }
+      Array.from(list.children).forEach((el, idx) => {
+        const num = el.querySelector('.gameplan-order-num');
+        if (num) num.textContent = '#0' + (idx + 1);
+      });
+    }
+
+    function saveRosterStatus(e) {
+      e.preventDefault();
+      const status = document.getElementById('edit-roster-status').value;
+      const returnDate = document.getElementById('edit-return-date').value;
+      const note = document.getElementById('edit-roster-note').value;
+      const badge = document.getElementById('lucas-status-badge');
+      const details = document.getElementById('lucas-status-details');
+      const map = {
+        disponivel: { cls: 'badge badge--available', txt: '✓ Disponível' },
+        indisponivel: { cls: 'badge badge--unavailable', txt: '! Indisponível' },
+        lesionado: { cls: 'badge badge--injured', txt: '+ Lesionado' },
+        reformado: { cls: 'badge badge--retired', txt: '— Reformado' }
+      };
+      badge.className = map[status].cls;
+      badge.textContent = map[status].txt;
+      details.innerHTML = '<strong>Retorno previsto:</strong> ' + (returnDate || '—') + ' &bull; <strong>Observação:</strong> ' + note;
+    }
+
+    function toggleStCoordinatorRole() {
+      const badge = document.getElementById('st-role-badge');
+      if (badge.style.display === 'none') {
+        badge.style.display = 'inline-flex';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    function toggleChip(btn) {
+      const active = btn.getAttribute('aria-pressed') === 'true';
+      btn.setAttribute('aria-pressed', String(!active));
+      btn.classList.toggle('is-active', !active);
+    }
+
+    function toggleOnboardingModal(open) {
+      document.getElementById('onboarding-modal').classList.toggle('is-open', open);
+    }
+
+    function toggleOnboardingRoleFields(role) {
+      document.getElementById('onboarding-jogador-fields').style.display = role === 'jogador' ? 'block' : 'none';
+      document.getElementById('onboarding-staff-fields').style.display = role === 'staff' ? 'block' : 'none';
+    }
+  </script>
+</body>
+</html>
