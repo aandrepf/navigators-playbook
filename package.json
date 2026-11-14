@@ -14,6 +14,7 @@
     "test:watch": "npm run test:watch -w @playbook/web",
     "lint": "oxlint",
     "preview": "npm run preview -w @playbook/web",
+    "sync:clickup": "node scripts/clickup-sync.mjs",
     "test:e2e": "playwright test"
   },
   "devDependencies": {

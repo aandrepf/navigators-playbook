@@ -3,6 +3,7 @@ import { AuthProvider } from './hooks/AuthProvider'
 import { useAuth } from './hooks/useAuth'
 import { AppShell } from './components/AppShell'
 import { AuthScreen } from './screens/AuthScreen'
+import { GoogleCallback } from './screens/GoogleCallback'
 import { Home } from './screens/Home'
 import { Evento } from './screens/Evento'
 import { Playbook } from './screens/Playbook'
@@ -42,6 +43,7 @@ function Router() {
   return (
     <Routes>
       <Route path="/login" element={<AuthScreen />} />
+      <Route path="/auth/google/callback" element={<GoogleCallback />} />
       <Route
         element={
           <RequireAuth>

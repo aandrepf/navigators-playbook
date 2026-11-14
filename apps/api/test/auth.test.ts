@@ -114,4 +114,47 @@ describe('autenticação por código de e-mail', () => {
     });
     expect(res.statusCode).toBe(202);
   });
+
+  it('retorna 409 ao registrar coordenador de unidade já ocupado', async () => {
+    // primeiro coordenador ofensivo entra normalmente
+    const first = await registerViaEmail(ctx, {
+      email: 'coord-a@example.com',
+      role: 'staff',
+      staffRole: 'coordenador_ofensivo',
+    });
+    expect(first.statusCode).toBe(200);
+
+    // segundo cadastro para a mesma vaga exclusiva → conflito de domínio
+    const duplicate = await registerViaEmail(ctx, {
+      email: 'coord-b@example.com',
+      role: 'staff',
+      staffRole: 'coordenador_ofensivo',
+    });
+    expect(duplicate.statusCode).toBe(409);
+    expect(duplicate.json()).toMatchObject({
+      error: 'este subpapel de staff já está ocupado',
+    });
+
+    // outra unidade exclusiva continua livre
+    const defensive = await registerViaEmail(ctx, {
+      email: 'coord-c@example.com',
+      role: 'staff',
+      staffRole: 'coordenador_defensivo',
+    });
+    expect(defensive.statusCode).toBe(200);
+
+    // coordenador de special teams é aditivo: não conflita
+    const st1 = await registerViaEmail(ctx, {
+      email: 'st1@example.com',
+      role: 'staff',
+      staffRole: 'coordenador_special_teams',
+    });
+    expect(st1.statusCode).toBe(200);
+    const st2 = await registerViaEmail(ctx, {
+      email: 'st2@example.com',
+      role: 'staff',
+      staffRole: 'coordenador_special_teams',
+    });
+    expect(st2.statusCode).toBe(200);
+  });
 });
