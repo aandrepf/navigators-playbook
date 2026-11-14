@@ -1,6 +1,7 @@
 ---
 description: Engenheiro frontend do Playbook do Time. Implementa as telas React 19 + Vite consumindo o contrato da API, com testes de tela via MSW.
 mode: all
+model: opencode-go/kimi-k2.7-code
 permissions:
   - action: edit
     resource: "*"

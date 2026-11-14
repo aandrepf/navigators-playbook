@@ -1,6 +1,7 @@
 ---
 description: Engenheiro backend do Playbook do Time. Fastify + Postgres, autorização por papel e unidade, contrato OpenAPI em docs/api e testes via app.inject.
 mode: all
+model: opencode-go/deepseek-v4-pro
 permissions:
   - action: edit
     resource: "*"

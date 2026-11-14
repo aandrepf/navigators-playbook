@@ -1,6 +1,7 @@
 ---
 description: Designer de produto e interface do Playbook do Time. Define tokens, componentes, telas e fluxos mobile-first e entrega protótipo navegável para o frontend herdar.
 mode: all
+model: opencode-go/gemini-4-argon
 permissions:
   - action: edit
     resource: "*"
