@@ -25,3 +25,8 @@ dist-ssr
 
 # Config local por worktree (define o agente padrao de cada trilha)
 opencode.jsonc
+
+# Worktrees do Orca (aninhados no repo)
+/ux/
+/api/
+/web/
