@@ -11,6 +11,10 @@ node_modules
 dist
 dist-ssr
 *.local
+.env.local
+.env.*.local
+.clickup-sync-state.json
+/config/clickup-tasks.json
 
 # Editor directories and files
 .vscode/*

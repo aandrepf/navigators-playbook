@@ -13,7 +13,8 @@
     "test": "npm run test --workspaces --if-present",
     "test:watch": "npm run test:watch -w @playbook/web",
     "lint": "oxlint",
-    "preview": "npm run preview -w @playbook/web"
+    "preview": "npm run preview -w @playbook/web",
+    "sync:clickup": "node scripts/clickup-sync.mjs"
   },
   "devDependencies": {
     "oxlint": "^1.90.0"
