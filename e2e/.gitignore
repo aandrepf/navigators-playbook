@@ -1,0 +1,4 @@
+# Artefatos gerados pela suíte E2E (ver e2e/README.md)
+.runtime/
+.results/
+.report/

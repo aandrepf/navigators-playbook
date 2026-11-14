@@ -1,0 +1,68 @@
+name: e2e
+
+on:
+  pull_request:
+  push:
+    branches: [main, qa]
+  workflow_dispatch:
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: Playwright (mobile + desktop)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        # Banco dedicado a testes: o nome contém "e2e", condição exigida pelo
+        # scripts/start-api.mjs, que zera o schema antes de cada execução.
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: playbook_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      CI: 'true'
+      E2E_DATABASE_URL: postgres://postgres:postgres@127.0.0.1:5432/playbook_e2e
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Instalar Chromium do Playwright
+        run: npx playwright install --with-deps chromium
+
+      - name: Rodar suíte E2E
+        run: npm run test:e2e
+
+      - name: Relatório HTML
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: e2e/.report
+          retention-days: 14
+
+      - name: Traces e screenshots das falhas
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-results
+          path: e2e/.results
+          retention-days: 7
