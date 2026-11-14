@@ -1,3 +1,4 @@
+import { isUniqueViolation } from '../db/errors.js';
 import type { Database, Queryable } from '../db/types.js';
 import {
   isSelfDeclarableStaffSubrole,
@@ -96,10 +97,20 @@ export async function findOrCreateUser(
         [input.teamId, userId],
       );
     } else if (input.staffRole) {
-      await tx.query(
-        'INSERT INTO staff_role (team_id, user_id, role) VALUES ($1, $2, $3)',
-        [input.teamId, userId, input.staffRole],
-      );
+      try {
+        await tx.query(
+          'INSERT INTO staff_role (team_id, user_id, role) VALUES ($1, $2, $3)',
+          [input.teamId, userId, input.staffRole],
+        );
+      } catch (err) {
+        // Subpapéis exclusivos (head coach e coordenadores de unidade) têm
+        // índice único por time; um segundo cadastro para a mesma vaga é
+        // conflito de domínio, não erro interno.
+        if (isUniqueViolation(err)) {
+          throw new HttpError(409, 'este subpapel de staff já está ocupado');
+        }
+        throw err;
+      }
     }
 
     return {

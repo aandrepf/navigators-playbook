@@ -119,6 +119,11 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: Subpapel de staff exclusivo já ocupado por outro membro
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
 
   /auth/session:
     get:
