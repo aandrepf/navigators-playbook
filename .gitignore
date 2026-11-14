@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Config local por worktree (define o agente padrao de cada trilha)
+opencode.jsonc
