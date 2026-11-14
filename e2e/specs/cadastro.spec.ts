@@ -2,6 +2,7 @@ import { expect, test } from '../support/fixtures'
 import { uniqueEmail } from '../support/accounts'
 import { waitForLoginCode } from '../support/mail'
 import { AuthPage } from '../support/pages/auth-page'
+import { WEB_URL } from '../support/constants.mjs'
 
 type SessionUser = { role: string; approvalState: string; subRoles: string[] }
 
@@ -60,12 +61,12 @@ test.describe('Cadastro de jogador', () => {
 })
 
 test.describe('Cadastro de staff', () => {
-  // Este cadastro ocupa uma vaga exclusiva (ofensivo ou defensivo) do banco da
+  // O cadastro ocupa uma vaga exclusiva (ofensivo ou defensivo) do banco da
   // execução. Uma nova tentativa encontraria a vaga tomada, então não é
   // repetível: sem retry. A CI já roda cada teste uma vez, com banco zerado.
   test.describe.configure({ retries: 0 })
 
-  test('cadastro de staff exige subpapel e fica pendente sem acesso de edição', async ({ page }, testInfo) => {
+  test('cadastro de staff exige subpapel, fica pendente e a vaga exclusiva conflita', async ({ page, browser }, testInfo) => {
     // Ofensivo e defensivo são exclusivos por time. Cada projeto usa a sua vaga
     // porque o banco é compartilhado pela execução inteira.
     const subRole = testInfo.project.name.startsWith('mobile')
@@ -95,6 +96,27 @@ test.describe('Cadastro de staff', () => {
 
     await page.goto('/playbook')
     await expect(page.getByRole('heading', { name: 'Acesso bloqueado' })).toBeVisible()
+
+    // Segundo candidato à mesma vaga, em outro browser: conflito de domínio
+    // (409 com mensagem), nunca erro interno.
+    const candidatoEmail = uniqueEmail('cadastro.staff.candidato')
+    const context = await browser.newContext({ baseURL: WEB_URL, locale: 'pt-BR' })
+    try {
+      const candidato = await context.newPage()
+      const second = new AuthPage(candidato)
+      await second.goto()
+      await second.startEmailLogin()
+      await second.requestCode({ email: candidatoEmail })
+      await second.enterCode(await waitForLoginCode(candidatoEmail))
+      await second.choosePapel('STAFF')
+      await second.submitStaff(subRole.label)
+
+      await expect(second.alert()).toContainText(/já está ocupado/i)
+      await expect(second.pendingHeading()).toHaveCount(0)
+      expect((await candidato.request.get('/auth/session')).status()).toBe(401)
+    } finally {
+      await context.close()
+    }
   })
 
   test.fixme(

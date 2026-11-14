@@ -40,3 +40,38 @@ deve voltar para **Em andamento** até os três itens abaixo passarem no reteste
 - Acúmulo de special teams no cadastro (`subRoles[0]`) continua como `fixme`
   de contrato/produto, não faz parte do card 01.
 - Consentimento real do Google continua sem cobertura automatizada.
+
+## Reteste 2 — `main` integrado (commit 0c65a87)
+
+Branch `qa` com `main` integrado (`58fe35b`). Suíte completa: `npm run test:e2e`.
+
+| # | Achado | Resultado | Evidência |
+| --- | --- | --- | --- |
+| 1 | Cadastro duplicado de coordenador vira 500 | **Resolvido.** O segundo candidato à mesma vaga exclusiva recebe 409 `este subpapel de staff já está ocupado` e a tela mostra o alerta. Caso ativo em `cadastro.spec.ts`, nos dois projetos. Teste de API de unidade também cobre 409 e special teams aditivo. | `cadastro.spec.ts` verde |
+| 2 | Web sem proxy de `/auth` no dev | **Resolvido.** A config padrão `apps/web/vite.config.ts` encaminha `/auth` e `/staff`: `GET /auth/session` → 401 JSON da API (antes: 404 do Vite). | curl na config padrão |
+| 3 | Retorno do Google com erro silencioso | **Não resolvido.** Reproduzido de ponta a ponta com a API real (credenciais fictícias, sem rede externa): `GET /auth/google/callback?error=access_denied` → 302 para `http://127.0.0.1:5173?login=erro&motivo=access_denied`. A raiz cai em `/login`, que não mostra alerta. O componente novo `GoogleCallback` só trata `/auth/google/callback?error=...`, rota que o backend nunca usa. | `auth.spec.ts` "erro devolvido pelo Google" falha nos dois projetos (`getByRole('alert')` não encontrado) |
+
+Também verdes: alerta acessível para login Google indisponível (503).
+
+### Reprodução do achado 3
+
+1. Subir a API com `E2E_DATABASE_URL` apontando para banco `e2e`/`test`, e o web com `npm run dev` ou `npx vite --config apps/web/vite.config.ts`.
+2. Abrir `http://127.0.0.1:5173/auth/google/callback?error=access_denied` (no dev, a requisição vai pela API).
+3. Esperado: alerta "Você cancelou o login com Google..." na tela de entrada. Obtido: tela de entrada sem alerta, URL `/login`.
+
+Correção sugerida (backend ou frontend, a decidir): ou o backend redireciona para
+`${FRONTEND_URL}/auth/google/callback?error=...` (alinhado ao componente novo), ou a
+tela de entrada lê `login=erro&motivo=...`. Qualquer uma passa no teste.
+
+### Observações não bloqueantes
+
+- O frontend lê um parâmetro de teste `forceError` em `AuthScreen` e envia
+  `?forceError=` ao `GET /auth/google`, e o mock também o interpreta. Isso é um gancho
+  de teste no código de produção. Sugerido: mover para o mock/MSW ou remover.
+- Acúmulo de special teams no cadastro segue `fixme` (`subRoles[0]`).
+- Posições/unidades no cadastro seguem `fixme` (contrato).
+
+### Veredito do reteste
+
+**Card 01 não pode ir para Concluído.** Dois de três achados resolvidos. O erro do
+Google continua reproduzível de ponta a ponta.
