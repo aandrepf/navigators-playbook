@@ -1,0 +1,4 @@
+# Segredos locais: nunca commitar
+.env
+.env.local
+.env.*.local

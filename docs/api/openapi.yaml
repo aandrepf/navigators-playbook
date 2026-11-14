@@ -1,0 +1,274 @@
+openapi: 3.1.0
+info:
+  title: Playbook do Time — API
+  version: 0.1.0
+  description: |
+    Contrato da fundação do backend do Playbook do Time (Fastify + Postgres).
+    Cobre autenticação por código de e-mail e por Google, sessão por cookie e a
+    leitura da fila de cadastros de staff pendentes.
+
+    **Regras de autorização** (decididas no servidor, nunca confiadas do cliente):
+    - `jogador` entra com estado `ativo` após confirmar o e-mail.
+    - `staff` entra `pendente` até um `head_coach` aprovar; enquanto pendente lê
+      apenas o próprio estado (`GET /auth/session`) e nada mais.
+    - `GET /staff/pending` exige `head_coach` ativo.
+
+    Valores de enum são snake_case; as *chaves* do JSON são camelCase.
+servers:
+  - url: http://localhost:3000
+    description: Desenvolvimento local
+tags:
+  - name: Auth
+    description: Autenticação e sessão
+  - name: Staff
+    description: Administração de staff (fila de aprovação)
+  - name: Health
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Verificação de vida (sem autenticação)
+      operationId: getHealth
+      responses:
+        '200':
+          description: Serviço no ar
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status: { type: string, const: ok }
+
+  /auth/email/request:
+    post:
+      tags: [Auth]
+      summary: Solicita o código de uso único por e-mail
+      description: |
+        Sempre responde 202 para não revelar se o e-mail está cadastrado.
+        Reenvio para o mesmo e-mail é limitado por um intervalo anti-abuso.
+      operationId: requestEmailCode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [email]
+              properties:
+                email: { type: string, format: email }
+      responses:
+        '202':
+          description: Código emitido (envio por e-mail)
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok]
+                properties:
+                  ok: { type: boolean, const: true }
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /auth/email/verify:
+    post:
+      tags: [Auth]
+      summary: Verifica o código e abre sessão (cria o usuário no primeiro acesso)
+      description: |
+        Se o e-mail ainda não existe no time, cria o usuário: `jogador` entra
+        `ativo`; `staff` entra `pendente` com o `staffRole` auto-declarado.
+        A resposta define o cookie de sessão (`httpOnly`, `secure`,
+        `sameSite=lax`).
+      operationId: verifyEmailCode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [email, code, teamCode, role]
+              properties:
+                email: { type: string, format: email }
+                code: { type: string, pattern: '^\d{6}$' }
+                teamCode: { type: string }
+                name: { type: string }
+                role: { type: string, enum: [jogador, staff] }
+                staffRole:
+                  type: string
+                  enum: [coordenador_ofensivo, coordenador_defensivo, coordenador_special_teams]
+      responses:
+        '200':
+          description: Autenticado; cookie de sessão definido
+          headers:
+            Set-Cookie:
+              description: Cookie de sessão (httpOnly, secure, sameSite=lax)
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [user]
+                properties:
+                  user: { $ref: '#/components/schemas/User' }
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          description: Código inválido/expirado ou código do time inválido
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /auth/session:
+    get:
+      tags: [Auth]
+      summary: Sessão atual
+      description: Devolve o usuário autenticado, ou 401 sem sessão válida.
+      operationId: getSession
+      responses:
+        '200':
+          description: Usuário da sessão
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [user]
+                properties:
+                  user: { $ref: '#/components/schemas/User' }
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Encerra a sessão e apaga o cookie
+      operationId: logout
+      responses:
+        '204':
+          description: Sessão revogada
+
+  /auth/google:
+    get:
+      tags: [Auth]
+      summary: Redireciona para o consentimento do Google
+      operationId: googleLogin
+      responses:
+        '302':
+          description: Redirecionamento para o Google
+        '503':
+          description: Login Google não configurado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /auth/google/callback:
+    get:
+      tags: [Auth]
+      summary: Callback do OAuth do Google
+      description: |
+        Troca o código por um perfil verificado e abre sessão. No primeiro
+        acesso cria o usuário como `jogador` `ativo`. Redireciona para
+        `FRONTEND_URL`.
+      operationId: googleCallback
+      parameters:
+        - name: code
+          in: query
+          schema: { type: string }
+        - name: state
+          in: query
+          schema: { type: string }
+        - name: error
+          in: query
+          schema: { type: string }
+      responses:
+        '302':
+          description: Redirecionamento para o frontend (com sessão ou erro)
+        '400':
+          description: Estado OAuth inválido ou código ausente
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /staff/pending:
+    get:
+      tags: [Staff]
+      summary: Lista cadastros de staff aguardando aprovação
+      description: Restrito a `head_coach` ativo. A aprovação/recusa é o próximo item.
+      operationId: listPendingStaff
+      security:
+        - sessionCookie: []
+      responses:
+        '200':
+          description: Lista de pendentes
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [staff]
+                properties:
+                  staff:
+                    type: array
+                    items: { $ref: '#/components/schemas/PendingStaff' }
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: playbook_session
+
+  schemas:
+    User:
+      type: object
+      required: [id, email, name, role, approvalState, subRoles]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        name: { type: [string, 'null'] }
+        role: { type: string, enum: [jogador, staff] }
+        approvalState: { type: string, enum: [ativo, pendente, recusado] }
+        subRoles:
+          type: array
+          items:
+            type: string
+            enum: [head_coach, coordenador_ofensivo, coordenador_defensivo, coordenador_special_teams]
+
+    PendingStaff:
+      type: object
+      required: [id, email, name, requestedSubrole, createdAt]
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string, format: email }
+        name: { type: [string, 'null'] }
+        requestedSubrole:
+          type: string
+          enum: [coordenador_ofensivo, coordenador_defensivo, coordenador_special_teams]
+        createdAt: { type: string, format: date-time }
+
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error: { type: string }
+
+  responses:
+    BadRequest:
+      description: Requisição inválida
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Unauthorized:
+      description: Não autenticado
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Forbidden:
+      description: Papel/subpapel sem permissão
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
