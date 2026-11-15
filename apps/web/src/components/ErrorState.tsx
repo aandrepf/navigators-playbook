@@ -7,12 +7,12 @@ export function ErrorState({
 }) {
   return (
     <div className="error-state-box" role="alert">
-      <div style={{ fontWeight: 700, fontSize: 'var(--text-lg)', marginBottom: 'var(--space-1)' }}>
-        ⚠ {message}
+      <div className="error-state-box__title">
+        {message}
       </div>
       {onRetry && (
         <button type="button" className="btn btn--secondary" onClick={onRetry}>
-          ↻ Tentar novamente
+          Tentar novamente
         </button>
       )}
     </div>

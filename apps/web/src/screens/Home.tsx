@@ -9,7 +9,7 @@ export function Home() {
   const { state } = useAuth()
 
   if (state.status === 'loading') {
-    return <LoadingState label="Carregando painel inicial" />
+    return <LoadingState label="Carregando home" />
   }
 
   if (state.status === 'error') {
@@ -68,10 +68,10 @@ export function Home() {
             <p className="card__meta" data-slot="card-content">Sáb, 16/11/2026 • 14:00 às 17:00 • Campo Suplementar Sul</p>
             <div className="btn-row" style={{ marginTop: 'var(--space-3)' }}>
               <button type="button" className="btn btn--success">
-                ✓ Vou ao treino
+                Vou ao treino
               </button>
               <button type="button" className="btn btn--danger">
-                ✕ Não vou (justificar)
+                Não vou (justificar)
               </button>
             </div>
           </article>
@@ -97,7 +97,7 @@ export function Home() {
                 <UnitBadge unit="ofensiva" />
                 <span className="badge badge--position" data-slot="badge" data-variant="position">Shotgun Trips Right</span>
               </div>
-              <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)' }}>
+              <span className="situation">
                 3rd & 6–10
               </span>
             </div>

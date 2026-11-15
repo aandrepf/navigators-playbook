@@ -157,7 +157,7 @@ export function AuthScreen() {
 
           {error && (
             <div className="field-error-msg" data-slot="field-error" role="alert" style={{ marginBottom: 'var(--space-3)' }}>
-              ⚠ {error}
+              {error}
             </div>
           )}
 
@@ -171,7 +171,7 @@ export function AuthScreen() {
             {loading ? 'Conectando...' : 'Continuar com Google'}
           </button>
 
-          <div style={{ textAlign: 'center', margin: 'var(--space-4) 0', color: 'var(--color-text-muted)' }}>
+          <div className="or-divider">
             ou
           </div>
 
@@ -243,7 +243,7 @@ export function AuthScreen() {
 
           {error && (
             <div className="field-error-msg" data-slot="field-error" role="alert" style={{ marginBottom: 'var(--space-3)' }}>
-              ⚠ {error}
+              {error}
             </div>
           )}
 
@@ -300,7 +300,7 @@ export function AuthScreen() {
             />
             {error && (
               <div className="field-error-msg" data-slot="field-error" role="alert">
-                ⚠ {error}
+                {error}
               </div>
             )}
           </div>
@@ -384,7 +384,7 @@ export function AuthScreen() {
 
           {error && (
             <div className="field-error-msg" data-slot="field-error" role="alert" style={{ marginBottom: 'var(--space-3)' }}>
-              ⚠ {error}
+              {error}
             </div>
           )}
 
@@ -461,7 +461,7 @@ export function AuthScreen() {
 
           {error && (
             <div className="field-error-msg" data-slot="field-error" role="alert" style={{ marginBottom: 'var(--space-3)' }}>
-              ⚠ {error}
+              {error}
             </div>
           )}
 

@@ -283,4 +283,31 @@ describe('Design system data-slot', () => {
       expect(badge.textContent).not.toMatch(iconGlyphs)
     }
   })
+
+  it('does not render generic icons in primary action buttons', async () => {
+    renderWithAuth(<App />, { route: '/' })
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /próximos eventos/i })).toBeInTheDocument()
+    })
+
+    const iconGlyphs = /[\u2713\u2715\u002B\u271A\u2795\u26A0\u21BB\u1F514]/u
+    const buttons = screen.getAllByRole('button')
+    for (const button of buttons) {
+      expect(button.textContent).not.toMatch(iconGlyphs)
+    }
+  })
+
+  it('renders highlighted cards with flat surfaces instead of gradients', async () => {
+    renderWithAuth(<App />, { route: '/' })
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /próximos eventos/i })).toBeInTheDocument()
+    })
+
+    const highlighted = document.querySelector('[data-variant="highlight"]')
+    expect(highlighted).toBeInTheDocument()
+    const bgImage = window.getComputedStyle(highlighted!).backgroundImage
+    expect(bgImage === 'none' || bgImage === '').toBe(true)
+  })
 })

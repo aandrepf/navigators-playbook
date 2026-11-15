@@ -15,9 +15,6 @@ export function EmptyState({
 
   return (
     <div className="empty-state-box">
-      <div style={{ fontSize: '2.25rem', marginBottom: 'var(--space-2)' }} aria-hidden="true">
-        🏈
-      </div>
       <h2 className="section-title">{title}</h2>
       <p
         className="section-subtitle"

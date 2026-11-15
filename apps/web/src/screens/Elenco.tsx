@@ -44,7 +44,7 @@ export function Elenco() {
         </div>
         <div data-slot="section-heading-actions">
           <button type="button" className="btn btn--primary">
-            + Registrar jogador
+            Registrar jogador
           </button>
         </div>
       </div>
