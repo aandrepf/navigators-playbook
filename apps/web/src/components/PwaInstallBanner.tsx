@@ -44,7 +44,6 @@ export function PwaInstallBanner() {
         <button
           type="button"
           className="btn btn--secondary"
-          style={{ minHeight: 44, padding: '4px 12px' }}
           onClick={dismiss}
         >
           Não mostrar novamente
@@ -52,12 +51,12 @@ export function PwaInstallBanner() {
       </div>
       <p className="card__meta" style={{ margin: '0 0 var(--space-3) 0' }}>
         No iPhone/iOS (16.4+), o Web Push exige que o app esteja na Tela de Início (toque em{' '}
-        <strong>Compartilhar ↑</strong> → <strong>Adicionar à Tela de Início</strong>). Enquanto o push não estiver ativo,
+        <strong>Compartilhar</strong> → <strong>Adicionar à Tela de Início</strong>). Enquanto o push não estiver ativo,
         os avisos chegam por <strong>e-mail</strong>.
       </p>
       <div className="btn-row">
         <button type="button" className="btn btn--primary" onClick={dismiss}>
-          🔔 Ativar notificações push neste aparelho
+          Ativar notificações push neste aparelho
         </button>
       </div>
     </div>

@@ -57,10 +57,10 @@ export function Evento() {
           </p>
           <div className="btn-row" style={{ marginTop: 'var(--space-3)' }}>
             <button type="button" className="btn btn--success" aria-pressed="false">
-              ✓ Vou ao treino
+              Vou
             </button>
             <button type="button" className="btn btn--danger" aria-pressed="false">
-              ✕ Não vou (Justificar)
+              Não vou
             </button>
           </div>
         </div>

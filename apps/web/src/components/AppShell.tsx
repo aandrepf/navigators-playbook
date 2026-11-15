@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { TopBar } from './TopBar'
+import { RosterStatusBadge } from './RosterStatusBadge'
 
 const PLAYER_NAV = [
   { to: '/', label: 'Home', icon: '🏠' },
@@ -76,12 +77,10 @@ export function AppShell() {
         </div>
 
         {user && user.role === 'jogador' && (
-          <div className="card" style={{ padding: 'var(--space-3)', fontSize: 'var(--text-xs)' }}>
-            <div style={{ fontWeight: 700, marginBottom: 4 }}>Status do elenco</div>
-            <span className="badge badge--available" data-slot="badge" data-variant="available">Disponível</span>
-            <div style={{ color: 'var(--color-text-muted)', marginTop: 6 }}>
-              Fuso: America/Sao_Paulo
-            </div>
+          <div className="sidebar-roster-widget">
+            <div className="sidebar-roster-widget__label">Status do elenco</div>
+            <RosterStatusBadge status="disponivel" />
+            <div className="sidebar-roster-widget__meta">Fuso: America/Sao_Paulo</div>
           </div>
         )}
       </nav>

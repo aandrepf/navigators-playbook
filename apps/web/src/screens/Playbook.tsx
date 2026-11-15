@@ -42,7 +42,7 @@ export function Playbook() {
         {state.status === 'authenticated' && state.user.role === 'staff' && (
           <div data-slot="section-heading-actions">
             <button type="button" className="btn btn--primary">
-              + Criar jogada
+              Criar jogada
             </button>
           </div>
         )}
@@ -71,7 +71,7 @@ export function Playbook() {
                 <span className="badge badge--new" data-slot="badge" data-variant="new">NOVO • v3</span>
                 <UnitBadge unit="ofensiva" />
               </div>
-              <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)' }}>
+              <span className="situation">
                 3rd & 6–10
               </span>
             </div>
@@ -85,7 +85,7 @@ export function Playbook() {
                 <span className="badge badge--new" data-slot="badge" data-variant="new">NOVO • v2</span>
                 <UnitBadge unit="special_teams" />
               </div>
-              <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)' }}>
+              <span className="situation">
                 Kickoff
               </span>
             </div>
@@ -108,18 +108,18 @@ export function Playbook() {
               </p>
             </div>
             <button type="button" className="btn btn--primary">
-              ✓ Marcar que estudei esta jogada
+              Marcar que estudei
             </button>
           </div>
 
-          <h4 style={{ margin: 'var(--space-4) 0 var(--space-2) 0', fontSize: 'var(--text-base)' }}>
+          <h4 className="subsection-title">
             Atribuições de Todas as Posições
           </h4>
           <div className="assignment-list">
             <div className="assignment-item assignment-item--mine">
               <div>
                 <span className="badge badge--position" data-slot="badge" data-variant="position">WR-Z</span>
-                <div style={{ fontSize: 11, color: 'var(--color-brand-primary)', fontWeight: 700, marginTop: 2 }}>
+                <div className="position-hint">
                   SUA POSIÇÃO
                 </div>
               </div>

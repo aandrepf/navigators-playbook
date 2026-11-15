@@ -53,10 +53,10 @@ export function Jogo() {
           </p>
           <div className="btn-row" style={{ marginTop: 'var(--space-3)' }}>
             <button type="button" className="btn btn--success" aria-pressed="false">
-              ✓ Disponível — Vou
+              Disponível — Vou
             </button>
             <button type="button" className="btn btn--danger" aria-pressed="false">
-              ✕ Indisponível — Não vou
+              Indisponível — Não vou
             </button>
           </div>
         </div>

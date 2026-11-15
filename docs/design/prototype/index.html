@@ -15,7 +15,7 @@
        ==================================================================== -->
   <aside class="proto-toolbar" aria-label="Controles de simulação do protótipo para handoff">
     <div class="proto-toolbar__brand">
-      <span aria-hidden="true">🏈</span>
+      
       <span>Protótipo Handoff — Playbook do Time</span>
     </div>
 
@@ -175,7 +175,7 @@
 
           <div id="state-panel-empty" class="state-overlay-panel" aria-live="polite">
             <div class="empty-state-box">
-              <div style="font-size: 2.25rem; margin-bottom: var(--space-2);" aria-hidden="true">🏈</div>
+              
               <h2 class="section-title">Nenhum item pendente nesta visualização</h2>
               <p class="section-subtitle" style="max-width: 440px; margin: var(--space-2) auto var(--space-4);">
                 Você está em dia com as respostas de eventos e todas as jogadas visíveis para a sua unidade já foram estudadas.
@@ -189,13 +189,13 @@
           <div id="state-panel-error" class="state-overlay-panel" role="alert">
             <div class="error-state-box">
               <div style="font-weight: 700; font-size: var(--text-lg); margin-bottom: var(--space-1);">
-                ⚠ Não foi possível sincronizar os dados com o servidor
+                Não foi possível sincronizar os dados com o servidor
               </div>
               <p style="margin: 0 0 var(--space-3) 0; color: var(--color-text-secondary);">
                 Verifique sua conexão no campo. Suas alterações não enviadas foram preservadas na tela para nova tentativa.
               </p>
               <button type="button" class="btn btn--secondary" onclick="setSimState('default')">
-                ↻ Tentar novamente
+                Tentar novamente
               </button>
             </div>
           </div>
@@ -225,11 +225,11 @@
                     </button>
                   </div>
                   <p class="card__meta" style="margin: 0 0 var(--space-3) 0;">
-                    No iPhone/iOS (16.4+), o Web Push exige que o app esteja na Tela de Início (toque em <strong>Compartilhar ↑</strong> &rarr; <strong>Adicionar à Tela de Início</strong>). Enquanto o push não estiver ativo, os avisos chegam por <strong>e-mail</strong>.
+                    No iPhone/iOS (16.4+), o Web Push exige que o app esteja na Tela de Início (toque em <strong>Compartilhar</strong> &rarr; <strong>Adicionar à Tela de Início</strong>). Enquanto o push não estiver ativo, os avisos chegam por <strong>e-mail</strong>.
                   </p>
                   <div class="btn-row">
                     <button type="button" class="btn btn--primary" onclick="alert('Permissão de Web Push solicitada por gesto explícito do usuário!')">
-                      🔔 Ativar notificações push neste aparelho
+                      Ativar notificações push neste aparelho
                     </button>
                   </div>
                 </aside>
@@ -295,10 +295,10 @@
 
                       <div class="btn-row" style="margin-top: var(--space-3);">
                         <button type="button" class="btn btn--success" onclick="quickConfirmHome('treino')">
-                          ✓ Vou ao treino
+                          Vou ao treino
                         </button>
                         <button type="button" class="btn btn--danger" onclick="switchScreen('evento'); openJustificationPanel('evento')">
-                          ✕ Não vou (justificar)
+                          Não vou (justificar)
                         </button>
                         <button type="button" class="btn btn--secondary" onclick="switchScreen('evento')">
                           Detalhes
@@ -422,10 +422,10 @@
 
                       <div class="btn-row" style="margin-top: var(--space-3);">
                         <button type="button" id="btn-evento-vou" class="btn btn--success" aria-pressed="false" onclick="selectEventResponse('vou')">
-                          ✓ Vou ao treino
+                          Vou ao treino
                         </button>
                         <button type="button" id="btn-evento-naovou" class="btn btn--danger" aria-pressed="false" onclick="selectEventResponse('nao_vou')">
-                          ✕ Não vou (Justificar)
+                          Não vou (Justificar)
                         </button>
                       </div>
 
@@ -457,7 +457,7 @@
                         </div>
 
                         <div id="justificativa-error" class="field-error-msg" role="alert" style="display: none; margin-bottom: var(--space-3);">
-                          ⚠ Selecione um motivo da lista antes de confirmar a ausência.
+                          Selecione um motivo da lista antes de confirmar a ausência.
                         </div>
 
                         <button type="submit" class="btn btn--danger btn--block">
@@ -639,7 +639,7 @@
                     <button type="button" class="chip" aria-pressed="false">Ofensiva (2)</button>
                     <button type="button" class="chip" aria-pressed="false">Special teams — Aberta a todos (1)</button>
                     <button type="button" class="chip" aria-pressed="false">Defesa — Liberadas p/ estudo (1)</button>
-                    <button type="button" class="chip" aria-pressed="false">★ Apenas novidades</button>
+                    <button type="button" class="chip" aria-pressed="false">Apenas novidades</button>
                     <button type="button" class="chip staff-only" aria-pressed="false">Arquivadas (Staff)</button>
                   </div>
                 </div>
@@ -720,7 +720,7 @@
 
                       <!-- Botão do Jogador para marcar que estudou (História 37) -->
                       <button type="button" id="btn-mark-studied" class="btn btn--primary" onclick="markPlayStudied()">
-                        ✓ Marcar que estudei esta jogada
+                        Marcar que estudei esta jogada
                       </button>
                     </div>
 
@@ -758,7 +758,7 @@
 
                         <circle cx="435" cy="130" r="9" fill="#FACC15" />
                         <path d="M 435 120 L 435 55 L 365 18" fill="none" stroke="#FACC15" stroke-width="3" />
-                        <text x="418" y="148" fill="#FACC15" font-weight="bold" font-size="11" font-family="monospace">WR-Z ★</text>
+                        <text x="418" y="148" fill="#FACC15" font-weight="bold" font-size="11" font-family="monospace">WR-Z</text>
                       </svg>
                     </div>
 
@@ -884,10 +884,10 @@
                       </p>
                       <div class="btn-row" style="margin-top: var(--space-3);">
                         <button type="button" class="btn btn--success" aria-pressed="true" onclick="alert('Marcação confirmada: Disponível para o jogo vs. Tritões FA!')">
-                          ✓ Estou disponível (Vou ao jogo)
+                          Estou disponível (Vou ao jogo)
                         </button>
                         <button type="button" class="btn btn--danger" aria-pressed="false" onclick="document.getElementById('jogo-justificativa-box').style.display='block'">
-                          ✕ Indisponível (Justificar)
+                          Indisponível (Justificar)
                         </button>
                       </div>
 
@@ -933,7 +933,7 @@
                               <span class="badge badge--retired">Marcação: Não vou</span>
                             </div>
                             <div class="card__meta" style="margin-top: 4px;">
-                              ⚠ Alerta de status do elenco: estiramento de posterior — não escalar neste confronto.
+                              Alerta de status do elenco: estiramento de posterior — não escalar neste confronto.
                             </div>
                           </div>
                           <span class="badge badge--injured">Inapto</span>
@@ -1094,11 +1094,11 @@
                           <span class="badge badge--defense" style="margin-top: 4px;">Subpapel solicitado: Coordenador Defensivo</span>
                         </div>
                         <div class="btn-row">
-                          <button type="button" class="btn btn--success" style="min-height: 44px; padding: 4px 12px;" onclick="document.getElementById('pending-staff-item-1').innerHTML='<span class=\'badge badge--available\'>✓ Carlos Eduardo Silva aprovado como Coordenador Defensivo!</span>'">
-                            ✓ Aprovar
+                          <button type="button" class="btn btn--success" style="min-height: 44px; padding: 4px 12px;" onclick="document.getElementById('pending-staff-item-1').innerHTML='<span class=\'badge badge--available\'>Carlos Eduardo Silva aprovado como Coordenador Defensivo!</span>'">
+                            Aprovar
                           </button>
-                          <button type="button" class="btn btn--danger" style="min-height: 44px; padding: 4px 12px;" onclick="document.getElementById('pending-staff-item-1').innerHTML='<span class=\'badge badge--injured\'>✕ Cadastro recusado pelo Head Coach</span>'">
-                            ✕ Recusar
+                          <button type="button" class="btn btn--danger" style="min-height: 44px; padding: 4px 12px;" onclick="document.getElementById('pending-staff-item-1').innerHTML='<span class=\'badge badge--injured\'>Cadastro recusado pelo Head Coach</span>'">
+                            Recusar
                           </button>
                         </div>
                       </div>
@@ -1113,7 +1113,7 @@
                           <strong>André Figueiredo</strong>
                           <div class="badge-row" style="margin-top: 4px;">
                             <span class="badge badge--offense">Coordenador Ofensivo</span>
-                            <span id="st-role-badge" class="badge badge--st">✓ + Coordenador de Special Teams</span>
+                            <span id="st-role-badge" class="badge badge--st">+ Coordenador de Special Teams</span>
                           </div>
                         </div>
                         <div class="btn-row">
@@ -1301,7 +1301,7 @@
                       <div class="card__header">
                         <div>
                           <h3 class="card__title">Rafael Costa</h3>
-                          <p class="card__meta">rafael.costa@navigators.com.br • E-mail confirmado ✓</p>
+                          <p class="card__meta">rafael.costa@navigators.com.br • E-mail confirmado</p>
                         </div>
                         <span class="badge badge--available">Sessão Ativa</span>
                       </div>
@@ -1341,13 +1341,13 @@
                         <div class="chip-bar" style="margin-bottom: 0;">
                           <button type="button" class="chip" aria-pressed="false" onclick="toggleChip(this)">QB</button>
                           <button type="button" class="chip" aria-pressed="false" onclick="toggleChip(this)">RB</button>
-                          <button type="button" class="chip is-active" aria-pressed="true" onclick="toggleChip(this)">✓ WR</button>
+                          <button type="button" class="chip is-active" aria-pressed="true" onclick="toggleChip(this)">WR</button>
                           <button type="button" class="chip" aria-pressed="false" onclick="toggleChip(this)">TE</button>
                           <button type="button" class="chip" aria-pressed="false" onclick="toggleChip(this)">OL</button>
                           <button type="button" class="chip" aria-pressed="false" onclick="toggleChip(this)">DL</button>
                           <button type="button" class="chip" aria-pressed="false" onclick="toggleChip(this)">LB</button>
                           <button type="button" class="chip" aria-pressed="false" onclick="toggleChip(this)">CB / S</button>
-                          <button type="button" class="chip is-active" aria-pressed="true" onclick="toggleChip(this)">✓ KR / PR</button>
+                          <button type="button" class="chip is-active" aria-pressed="true" onclick="toggleChip(this)">KR / PR</button>
                           <button type="button" class="chip" aria-pressed="false" onclick="toggleChip(this)">K / P / LS</button>
                         </div>
                       </div>
@@ -1501,7 +1501,7 @@
           </h2>
         </div>
         <button type="button" class="btn btn--secondary" style="min-height: 44px; padding: 4px 12px;" onclick="toggleOnboardingModal(false)">
-          ✕ Fechar
+          Fechar
         </button>
       </div>
 
@@ -1574,7 +1574,7 @@
           </h2>
         </div>
         <button type="button" class="btn btn--secondary" onclick="document.getElementById('image-zoom-dialog').close()">
-          ✕ Fechar zoom (Esc)
+          Fechar zoom (Esc)
         </button>
       </div>
       <div class="play-diagram-box" style="margin: 0;">
@@ -1598,7 +1598,7 @@
           <text x="306" y="156" fill="#CBD5E1" font-size="10" font-family="monospace">Slot-Y (Out 10yd)</text>
           <circle cx="435" cy="130" r="9" fill="#FACC15" />
           <path d="M 435 120 L 435 55 L 365 18" fill="none" stroke="#FACC15" stroke-width="3" />
-          <text x="395" y="148" fill="#FACC15" font-weight="bold" font-size="11" font-family="monospace">WR-Z ★ (Post 18yd)</text>
+          <text x="395" y="148" fill="#FACC15" font-weight="bold" font-size="11" font-family="monospace">WR-Z (Post 18yd)</text>
         </svg>
       </div>
     </div>
@@ -1677,7 +1677,7 @@
     function quickConfirmHome() {
       const badge = document.getElementById('home-treino-status');
       badge.className = 'badge badge--available';
-      badge.textContent = '✓ Presença: Vou';
+      badge.textContent = 'Presença: Vou';
     }
 
     function selectEventResponse(choice) {
@@ -1691,7 +1691,7 @@
         btnNaoVou.setAttribute('aria-pressed', 'false');
         form.style.display = 'none';
         feedback.style.color = 'var(--color-status-available)';
-        feedback.textContent = '✓ Presença confirmada ("Vou ao treino"). Você pode alterar sua resposta até 15/11 às 14:00.';
+        feedback.textContent = 'Presença confirmada ("Vou ao treino"). Você pode alterar sua resposta até 15/11 às 14:00.';
         quickConfirmHome();
       } else {
         btnVou.setAttribute('aria-pressed', 'false');
@@ -1717,7 +1717,7 @@
       document.getElementById('evento-justificativa-form').style.display = 'none';
       const feedback = document.getElementById('evento-feedback-banner');
       feedback.style.color = 'var(--color-status-unavailable)';
-      feedback.textContent = '✕ Ausência registrada com justificativa ("' + motivo + '"). Visível apenas para o staff.';
+      feedback.textContent = 'Ausência registrada com justificativa ("' + motivo + '"). Visível apenas para o staff.';
       const badge = document.getElementById('home-treino-status');
       badge.className = 'badge badge--injured';
       badge.textContent = 'Ausente (Justificado)';
@@ -1728,7 +1728,7 @@
       btn.textContent = 'Estudada na versão v3';
       btn.className = 'btn btn--success';
       document.getElementById('detail-new-badge').className = 'badge badge--available';
-      document.getElementById('detail-new-badge').textContent = '✓ ESTUDADA (v3)';
+      document.getElementById('detail-new-badge').textContent = 'ESTUDADA (v3)';
       document.getElementById('play-list-new-badge').className = 'badge badge--available';
       document.getElementById('play-list-new-badge').textContent = 'Estudada • v3';
       const homeBadge = document.getElementById('badge-new-play-1');
