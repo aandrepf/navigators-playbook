@@ -6,10 +6,11 @@ treino, disponibilidade para jogo e status do elenco.
 ## Estrutura
 
 ```
-apps/web   React + TypeScript + Vite (front-end e PWA)
-apps/api   Fastify + Postgres (backend; contrato em docs/api/)
-docs/adr   decisões arquiteturais
-.scratch   spec e tickets (tracker local)
+apps/web      React + TypeScript + Vite (front-end, PWA e biblioteca UI P0 em src/components/ui/)
+apps/api      Fastify + Postgres (backend; contrato em docs/api/)
+docs/design   sistema de design Vega, inventário Figma autenticado e protótipo navegável (prototype/index.html)
+docs/adr      decisões arquiteturais
+.scratch      spec e tickets (tracker local)
 ```
 
 Workspaces npm na raiz. Cada app tem o próprio `package.json`; os comandos

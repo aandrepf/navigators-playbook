@@ -1,126 +1,86 @@
 # Referência Figma — shadcncraft Free Starter Kit (`docs/design/FIGMA-REFERENCE.md`)
 
-Análise técnica e guia de adaptação do arquivo público do Figma **shadcn UI Kit – shadcncraft – Free Starter Kit (Community)** para o domínio mobile-first do **Playbook do Time** (`Navigators FA`).
+Análise técnica, arquitetura de tokens e guia de paridade entre o arquivo oficial **shadcn UI Kit – shadcncraft – Free Starter Kit (Community)** (`node-id=7050-2702`), o inventário autenticado ([`FIGMA-COMPONENT-INVENTORY.md`](./FIGMA-COMPONENT-INVENTORY.md)), a biblioteca React P0 implementada em [`apps/web/src/components/ui/`](../../apps/web/src/components/ui/README.md) e o protótipo navegável em [`docs/design/prototype/`](./prototype/index.html).
 
 - **URL de referência**: `https://www.figma.com/design/bl5eJw33wjuSWJwGZ3KUnl/shadcn-UI-Kit-%E2%80%93-shadcncraft-%E2%80%93-Free-Starter-Kit--Community-?node-id=7050-2702&p=f&t=Eg5DGlusJnGSI2Wq-0`
 - **File Key**: `bl5eJw33wjuSWJwGZ3KUnl`
-- **Node focado**: `7050-2702` (`7050:2702` — Página de apresentação / Getting Started & Overview da arquitetura v3 do Free Starter Kit)
-- **Última atualização verificada nos metadados do arquivo**: `2026-11-15T11:01:57.145Z` (versão de Novembro/2026, arquitetura **shadcncraft v3**)
+- **Node focado**: `7050:2702` (`Start here` — quadros `10354:4189` e `10335:6000` da arquitetura **shadcncraft v3**)
+- **Inventário completo extraído da sessão autenticada**: [`docs/design/FIGMA-COMPONENT-INVENTORY.md`](./FIGMA-COMPONENT-INVENTORY.md) (`25` páginas, `25 COMPONENT_SET`s com `439` variantes, `10 COMPONENT`s isolados e `1.159` variáveis locais)
+- **Biblioteca React P0 implementada**: [`apps/web/src/components/ui/`](../../apps/web/src/components/ui/FIGMA-REACT-MATRIX.md) (`primitives/` + `composed/`)
 
 ---
 
-## 1. Diagnóstico de Acesso e Limitações (O que é público vs. O que exige login)
+## 1. Diagnóstico Real de Acesso (Sessão Autenticada vs. Dev Mode vs. API REST)
 
-1. **Acesso público sem login no navegador (`link_access: "view"`)**:
-   - Os metadados públicos do arquivo (`/api/files/bl5eJw33wjuSWJwGZ3KUnl`) confirmam `link_access: "view"`, `has_file_link_password: false` e `viewer_export_restricted: false`.
-   - Qualquer pessoa com um navegador moderno consegue abrir a URL pública e o embed (`/embed?embed_host=share&url=...`) para visualizar o canvas (WebGL / HTMLInCanvas), navegar até o `node-id=7050-2702` e visualizar os quadros de apresentação dos **7 componentes + 8 blocos gratuitos**, os **8 estilos shadcn** e a alternância **Light / Dark mode**.
-   - Adicionalmente, o catálogo gratuito correspondente no registro React (`https://shadcncraft.com/r/radix-vega/<item>.json`) e a documentação de variáveis v3 (`https://shadcncraft.com/docs/figma/variables`) são 100% públicos sem autenticação nem chave de licença.
-
-2. **O que EXIGE login no Figma (ou autenticação adicional)**:
-   - **Inspeção do painel `Local Variables` (coleções `Tailwind`, `Style` e `Mode`), árvore de camadas editável, painel de propriedades de variantes e Dev Mode (`?mode=dev`)**: exige estar autenticado em uma conta Figma e duplicar o arquivo da comunidade para os próprios rascunhos (*"Open in Figma"* / *"Duplicate to your drafts"*). Visitantes anônimos no navegador veem o canvas em modo somente leitura limitada, sem acesso ao painel de variáveis nem ao Dev Mode.
-   - **API REST oficial do Figma (`GET https://api.figma.com/v1/files/bl5eJw33wjuSWJwGZ3KUnl/nodes?ids=7050:2702`)**: exige autenticação via Personal Access Token (`X-Figma-Token`) ou OAuth; sem token retorna `HTTP 403 {"status":403,"err":"Invalid token"}`.
-   - **Acesso HTTP automatizado sem cabeçalhos de navegador**: requisições diretas sem User-Agent de navegador são bloqueadas pelo WAF/CloudFront do Figma (`HTTP 403 Request blocked`).
-   - **Itens fora do Free Starter Kit**: o arquivo gratuito disponibiliza 7 componentes (`badge`, `avatar-stack`, `featured-icon`, `image-zoom`, `page-heading`, `profile-card`, `section-heading`/`tagline` + `marquee`, ` placeholder-logo`, `star-rating`) e 8 blocos (`banner-10`, `benefits-13`, `contact-11`, `faqs-4`, `footer-4`, `newsletter-signup-5`, `testimonials-11`, `top-navigation-5`). Os demais 352 blocos Pro, 58 componentes Pro e a geração automática de código pelo plugin exigem licença comercial (`Base Figma` / `Pro Figma + React`).
+1. **Design Mode Autenticado + Runtime `window.figma` + Painel `&view=variables` (`100% EXTRAÍDO`)**:
+   - Na sessão autenticada do Figma, extraímos diretamente via `window.figma` todas as **1.159 variáveis locais** distribuídas nas 3 coleções (`Tailwind`: `528`, `Style`: `553` com todos os 8 modos incluindo `Vega`, e `Mode`: `78` em `Light` e `Dark`), além das `componentPropertyDefinitions` de todos os `25 COMPONENT_SET`s e `10 COMPONENT`s.
+2. **Dev Mode (`&m=dev`) (`BLOQUEADO NO PLANO FIGMA FREE`)**:
+   - Requer assinatura **Figma Professional** (*"Upgrade to work in Dev Mode"*). Essa restrição foi integralmente suprida pela extração da árvore de cena (`window.figma`) combinada aos artefatos TSX oficiais gratuitos de `https://shadcncraft.com/r/radix-vega/<item>.json`.
+3. **Itens Pro do Catálogo `shadcncraft` (`BLOQUEADOS SEM LICENÇA COMERCIAL`)**:
+   - Os quadros da página `Pro` (`10335:4860`) no arquivo gratuito são capturas estáticas de vitrine. Toda a implementação do **Playbook do Time** usa exclusivamente os componentes e tokens abertos do kit + HTML5/CSS nativo, sem qualquer dependência de licença paga.
 
 ---
 
-## 2. Análise da Arquitetura do Kit (`node-id=7050-2702` e Padrões shadcn / shadcncraft v3)
+## 2. Arquitetura do Kit (`Tailwind` → `Style: Vega` → `Mode: Light & Dark`)
 
-### 2.1. Cadeia de 3 Coleções de Variáveis (`Tailwind` → `Style` → `Mode`)
+### 2.1. Cadeia das 3 Coleções de Variáveis (`1.159 variáveis`)
 
-No shadcncraft v3, nenhum componente usa valores hexadecimais fixos; toda propriedade resolve em uma cadeia de três coleções:
-1. **`Tailwind` (Primitivas)**: escala base de espaçamento (`n × 4px`), largura de borda, raio bruto, opacidade e paleta de cores base.
-2. **`Style` (8 estilos visuais nativos)**: coleção multi-modo com os 8 estilos oficiais do ecossistema shadcn:
-   - **Vega** *(referência principal adotada)*: limpo, neutro e familiar (`Inter` para corpo/títulos, `JetBrains Mono` para código/dados tabulares, ícones `Lucide`, escala de espaçamento 1:1 com Tailwind).
-   - **Nova** e **Mira**: estilos compactos com redução de padding/margem (`pro/space/4` resolve para `12px` em vez de `16px`).
-   - **Maia** e **Luma**: arredondados (`rounded-4xl` em badges) e espaçamento generoso.
-   - **Lyra**: cantos retos/quadrados voltado a interfaces totalmente monoespaçadas.
-   - **Sera**: editorial com serifas (`Playfair Display`) e espaçamento expandido.
-   - **Rhea**: variação compacta do Luma.
-3. **`Mode` (`Light` e `Dark`)**: coleção semântica aplicada diretamente às camadas dos componentes:
-   - Superfícies e texto: `background`, `foreground`, `card`, `card-foreground`, `popover`, `popover-foreground`, `muted`, `muted-foreground`.
-   - Ações e destaque: `primary`, `primary-foreground`, `secondary`, `secondary-foreground`, `accent`, `accent-foreground`, `destructive`, `destructive-foreground`.
-   - Bordas, inputs e foco: `border`, `input`, `ring`, além dos tokens específicos do shadcncraft para contraste em modo escuro (`bg-input-30`, `bg-input-50`, `bg-input-80`, `custom/focus`, `custom/destructive-focus`) e cores semânticas de estado (`--success`, `--warning`, `--info`).
+Em `docs/design/prototype/styles.css` (bloco `/* shadcncraft:tokens:start */`), reproduzimos fielmente a resolução em 3 camadas do Figma:
 
-### 2.2. Anatomia `data-slot` 1:1 entre Figma e DOM
+1. **Collection 1 — `Tailwind` (`VariableCollectionId:9880:18406` — 528 variáveis)**:
+   - Primitivas de cor (`neutral/50..950`, `emerald`, `green`, `amber`, `red`, `sky`, `violet`), escala de espaçamento base `4px` (`--space-1` a `--space-12`) e raios brutos.
+2. **Collection 2 — `Style: Vega` (`VariableCollectionId:9880:18408`, modo `9880:6` — 553 variáveis)**:
+   - Tipografia `Inter` (`--font-sans`, `--font-heading`) e `Geist Mono` / `JetBrains Mono` (`--font-mono`) com `font-variant-numeric: tabular-nums`.
+   - Biblioteca de ícones `icon-library/lucide = true` (`[data-slot="icon"]`, `16×16px`, `stroke-width: 2`).
+   - Raios de componente do modo `Vega`: `--component-button-radius: 8px` (`radius/md`), `--component-input-radius: 8px` (`radius/md`), `--component-card-radius: 14px` (`radius/xl`), `--component-badge-radius: 26px` (`radius/4xl`).
+   - Adaptação obrigatória de domínio: `--touch-min: 44px` em todos os controles acionáveis (`Button`, `Input`, `Select`, `TabsTrigger`, `Chip`, itens de navegação).
+3. **Collection 3 — `Mode` (`VariableCollectionId:9880:18407` — 78 variáveis)**:
+   - **`Vega Light` (`[data-theme="light"]` — PADRÃO)**: superfície limpa e neutra fiel ao Figma (`--background: #FFFFFF`, `--canvas: #FAFAFA`, `--card: #FFFFFF`, `--foreground: #0A0A0A`, `--primary: #171717`, `--secondary: #F5F5F5`, `--muted: #F5F5F5`, `--muted-foreground: #525252` com contraste `7.5:1` AA, `--border: #E5E5E5`, `--input: #D4D4D4`).
+   - **`Vega Dark` (`[data-theme="dark"]` — ALTERNATIVO)**: escala neutra `neutral-950/900` fiel ao modo escuro do kit (`--background: #0A0A0A`, `--card: #171717`, `--foreground: #FAFAFA`, `--primary: #E5E5E5`, `--secondary: #262626`, `--muted-foreground: #A3A3A3` com contraste `6.9:1` AA, `--border: #262626`, `--input: #404040`, `--bg-input-30: #1D1D1D`).
+   - **Zero layout genérico de IA ou dashboard tático neon**: o protótipo abandona fundos azul-marinho saturados e quadros verde-escuro artificiais em favor da composição editorial e limpa do **Vega**, inclusive no diagrama da jogada (`--diagram-surface: #F8FAFC` no Light e `#121820` no Dark).
 
-A decisão arquitetural central do kit é nomear cada camada interna no Figma exatamente com o valor do atributo `data-slot` renderizado pelo componente React:
-- Cartões: `data-slot="card"`, `data-slot="card-header"`, `data-slot="card-title"`, `data-slot="card-description"`, `data-slot="card-content"`, `data-slot="card-footer"`.
-- Cabeçalhos de seção (`@shadcncraft/section-heading`): `data-slot="section-heading"`, `data-slot="tagline"`, `data-slot="section-heading-title"`, `data-slot="section-heading-body"`, `data-slot="section-heading-actions"`.
-- Emblemas (`@shadcncraft/badge`): `data-slot="badge"` com `data-variant="default | secondary | destructive | outline | ghost | success | warning"`.
-- Pilha de avatares (`@shadcncraft/avatar-stack`): `data-slot="avatar-stack"` e `data-slot="avatar-stack-overflow"` (`+N`).
-- Campos de formulário (`Field`): `data-slot="field"`, `data-slot="field-label"`, `data-slot="field-description"`, `data-slot="field-error"`.
+### 2.2. Paridade 1:1 entre Figma, Biblioteca React P0 (`apps/web/src/components/ui/`) e Protótipo
 
-### 2.3. Estados Interativos nos Componentes do Kit
+O protótipo em `docs/design/prototype/index.html` e `styles.css` consome exatamente a mesma anatomia `data-slot`, `data-variant`, `data-size`, `data-state` e classes `.ui-*` implementadas em `apps/web/src/components/ui/`:
 
-Extraído diretamente da implementação de referência do kit (`radix-vega`):
-- **Foco visível (`:focus-visible`)**: combinação de borda ativa + anel translúcido externo (`focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50`).
-- **Erro / Inválido (`[aria-invalid="true"]`)**: borda destrutiva + halo de alerta (`aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40`).
-- **Redução de movimento (`prefers-reduced-motion`)**: uso explícito de `motion-reduce:transition-none` (como visto em `@shadcncraft/image-zoom`).
+| Origem no Figma (`Node ID`) | Componente em `apps/web/src/components/ui/` | Atributos `data-slot` & Variantes no Protótipo | Estados Demonstrados ao Vivo no Protótipo |
+| :--- | :--- | :--- | :--- |
+| `2814:11933` / Set `9892:5454` (`308` vars) | `primitives/button.tsx` (`.ui-btn`) | `data-slot="button"`, `data-variant="default \| primary \| secondary \| outline \| ghost \| link \| destructive \| success"`, `data-size="sm \| default \| lg \| icon"` | `default`, `hover` (`data-state="hover"`), `focus` (`data-state="focus"`), `disabled`, `loading` (`aria-busy="true"` + `<Spinner>`), `error` (`aria-invalid="true"`) |
+| `9713:3107` / Set `9892:4091` (`20` vars) | `primitives/badge.tsx` (`.ui-badge`) | `data-slot="badge"`, `data-variant="default \| secondary \| outline \| destructive \| ghost \| link \| success \| warning \| offense \| defense \| st \| new \| available \| unavailable \| injured \| retired \| position"` |Variantes base do shadcn + variantes de domínio com independência de cor (borda sólida, tracejada, dupla, pontilhada + glifo + texto) |
+| `2819:27270` / Set `9892:11430` (`21` vars) | `primitives/input.tsx` (`.ui-input`) | `data-slot="input"`, `data-state="hover \| focus \| disabled \| error"` | `default`, `hover`, `focus` (`effect: focus/input`), `disabled`, `error` (`aria-invalid="true"`) |
+| Base Kit / `9881:54151` (`9892:18616`) | `primitives/select.tsx` (`.ui-select`) & `<textarea data-slot="textarea">` | `data-slot="select"`, `data-slot="textarea"` | `default`, `hover`, `focus`, `disabled`, `error` (`aria-invalid="true"`) |
+| `10317:66519` / Comp `10292:63620` | `primitives/spinner.tsx` (`.ui-spinner`) | `data-slot="spinner"`, `role="status"` (`sm`, `default`, `lg`) | Dentro de botões `aria-busy="true"` e no painel global de carregamento |
+| `9880:18319` / Sets `9892:3711`, `3738` | `primitives/avatar.tsx` (`.ui-avatar`) + `AvatarStack` | `data-slot="avatar"`, `data-slot="avatar-fallback"`, `data-slot="avatar-stack"`, `data-slot="avatar-stack-overflow"` | Tamanhos `sm`, `default`, `lg`, indicador `.ui-avatar__badge` e pilha com `+25` |
+| `9892:14579` / Set `9892:14300` (`9` vars) | `primitives/section-heading.tsx` (`.ui-section-heading`) | `data-slot="section-heading"`, `section-heading-tagline`, `section-heading-title`, `section-heading-body`, `section-heading-actions` | `data-justification="space-between \| left \| center"`, `data-size="large \| small"` |
+| `9880:2019` / Set `9883:5748` (`Banner 10`) | `primitives/banner.tsx` (`.ui-banner`) | `data-slot="banner"`, `data-variant="default \| highlight \| warning"` | Banner de instalação PWA + Web Push na Home com ação de dispensar |
+| Registry `image-zoom` + Modal | `primitives/dialog.tsx` (`.ui-dialog`) | `data-slot="dialog"`, `dialog-panel`, `dialog-header`, `dialog-title`, `dialog-description`, `dialog-footer`, `dialog-close` | Modais nativos `<dialog>` para Cadastro/Login, Exclusão de Conta, Demo P0 e Zoom da Jogada |
+| `2819:20398` / Sets `9892:10458`, `10376`, `10403` | `composed/card.tsx` (`.ui-card`) | `data-slot="card"`, `card-header`, `card-title`, `card-description`, `card-content`, `card-footer` | `data-variant="default \| highlight \| warning \| danger"`, `data-size="default \| sm"` |
+| `9880:5406` (`Contact 11`) + `component/field/*` | `composed/field.tsx` (`.ui-field`) | `data-slot="field"`, `field-label`, `field-hint`, `field-error` (`role="alert"`) | Normal, `data-disabled="true"` e `data-invalid="true"` (validação ao vivo da justificativa) |
 
 ---
 
 ## 3. O que foi Adotado e Adaptado vs. O que foi Rejeitado
 
-Seguindo a diretriz de **adaptar sem copiar cegamente**, preservando o domínio esportivo mobile-first, contraste WCAG AA e vocabulário do `GLOSSARY.md`:
-
-### 3.1. Adotado com Adaptação ao Playbook do Time
-
-| Elemento do Kit Figma / shadcn | Como foi adaptado para o Playbook do Time | Onde impacta (`docs/design/`) |
+| Elemento do Kit Figma (`bl5eJw33wjuSWJwGZ3KUnl`) | Decisão | Como foi aplicado no Playbook do Time |
 | :--- | :--- | :--- |
-| **Tokens Semânticos `Mode` (`Light` & `Dark`) + Região Gerenciada (`shadcncraft:tokens`)** | Implementamos as 3 coleções de variáveis do Figma (`1. Tailwind Primitives` → `2. Style: Vega` → `3. Mode: Light & Dark`) dentro do bloco `/* shadcncraft:tokens:start */`. O modo **Light** (padrão de capa do Figma Starter Kit: `--background: #F8FAFC`, `--card: #FFFFFF`, `--primary: #0F172A`, `--border: #E2E8F0`, `--muted-foreground: #475569` com `7.5:1` AA) e o modo **Dark** (`zinc-950` `--background: #09090B`, `--card: #121215`, `--primary: #FAFAFA`, `--border: #27272A`, `--muted-foreground: #A1A1AA` com `7.8:1` AA) podem ser alternados ao vivo pelo seletor `[☀ Light | ☾ Dark]` no topo do protótipo. | `README.md`, `prototype/styles.css`, `prototype/index.html` |
-| **Ícones Vetoriais Lucide (`data-slot="icon"`) e Catálogo Interativo do Design System** | Substituímos os emojis de navegação por ícones vetoriais SVG no padrão **Lucide** (`stroke-width: 2`, `16×16px`, padrão do estilo `Vega`) e adicionamos a tela/aba **`Design System (Vega)`** (`data-nav="design-system"`) demonstrando ao vivo todos os swatches semânticos, escala de espaçamento `pro/space/*`, botões, badges, campos e componentes em todos os estados (`default`, `hover`, `focus-visible`, `disabled`, `aria-busy`, `aria-invalid`). | `prototype/index.html`, `prototype/styles.css` |
-| **Contraste de Inputs em Dark Mode (`bg-input-30`)** | Aplicamos o padrão `bg-input-30` do shadcncraft (`--input-bg: #0E1626` com borda `--input: #3E5480` de contraste `3.1:1`) para que campos de busca, seleção de posição e texto livre de justificativa se destaquem nitidamente sobre o fundo do `--card` (`#131C2E`). | `README.md`, `prototype/styles.css` |
-| **Anatomia `data-slot` e `data-variant` no DOM** | Todos os componentes especificados e o HTML do protótipo passam a expor `data-slot="card"`, `data-slot="card-header"`, `data-slot="badge"`, `data-slot="section-heading"`, `data-slot="avatar-stack"`, `data-slot="banner"`, `data-slot="field"` e `data-variant="..."`, permitindo paridade 1:1 com a implementação React e seletores estáveis nos testes. | `README.md`, `screens/*.md`, `prototype/index.html` |
-| **Componente `Badge` (`@shadcncraft/badge`)** | Adotamos as variantes `default`, `secondary`, `destructive`, `outline`, `success` e `warning` (`rounded-full` / `rounded-4xl`), adicionando obrigatoriamente variante visual + estilo de borda distinto para nunca depender só de cor nos status do elenco (`disponivel`, `indisponivel`, `lesionado`, `reformado`), unidades e respostas. | `README.md`, `screens/*.md`, `prototype/index.html` |
-| **Componente `AvatarStack` (`@shadcncraft/avatar-stack`)** | Adotado no cabeçalho dos cartões de **Evento** e **Jogo** para exibir compactamente as iniciais dos jogadores confirmados com contador `+N` (`+25`), economizando espaço vertical no celular. | `screens/home.md`, `screens/evento.md`, `screens/jogo.md`, `prototype/index.html` |
-| **Componente `ImageZoom` (`@shadcncraft/image-zoom`)** | Adotado para a história `40` (*"Como jogador, quero abrir a imagem da jogada, para ver o desenho do coach"*): modal `<dialog>` nativo ocupando `100dvw × 100dvh` com fundo `bg-background/85 backdrop-blur-md`, botão de fechar de `44×44px` e respeito a `prefers-reduced-motion`. | `screens/playbook.md`, `prototype/index.html`, `prototype/styles.css` |
-| **Bloco `Banner10` (`@shadcncraft/banner-10`)** | Adaptado para o `<PwaInstallBanner>` na **Home** (história `74` / ADR-0002): container semântico `<aside role="banner">` com ícone de destaque, instruções de instalação na tela inicial, CTA de gesto para Web Push e botão de dispensa definitiva. | `screens/home.md`, `prototype/index.html` |
-| **Bloco `Contact11` + `SectionHeading`** | Adaptado para o canal `"Falar com o staff"` na tela **Perfil** e no bloqueio pós-prazo de **Evento/Jogo** (história `78`), usando a estrutura `SectionHeading` + `Field` + `FieldLabel` + `Textarea`. | `screens/perfil.md`, `screens/evento.md`, `prototype/index.html` |
-
-### 3.2. Rejeitado (e Motivo Técnico / de Produto)
-
-| Elemento do Kit Figma / shadcn | Decisão | Motivo da Rejeição |
-| :--- | :--- | :--- |
-| **Alturas compactas de botões/controles (`h-8` / `32px` nos estilos `Nova` e `Mira`, ou `h-9` / `36px` no `Vega` padrão)** | **Rejeitado para elementos interativos** | O app é operado no celular em campo de futebol americano. As regras do projeto exigem **alvo de toque mínimo de `44×44px`** (`min-height: 44px`). Somente emblemas puramente informativos (não clicáveis) usam altura compacta (`22px–24px`). |
-| **Bloco `TopNavigation5` (barra superior com menu hambúrguer expansível no mobile)** | **Rejeitado** | O spec (`.scratch/playbook/spec.md`) e o perfil UX determinam **barra de navegação inferior fixa no celular** (com `env(safe-area-inset-bottom)`) e **navegação lateral fixa no desktop (`>= 1024px`)**, com ocultação da aba **Elenco** para o papel `jogador`. |
-| **Dependência exclusiva de cor nas variantes `success` / `warning` / `destructive` do `Badge` original** | Rejeitado sem variante/borda | No kit original, `variant="success"` muda apenas `bg-green-100 text-green-700`. No Playbook do Time, toda indicação de status do elenco, unidade, presença ou marcação combina **cor + variante + texto explícito + estilo de borda (sólida, tracejada, dupla, pontilhada)**. |
-| **Texto secundário de baixo contraste (`muted-foreground` neutro abaixo de `4.5:1`)** | **Rejeitado** | Ajustamos `--muted-foreground` para `#94A3B8` / `#CBD5E1` sobre superfícies escuras (`5.8:1` a `11.8:1`), garantindo conformidade estrita com **WCAG 2.1 AA** sob luz solar intensa. |
-| **Componentes e blocos de Marketing / E-commerce (`marquee`, `star-rating`, `benefits-13`, `newsletter-signup-5`, `testimonials-11`, `footer-4`, `pricing`, `cart`)** | **Rejeitado** | Fora do escopo do MVP. Nenhuma funcionalidade fora do spec foi introduzida. |
-| **Estilo `Sera` (serifado editorial) e `Lyra` (100% monoespaçado quadrado)** | **Rejeitado** | Prejudicam a leitura rápida de atribuições longas no celular. Mantivemos a base tipográfica do estilo **Vega** (`Inter` para interface/leitura e `JetBrains Mono` exclusivamente para down & distância, versão `v3`, prazos e contadores tabulares). |
+| **Estilo `Vega` com `Light` como padrão e `Dark` alternativo** | **Adotado (`P0`)** | `Vega Light` é o tema padrão (`data-theme="light"`), com alternância instantânea para `Vega Dark` (`data-theme="dark"`) na barra superior do protótipo. |
+| **Controles `Button`, `Input`, `Select`, `Textarea` (`36px` no Figma)** | **Adaptado (`>= 44×44px`)** | Elevados para `min-height: 44px` e `font-size: 16px` para operação de toque em campo e prevenção de auto-zoom no iOS Safari. |
+| **`Badge` (`Set 9892:4091`)** | **Adaptado (Independência de Cor)** | Além das 8 variantes base, inclui as variantes de domínio (`offense`, `defense`, `st`, `new`, `available`, `unavailable`, `injured`, `retired`, `position`) combinando cor + borda distinta + glifo + texto. |
+| **`Banner 10` (`Set 9883:5748`) e `Contact 11` (`Set 9883:8297`)** | **Adotados e Adaptados** | Convertidos no `<PwaInstallBanner>` (Home) e no cartão `"Falar com o Staff"` (Perfil/Evento — História 78). |
+| **`Top Navigation 5` (`Set 9883:12288`)** | **Rejeitado** | Substituído pelo `<AppShell>` com barra inferior fixa no celular (`< 1024px`, respeitando `safe-area-inset-bottom`) e Sidebar fixa no desktop (`>= 1024px`), ocultando a aba **Elenco** quando `papel === 'jogador'`. |
+| **Blocos de Marketing (`Benefits 13`, `FAQ 4` como página, `Footer 4`, `Newsletter Signup 5`, `Testimonial 11`, `Star rating`, `Kbd`)** | **Rejeitados** | Fora do escopo operacional do MVP. |
 
 ---
 
-## 4. Recomendações de Arquitetura e Dependências para o Frontend (`apps/web`)
+## 4. Validação Responsiva Realizada (`Desktop 1440×1024` e `Mobile 390×844`)
 
-Atualmente `apps/web/package.json` possui apenas `react` (`^19.3.1`) e `react-dom` (`^19.3.1`), sem Tailwind, sem Radix UI e sem bibliotecas de componentes externas.
-
-Seguindo a regra **"Não instale bibliotecas apenas por moda: proponha dependências somente se houver ganho claro"**:
-
-1. **Zero necessidade de licença paga ou registro `@shadcncraft` Pro**:
-   - O frontend **não deve** depender do registro pago do shadcncraft nem instalar dezenas de pacotes `@radix-ui/*` apenas para reproduzir cartões, badges, abas e formulários que o HTML5 nativo + CSS Custom Properties já resolvem com zero custo de bundle e máxima acessibilidade.
-2. **Herdar diretamente `docs/design/prototype/styles.css` + convenção `data-slot`**:
-   - A folha de estilos do protótipo já contém o bloco `/* shadcncraft:tokens:start */` com todos os tokens semânticos shadcn (`--background`, `--card`, `--primary`, `--muted`, `--destructive`, `--success`, `--warning`, `--border`, `--input`, `--ring`, `--radius`) pareados com os tokens de domínio do Playbook do Time e utilitários prontos para `[data-slot="card"]`, `[data-slot="badge"]`, `[data-slot="avatar-stack"]`, `[data-slot="section-heading"]` e `[data-slot="field"]`.
-   - Usar elementos nativos acessíveis (`<dialog>` nativo para o lightbox de zoom da imagem da jogada e modais de confirmação, `<select>`, `<button aria-pressed>`, `<nav>`, `<aside role="banner">`) reduz o risco de incompatibilidades de peerDependencies com **React 19.3** e simplifica os testes de tela com **React Testing Library + MSW (Seam 2)**.
-3. **Dependências opcionais (somente se o engenheiro frontend julgar útil)**:
-   - **Recomendação padrão**: **0 dependências novas** de UI (copiar os tokens e classes de `docs/design/prototype/styles.css` e criar os 8 componentes reutilizáveis em `apps/web/src/components/ui/` mantendo os atributos `data-slot` e `data-variant`).
-   - **Se desejar ícones vetoriais padronizados**: `lucide-react` (biblioteca padrão do estilo `Vega` no shadcncraft, tree-shakeable, substitui os glifos SVG inline caso necessário).
-   - **Não instalar**: `react-medium-image-zoom` (usado pelo `@shadcncraft/image-zoom`, pois um `<dialog>` nativo com imagem ampliável resolve a história 40 sem dependências extras), bibliotecas de carrossel (`embla-carousel-react`), nem gerenciadores de estado ou CSS-in-JS pesados.
-
----
-
-## 5. O Que Mudou na Revisão Visual do Design System e do Protótipo (Comparação Antes vs. Depois no Navegador)
-
-Validamos visualmente no Google Chrome (`1440×1024` desktop e `390×844` mobile) a transformação entre a versão inicial (que apenas adicionava aliases CSS mantendo o tema azul-marinho original) e a nova implementação completa do **Design System Vega (`shadcncraft v3`)**:
-
-1. **Superfícies, Cores e Alternância `Light` / `Dark` (`Collection 3: Mode`)**:
-   - **Antes**: Fundo único azul-marinho escuro (`#0B111E` / `#131C2E` / `#263554`) sem modo claro e sem distinção visual da estética shadcn/Vega.
-   - **Depois**: Implementação integral dos dois modos (`[data-theme="light"]` como padrão de abertura idêntico à capa do Figma Starter Kit — `--background: #F8FAFC`, `--card: #FFFFFF`, `--primary: #0F172A`, `--border: #E2E8F0`, `--muted-foreground: #475569` `7.5:1` AA — e `[data-theme="dark"]` em escala neutra `zinc-950` `#09090B` / `#121215` / `#27272A` com `--muted-foreground: #A1A1AA` `7.8:1` AA), com seletor interativo `[☀ Light | ☾ Dark]` na barra superior.
-2. **Seletores CSS Guiados por `[data-slot]` e `[data-variant]` (`Collection 2: Style Vega`)**:
-   - **Antes**: `data-slot` estava presente apenas em alguns elementos, enquanto os estilos dependiam de classes legadas.
-   - **Depois**: `docs/design/prototype/styles.css` estiliza diretamente `[data-slot="app-shell"]`, `[data-slot="sidebar"]`, `[data-slot="bottom-nav"]`, `[data-slot="section-heading"]`, `[data-slot="tagline"]`, `[data-slot="card"]`, `[data-slot="card-header"]`, `[data-slot="card-title"]`, `[data-slot="card-description"]`, `[data-slot="badge"]`, `[data-slot="button"]`, `[data-slot="tabs-list"]`, `[data-slot="tabs-trigger"]`, `[data-slot="field"]`, `[data-slot="input"]`, `[data-slot="select"]`, `[data-slot="textarea"]`, `[data-slot="featured-icon"]`, `[data-slot="avatar-stack"]`, `[data-slot="profile-card"]`, `[data-slot="banner"]` e `dialog[data-slot="image-zoom-dialog"]`.
-3. **Ícones Vetoriais Lucide (`data-slot="icon"`)**:
-   - **Antes**: Emojis (`🏠`, `📋`, `📖`, `🏟️`, `👥`, `⚙️`) na navegação lateral e na barra inferior.
-   - **Depois**: Ícones vetoriais SVG **Lucide** (`stroke-width: 2`, `16×16px`), biblioteca oficial padrão do estilo **Vega** no shadcncraft.
-4. **Aba / Catálogo Interativo `Design System (Figma Kit)` no Protótipo**:
-   - Adicionada a seção `#screen-design-system` acessível pelo botão `"🎨 Design System (Figma Kit)"` na barra superior e na sidebar, exibindo ao vivo os swatches semânticos (`--background`, `--card`, `--primary`, `--secondary`, `--muted`, `--accent`, `--destructive`, `--ring`), todas as variantes e estados de `Button` (`default`, `outline`, `success`, `destructive`, `aria-busy="true"` loading, `disabled`), `Badge` de domínio (unidades, novidade e status do elenco nunca dependentes só de cor), `Field` / `Input` (incluindo estado `aria-invalid="true"` com halo destrutivo), `FeaturedIcon`, `AvatarStack` e `Tabs`.
+O protótipo refeito (`docs/design/prototype/index.html` + `styles.css`) foi inspecionado e validado em:
+1. **Desktop `1440×1024` (`Vega Light` & `Vega Dark`)**:
+   - Sidebar esquerda fixa (`264px`, tokens `--sidebar-*`) com `<ProfileCard>` no rodapé;
+   - Grids de 2 e 3 colunas e layout mestre-detalhe (`5fr / 7fr`) no Playbook e no Game Plan;
+   - Catálogo interativo `Componentes Figma & P0` exibindo todos os swatches, variantes e estados lado a lado;
+   - Zero overflow horizontal (`scrollWidth <= clientWidth`).
+2. **Mobile `390×844` (`Vega Light` & `Vega Dark`)**:
+   - Barra de navegação inferior fixa (`[data-slot="bottom-nav"]`) com `env(safe-area-inset-bottom)` e alvos `>= 44×44px`;
+   - Aba **Elenco** estritamente ausente para `jogador` e visível para `staff`;
+   - Empilhamento em 1 coluna sem truncamento e sem barra de rolagem horizontal.
