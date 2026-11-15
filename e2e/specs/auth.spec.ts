@@ -73,16 +73,32 @@ test.describe('Login com Google', () => {
     await expect(page).toHaveURL(/\/auth\/google$/)
   })
 
-  test.fixme(
-    'retorno do Google com erro mostra o motivo na tela de entrada',
-    async () => {
-      // BUG (produto): GET /auth/google/callback redireciona para
-      // `FRONTEND_URL?login=erro&motivo=...` (ver apps/api/src/auth/routes.ts),
-      // mas a AuthScreen não lê esse parâmetro e não mostra erro algum.
-      // Reprodução: abrir /login?login=erro&motivo=estado; nada é exibido.
-      // Desbloquear quando a tela ler o parâmetro e exibir a mensagem.
-    },
-  )
+  test('login Google indisponível (503) mostra alerta acessível na entrada', async ({ page }) => {
+    await page.route('**/auth/google', (route) =>
+      route.fulfill({
+        status: 503,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'login Google não configurado' }),
+      }),
+    )
+
+    const auth = new AuthPage(page)
+    await auth.goto()
+    await auth.googleButton().click()
+
+    await expect(auth.alert()).toContainText(/login Google não configurado/i)
+    await expect(page).toHaveURL(/\/login$/)
+  })
+
+  test('erro devolvido pelo Google (access_denied) volta com mensagem na entrada', async ({ page }) => {
+    // Fluxo real sem credenciais externas: a API (com credenciais fictícias)
+    // redireciona o erro do callback para FRONTEND_URL com `?login=erro&motivo=...`.
+    // Hoje esse redirect aponta para a raiz e a tela de entrada não lê os
+    // parâmetros, então o usuário não vê o motivo.
+    await page.goto('/auth/google/callback?error=access_denied')
+
+    await expect(page.getByRole('alert')).toContainText(/cancelou o login com google/i)
+  })
 })
 
 test.describe('Sessão', () => {

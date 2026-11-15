@@ -64,9 +64,11 @@ const child = spawn('npx', ['tsx', 'src/server.ts'], {
     SEED_HEAD_COACH_EMAIL: HEAD_COACH_EMAIL,
     SEED_HEAD_COACH_NAME: 'Head Coach E2E',
     SESSION_COOKIE_SECURE: 'false',
-    // Sem Google configurado: o botão de Google é coberto por interceptação.
-    GOOGLE_CLIENT_ID: '',
-    GOOGLE_CLIENT_SECRET: '',
+    // Credenciais fictícias: habilitam GET /auth/google (redirect para o Google,
+    // interceptado pelos testes) e o callback com `?error=...`, que redireciona
+    // sem falar com o Google. Nenhum teste troca código real.
+    GOOGLE_CLIENT_ID: 'e2e-google-client-id',
+    GOOGLE_CLIENT_SECRET: 'e2e-google-client-secret',
   },
   stdio: ['ignore', 'pipe', 'pipe'],
 })
