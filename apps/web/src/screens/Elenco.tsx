@@ -62,14 +62,14 @@ export function Elenco() {
         <div className="assignment-item" data-slot="card" style={{ gridTemplateColumns: '1fr auto' }}>
           <div>
             <strong>Rafael Costa</strong> <span className="badge badge--position" data-slot="badge" data-variant="position">WR / KR</span>
-            <div className="card__meta tabular" data-slot="card-content">Taxa de comparecimento: 92% (11/12 treinos)</div>
+            <div className="card__meta" data-slot="card-content">Taxa de comparecimento: 92% (11/12 treinos)</div>
           </div>
           <RosterStatusBadge status="disponivel" />
         </div>
         <div className="assignment-item" data-slot="card" style={{ gridTemplateColumns: '1fr auto' }}>
           <div>
             <strong>Diego Almeida</strong> <span className="badge badge--position" data-slot="badge" data-variant="position">LB</span>
-            <div className="card__meta tabular" data-slot="card-content">Taxa de comparecimento: 83% (10/12 treinos)</div>
+            <div className="card__meta" data-slot="card-content">Taxa de comparecimento: 83% (10/12 treinos)</div>
           </div>
           <RosterStatusBadge status="lesionado" returnDate="30/11" />
         </div>

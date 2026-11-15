@@ -199,7 +199,7 @@ export function AuthScreen() {
             <input
               id="team-code"
               type="text"
-              className="form-input mono"
+              className="form-input"
               data-slot="field-input"
               value={teamCode}
               onChange={(e) => setTeamCode(e.target.value.toUpperCase())}
@@ -289,7 +289,7 @@ export function AuthScreen() {
               type="text"
               inputMode="numeric"
               autoComplete="one-time-code"
-              className="form-input mono"
+              className="form-input"
               data-slot="field-input"
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
