@@ -22,28 +22,30 @@ Os tokens abaixo são a fonte única de estilo em `docs/design/prototype/styles.
 
 Paleta inspirada em quadro tático escuro de alto contraste (tema padrão escuro de baixa fadiga visual em reuniões e alto contraste para leitura rápida) com superfícies bem delimitadas.
 
-| Token | Valor Hex | Uso semântico | Contraste sobre fundo |
-| :--- | :--- | :--- | :--- |
-| `--color-bg-canvas` | `#0B111E` | Fundo principal da aplicação | — |
-| `--color-bg-surface` | `#131C2E` | Cartões de evento, jogada e listas | — |
-| `--color-bg-elevated` | `#1C2841` | Modais, gavetas, cabeçalhos fixos, hover | — |
-| `--color-bg-input` | `#0E1626` | Campos de busca, seleção e texto livre | — |
-| `--color-border-subtle` | `#263554` | Divisores de lista e bordas de cartão | — |
-| `--color-border-strong` | `#3E5480` | Bordas de campos de formulário (`3.1:1`) | `3.1:1` (AA UI) |
-| `--color-text-primary` | `#F8FAFC` | Títulos, nomes de jogadas, dados principais | `17.4:1` sobre canvas |
-| `--color-text-secondary` | `#CBD5E1` | Subtítulos, formação, local, metadados | `11.8:1` sobre surface |
-| `--color-text-muted` | `#94A3B8` | Rótulos auxiliares, carimbos de versão | `5.8:1` sobre surface (AA) |
-| `--color-brand-primary` | `#38BDF8` | Ação primária, aba ativa, links e foco | `8.9:1` sobre canvas |
-| `--color-brand-primary-strong` | `#0284C7` | Fundo de botão primário com texto `#FFFFFF` | `4.6:1` com `#FFFFFF` (AA) |
-| `--color-accent-new` | `#FACC15` | Selo de **Novidade** em jogada não estudada | `11.6:1` com texto `#0B111E` |
-| `--color-unit-offense` | `#60A5FA` | Emblema de unidade: **Ofensiva** | `7.2:1` sobre surface |
-| `--color-unit-defense` | `#F87171` | Emblema de unidade: **Defesa** | `6.1:1` sobre surface |
-| `--color-unit-st` | `#C084FC` | Emblema de unidade: **Special teams** | `6.5:1` sobre surface |
-| `--color-status-available` | `#34D399` | Status `disponivel` / resposta **Vou** / presente | `9.2:1` sobre surface |
-| `--color-status-unavailable` | `#FBBF24` | Status `indisponivel` / pendente de resposta | `10.8:1` sobre surface |
-| `--color-status-injured` | `#FB7185` | Status `lesionado` / resposta **Não vou** / erro | `6.3:1` sobre surface |
-| `--color-status-retired` | `#94A3B8` | Status `reformado` / jogada arquivada | `5.8:1` sobre surface |
-| `--color-focus-ring` | `#FACC15` | Anel de foco de teclado (`2px solid` + offset) | `12.1:1` sobre canvas |
+| Token | Alias Semântico shadcn (`Mode`) | Valor Hex | Uso semântico | Contraste sobre fundo |
+| :--- | :--- | :--- | :--- | :--- |
+| `--color-bg-canvas` | `--background` | `#0B111E` | Fundo principal da aplicação | — |
+| `--color-bg-surface` | `--card` | `#131C2E` | Cartões de evento, jogada e listas | — |
+| `--color-bg-elevated` | `--popover` / `--secondary` | `#1C2841` | Modais, gavetas, cabeçalhos fixos, hover | — |
+| `--color-bg-input` | `--bg-input-30` | `#0E1626` | Campos de busca, seleção e texto livre | — |
+| `--color-border-subtle` | `--border` | `#263554` | Divisores de lista e bordas de cartão | — |
+| `--color-border-strong` | `--input` | `#3E5480` | Bordas de campos de formulário (`3.1:1`) | `3.1:1` (AA UI) |
+| `--color-text-primary` | `--foreground` / `--card-foreground` | `#F8FAFC` | Títulos, nomes de jogadas, dados principais | `17.4:1` sobre canvas |
+| `--color-text-secondary` | `--secondary-foreground` | `#CBD5E1` | Subtítulos, formação, local, metadados | `11.8:1` sobre surface |
+| `--color-text-muted` | `--muted-foreground` | `#94A3B8` | Rótulos auxiliares, carimbos de versão | `5.8:1` sobre surface (AA) |
+| `--color-brand-primary` | `--accent` | `#38BDF8` | Ação primária, aba ativa, links e foco | `8.9:1` sobre canvas |
+| `--color-brand-primary-strong` | `--primary` | `#0284C7` | Fundo de botão primário com `--primary-foreground: #FFFFFF` | `4.6:1` com `#FFFFFF` (AA) |
+| `--color-accent-new` | `--warning` / `--ring` | `#FACC15` | Selo de **Novidade** em jogada não estudada | `11.6:1` com texto `#0B111E` |
+| `--color-unit-offense` | `--info` | `#60A5FA` | Emblema de unidade: **Ofensiva** | `7.2:1` sobre surface |
+| `--color-unit-defense` | — | `#F87171` | Emblema de unidade: **Defesa** | `6.1:1` sobre surface |
+| `--color-unit-st` | — | `#C084FC` | Emblema de unidade: **Special teams** | `6.5:1` sobre surface |
+| `--color-status-available` | `--success` | `#34D399` | Status `disponivel` / resposta **Vou** / presente | `9.2:1` sobre surface |
+| `--color-status-unavailable` | `--warning` | `#FBBF24` | Status `indisponivel` / pendente de resposta | `10.8:1` sobre surface |
+| `--color-status-injured` | `--destructive` | `#FB7185` | Status `lesionado` / resposta **Não vou** / erro | `6.3:1` sobre surface |
+| `--color-status-retired` | `--muted` | `#94A3B8` | Status `reformado` / jogada arquivada | `5.8:1` sobre surface |
+| `--color-focus-ring` | `--ring` | `#FACC15` | Anel de foco de teclado (`2px solid` + halo `3px`) | `12.1:1` sobre canvas |
+
+> **Paridade com o Figma Reference (`shadcncraft v3` — Estilo Base `Vega`)**: Em `docs/design/prototype/styles.css`, todos os tokens semânticos padrão do shadcn (`--background`, `--foreground`, `--card`, `--card-foreground`, `--popover`, `--primary`, `--secondary`, `--muted`, `--accent`, `--destructive`, `--success`, `--warning`, `--info`, `--border`, `--input`, `--ring`, `--radius`, `--sidebar-*`) são exportados dentro da região gerenciada `/* shadcncraft:tokens:start */ ... /* shadcncraft:tokens:end */`, permitindo sincronização direta com o frontend sem perder os tokens de domínio. Veja [`FIGMA-REFERENCE.md`](./FIGMA-REFERENCE.md).
 
 > **Regra de independência de cor**: nenhum status do elenco, unidade, presença ou marcação usa apenas cor. Todo emblema combina:
 > 1. Ícone vetorial distinto (`✓` disponível/vou, `✕` não vou/ausente, `+` lesionado, `!` indisponível/pendente, `—` reformado);
@@ -172,7 +174,8 @@ No modo instalado na tela inicial (`display: standalone`), o layout aplica:
 - [`flows/aprovacao-staff.md`](./flows/aprovacao-staff.md) — Estado pendente do recém-cadastrado como staff, notificação ao head coach, aprovação/recusa, concessão cumulativa de coordenador de special teams e remoção do papel de staff.
 - [`flows/instalacao-pwa.md`](./flows/instalacao-pwa.md) — Convite não intrusivo (exibido uma única vez na Home) para adicionar à tela inicial no iOS/Android, ativação de Web Push por gesto do usuário e fallback automático por e-mail.
 
-### Questões em Aberto (`docs/design/OPEN-QUESTIONS.md`)
+### Referência Figma & Questões em Aberto (`docs/design/`)
+- [`FIGMA-REFERENCE.md`](./FIGMA-REFERENCE.md) — Análise do arquivo público **shadcn UI Kit – shadcncraft – Free Starter Kit (`node-id=7050-2702`)**, cadeia de variáveis v3 (`Tailwind` → `Style` → `Mode`), anatomia `data-slot` 1:1, o que foi adotado, o que foi rejeitado, diagnóstico de login do Figma e recomendações enxutas de dependências para o frontend.
 - [`OPEN-QUESTIONS.md`](./OPEN-QUESTIONS.md) — Decisões de produto não cobertas pelo spec registradas formalmente para validação antes ou durante a implementação.
 
 ---
@@ -195,20 +198,25 @@ python3 -m http.server 4173 --directory docs/design/prototype
 No topo do protótipo há uma **Barra de Simulação de Handoff** que permite alternar instantaneamente:
 - **Papel / Subpapel**: `Jogador (Ofensiva — WR/KR)`, `Staff — Head Coach`, `Staff — Coordenador Ofensivo`, `Staff — Pendente`.
 - **Estado da Tela**: `Padrão (Sucesso)`, `Carregando (Skeleton)`, `Vazio (Empty State)`, `Erro (Falha de Rede/Validação)`.
-- **Tela Ativa**: `Home`, `Evento`, `Playbook`, `Jogo`, `Elenco (Staff)`, `Perfil` (além dos modais de Cadastro/Login e Detalhe/Edição).
+- **Tela Ativa**: `Home`, `Evento`, `Playbook`, `Jogo`, `Elenco (Staff)`, `Perfil` (além dos modais de Cadastro/Login e Zoom da Imagem da Jogada).
 
-### 6.2. Componentes Reutilizáveis que se Repetem entre as Telas
+### 6.2. Componentes Reutilizáveis e Anatomia `data-slot` (Padrão shadcncraft / shadcn)
 
-| Componente | Telas onde aparece | Props / Variantes principais | Estados obrigatórios |
-| :--- | :--- | :--- | :--- |
-| `<AppShell>` | Todas as 6 telas | `role: 'jogador' \| 'staff'`, `approvalStatus: 'ativo' \| 'pendente'`. Esconde a aba **Elenco** quando `role === 'jogador'`. | Responsivo: bottom bar (`< 1024px`) com safe-area iOS e sidebar (`>= 1024px`). |
-| `<UnitBadge>` | Home, Playbook, Jogo, Elenco, Perfil | `unit: 'ofensiva' \| 'defesa' \| 'special_teams'` | Cor semântica + ícone + texto em caixa alta (`OFENSIVA`, `DEFESA`, `SPECIAL TEAMS`). |
-| `<RosterStatusBadge>` | Jogo, Elenco, Perfil | `status: 'disponivel' \| 'indisponivel' \| 'lesionado' \| 'reformado'`, `returnDate?: string` | Ícone + texto + borda distinta (nunca apenas cor). |
-| `<EventResponseCard>` | Home, Evento, Jogo | `type: 'treino' \| 'jogo'`, `deadline: string`, `isPastDeadline: boolean`, `currentResponse?: 'vou' \| 'nao_vou'` | `default`, `focus-visible`, `loading` (salvando), `disabled` (prazo vencido), `error` (recusa sem justificativa). |
-| `<JustificationSheet>` | Evento, Jogo | Lista de motivos rápidos + `<textarea>` complementar obrigatório quando "Outro" ou opcional para detalhar. | Validação de campo obrigatório (`aria-invalid`), `loading` no envio, `error` de rede. |
-| `<PlayCard>` | Home, Playbook, Jogo (Game Plan) | `name`, `unit`, `formation`, `situation`, `version`, `isNew: boolean`, `hasImage: boolean`, `gamePlanNote?: string` | Selo `NOVO` (`!isRead`), foco de teclado, estado `arquivada` para staff. |
-| `<AttendanceSummaryPanel>` | Evento, Jogo (somente staff) | Três abas/colunas: `Confirmados`, `Ausentes (com justificativa)`, `Sem resposta`. | No Jogo, cruza com `<RosterStatusBadge>` alertando caso um jogador `lesionado` ou `reformado` esteja listado. |
-| `<PwaInstallBanner>` | Home, Perfil | Detecta standalone vs. browser tab; instruções passo a passo para iOS Safari ("Compartilhar → Adicionar à Tela de Início"). | Dispensável uma vez (`localStorage` / preferência), botão de ativar Web Push por gesto. |
+Todos os componentes seguem a convenção `data-slot="<component>"` e `data-variant="<variant>"` do kit de referência (`FIGMA-REFERENCE.md`), sem exigir bibliotecas pesadas (podem ser implementados diretamente em React 19 + CSS de `docs/design/prototype/styles.css`):
+
+| Componente | `data-slot` | Telas onde aparece | Props / Variantes principais | Estados obrigatórios |
+| :--- | :--- | :--- | :--- | :--- |
+| `<AppShell>` | `app-shell`, `sidebar`, `bottom-nav` | Todas as 6 telas | `role: 'jogador' \| 'staff'`, `approvalStatus: 'ativo' \| 'pendente'`. Esconde a aba **Elenco** quando `role === 'jogador'`. | Responsivo: bottom bar (`< 1024px`) com safe-area iOS e sidebar (`>= 1024px`). |
+| `<SectionHeading>` | `section-heading`, `tagline`, `section-heading-title`, `section-heading-body` | Todas as 6 telas | Adaptado de `@shadcncraft/section-heading` com suporte a ações laterais (`section-heading-actions`). | Hierarquia semântica `<h2>`/`<h3>` e contraste AA. |
+| `<UnitBadge>` | `badge` (`data-variant="offense \| defense \| st"`) | Home, Playbook, Jogo, Elenco, Perfil | `unit: 'ofensiva' \| 'defesa' \| 'special_teams'` | Cor semântica + ícone + texto em caixa alta (`OFENSIVA`, `DEFESA`, `SPECIAL TEAMS`). |
+| `<RosterStatusBadge>` | `badge` (`data-variant="available \| unavailable \| injured \| retired"`) | Jogo, Elenco, Perfil | `status: 'disponivel' \| 'indisponivel' \| 'lesionado' \| 'reformado'`, `returnDate?: string` | Ícone (`✓`, `!`, `+`, `—`) + texto + borda distinta (nunca apenas cor). |
+| `<AvatarStack>` | `avatar-stack`, `avatar-stack-overflow` | Home, Evento, Jogo | Adaptado de `@shadcncraft/avatar-stack`: pilha compacta de iniciais dos confirmados com contador `+N`. | Anel `ring-2 ring-background` e rótulo acessível com total de confirmados. |
+| `<EventResponseCard>` | `card`, `card-header`, `card-title`, `card-content` | Home, Evento, Jogo | `type: 'treino' \| 'jogo'`, `deadline: string`, `isPastDeadline: boolean`, `currentResponse?: 'vou' \| 'nao_vou'` | `default`, `focus-visible`, `loading` (salvando), `disabled` (prazo vencido), `error` (recusa sem justificativa). |
+| `<JustificationSheet>` | `field`, `field-label`, `field-error` | Evento, Jogo | Lista de motivos rápidos + `<textarea>` complementar obrigatório quando "Outro" ou opcional para detalhar. | Validação de campo obrigatório (`aria-invalid="true"` + halo destrutivo), `loading` no envio, `error` de rede. |
+| `<PlayCard>` | `card`, `badge` | Home, Playbook, Jogo (Game Plan) | `name`, `unit`, `formation`, `situation`, `version`, `isNew: boolean`, `hasImage: boolean`, `gamePlanNote?: string` | Selo `NOVO` (`!isRead`), foco de teclado, estado `arquivada` para staff. |
+| `<ImageZoomDialog>` | `image-zoom-dialog` | Playbook, Jogo | Adaptado de `@shadcncraft/image-zoom` com `<dialog>` nativo (`100dvw × 100dvh`, `backdrop-blur-md`) sem dependências externas. | Abertura por botão `"Ampliar imagem"`, fechamento por `Esc`/botão `44×44px` e respeito a `prefers-reduced-motion`. |
+| `<AttendanceSummaryPanel>` | `card`, `tabs` | Evento, Jogo (somente staff) | Três abas/colunas: `Confirmados`, `Ausentes (com justificativa)`, `Sem resposta`. | No Jogo, cruza com `<RosterStatusBadge>` alertando caso um jogador `lesionado` ou `reformado` esteja listado. |
+| `<PwaInstallBanner>` | `banner` (`role="banner"`) | Home, Perfil | Adaptado de `@shadcncraft/banner-10`: detecta standalone vs. browser tab; instruções iOS Safari ("Compartilhar → Adicionar à Tela de Início"). | Dispensável uma vez (`localStorage` / preferência), botão de ativar Web Push por gesto (`44px`). |
 
 ### 6.3. Checklist de Implementação por Tela para o Frontend (`apps/web`)
 

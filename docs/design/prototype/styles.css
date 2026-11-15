@@ -1,26 +1,65 @@
 /* ==========================================================================
    Playbook do Time — Design System & Static Prototype Stylesheet
    Mobile-First, WCAG 2.1 AA, iOS Safe Areas, 44px Touch Targets
+   Reference: shadcncraft Free Starter Kit v3 (Style: Vega + Tactical Dark Mode)
    ========================================================================== */
+
+/* shadcncraft:tokens:start */
+:root,
+.dark {
+  --background: #0B111E;
+  --foreground: #F8FAFC;
+  --card: #131C2E;
+  --card-foreground: #F8FAFC;
+  --popover: #1C2841;
+  --popover-foreground: #F8FAFC;
+  --primary: #0284C7;
+  --primary-foreground: #FFFFFF;
+  --secondary: #1C2841;
+  --secondary-foreground: #CBD5E1;
+  --muted: #182338;
+  --muted-foreground: #94A3B8;
+  --accent: #38BDF8;
+  --accent-foreground: #0B111E;
+  --destructive: #FB7185;
+  --destructive-foreground: #0B111E;
+  --success: #34D399;
+  --warning: #FBBF24;
+  --info: #60A5FA;
+  --border: #263554;
+  --input: #3E5480;
+  --bg-input-30: #0E1626;
+  --ring: #FACC15;
+  --radius: 0.625rem;
+  --sidebar: #131C2E;
+  --sidebar-foreground: #F8FAFC;
+  --sidebar-primary: #38BDF8;
+  --sidebar-primary-foreground: #0B111E;
+  --sidebar-accent: #1C2841;
+  --sidebar-accent-foreground: #F8FAFC;
+  --sidebar-border: #263554;
+  --sidebar-ring: #FACC15;
+}
+/* shadcncraft:tokens:end */
 
 :root {
   /* Color Tokens — Tactical High-Contrast Dark Theme (WCAG AA Verified) */
-  --color-bg-canvas: #0B111E;
-  --color-bg-surface: #131C2E;
-  --color-bg-elevated: #1C2841;
-  --color-bg-input: #0E1626;
-  --color-border-subtle: #263554;
-  --color-border-strong: #3E5480;
+  --color-bg-canvas: var(--background);
+  --color-bg-surface: var(--card);
+  --color-bg-elevated: var(--popover);
+  --color-bg-input: var(--bg-input-30);
+  --color-border-subtle: var(--border);
+  --color-border-strong: var(--input);
 
-  --color-text-primary: #F8FAFC;
-  --color-text-secondary: #CBD5E1;
-  --color-text-muted: #94A3B8;
+  --color-text-primary: var(--foreground);
+  --color-text-secondary: var(--secondary-foreground);
+  --color-text-muted: var(--muted-foreground);
 
-  --color-brand-primary: #38BDF8;
-  --color-brand-primary-strong: #0284C7;
+  --color-brand-primary: var(--accent);
+  --color-brand-primary-strong: var(--primary);
   --color-brand-primary-subtle: rgba(56, 189, 248, 0.14);
 
-  --color-accent-new: #FACC15;
+  --color-accent-new: var(--ring);
   --color-accent-new-bg: rgba(250, 204, 21, 0.16);
 
   /* Units */
@@ -818,12 +857,72 @@ html, body {
   resize: vertical;
 }
 
-/* Input Error State */
+/* Input Error State (shadcncraft aria-invalid ring pattern) */
 .form-input[aria-invalid="true"],
 .form-select[aria-invalid="true"],
 .form-textarea[aria-invalid="true"] {
   border-color: var(--color-status-injured);
   border-width: 2px;
+  box-shadow: 0 0 0 3px rgba(251, 113, 133, 0.28);
+}
+
+/* AvatarStack Component (@shadcncraft/avatar-stack adapted) */
+[data-slot="avatar-stack"] {
+  display: inline-flex;
+  align-items: center;
+  isolation: isolate;
+}
+
+[data-slot="avatar-stack"] > * {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  border: 2px solid var(--color-bg-surface);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  margin-left: -7px;
+  flex-shrink: 0;
+}
+
+[data-slot="avatar-stack"] > *:first-child {
+  margin-left: 0;
+}
+
+[data-slot="avatar-stack-overflow"] {
+  background: var(--color-brand-primary-subtle);
+  color: var(--color-brand-primary);
+  border-color: var(--color-border-strong);
+}
+
+/* ImageZoom Dialog (@shadcncraft/image-zoom adapted with native <dialog>) */
+dialog[data-slot="image-zoom-dialog"] {
+  position: fixed;
+  inset: 0;
+  width: 100dvw;
+  height: 100dvh;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: var(--space-4);
+  border: none;
+  background: rgba(11, 17, 30, 0.88);
+  backdrop-filter: blur(8px);
+  color: var(--color-text-primary);
+  z-index: 400;
+}
+
+dialog[data-slot="image-zoom-dialog"][open] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
 }
 
 .field-error-msg {
