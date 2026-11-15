@@ -26,3 +26,23 @@ Object.defineProperty(window.navigator, 'standalone', {
   writable: true,
   value: false,
 })
+
+// Polyfill HTMLDialogElement methods for jsdom (used by <Dialog> primitive tests).
+if (!window.HTMLDialogElement.prototype.showModal) {
+  Object.defineProperty(window.HTMLDialogElement.prototype, 'showModal', {
+    writable: true,
+    value(this: HTMLDialogElement) {
+      this.setAttribute('open', '')
+    },
+  })
+}
+
+if (!window.HTMLDialogElement.prototype.close) {
+  Object.defineProperty(window.HTMLDialogElement.prototype, 'close', {
+    writable: true,
+    value(this: HTMLDialogElement) {
+      this.removeAttribute('open')
+      this.dispatchEvent(new Event('close'))
+    },
+  })
+}
