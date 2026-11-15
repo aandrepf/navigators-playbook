@@ -238,4 +238,19 @@ describe('Design system data-slot', () => {
     expect(Array.from(badges).some((b) => b.getAttribute('data-variant') === 'position')).toBe(true)
     expect(Array.from(badges).some((b) => b.getAttribute('data-variant') === 'available')).toBe(true)
   })
+
+  it('requires data-slot and data-variant on every badge', async () => {
+    renderWithAuth(<App />, { route: '/' })
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /próximos eventos/i })).toBeInTheDocument()
+    })
+
+    const allBadges = document.querySelectorAll('.badge')
+    expect(allBadges.length).toBeGreaterThan(0)
+    for (const badge of Array.from(allBadges)) {
+      expect(badge).toHaveAttribute('data-slot', 'badge')
+      expect(badge).toHaveAttribute('data-variant')
+    }
+  })
 })
