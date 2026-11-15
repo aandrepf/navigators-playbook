@@ -1,42 +1,53 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#0B111E" />
-  <title>Playbook do Time — Protótipo Navegável (Mobile-First & Desktop)</title>
+  <meta name="theme-color" content="#F8FAFC" />
+  <title>Playbook do Time — Design System Vega (shadcncraft v3) &amp; Protótipo</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
-<body data-role="jogador" data-state="default">
+<body data-role="jogador" data-state="default" data-theme="light">
   <a href="#conteudo-principal" class="skip-link">Pular para o conteúdo principal</a>
 
   <!-- ====================================================================
-       BARRA DE SIMULAÇÃO DE HANDOFF (Papel, Estado da Tela e Viewport)
+       BARRA DE SIMULAÇÃO DE HANDOFF (Tema Light/Dark, Papel, Estado, Viewport e Design System)
        ==================================================================== -->
-  <aside class="proto-toolbar" aria-label="Controles de simulação do protótipo para handoff">
+  <aside class="proto-toolbar" aria-label="Controles de simulação do protótipo e Design System">
     <div class="proto-toolbar__brand">
-      <span aria-hidden="true">🏈</span>
-      <span>Protótipo Handoff — Playbook do Time</span>
+      <span class="sidebar-brand-mark" style="width: 26px; height: 26px; font-size: 12px;">NP</span>
+      <span>Navigators Playbook</span>
+      <span data-slot="badge" data-variant="outline" class="badge badge--position">shadcncraft v3 • Style: Vega</span>
     </div>
 
     <div class="proto-toolbar__controls">
+      <!-- Alternador Light / Dark idêntico ao cabeçalho do Figma Starter Kit -->
+      <div class="theme-mode-switcher" role="group" aria-label="Modo de cor (Collection 3: Mode)">
+        <button type="button" id="btn-theme-light" class="theme-mode-btn" aria-pressed="true" onclick="setThemeMode('light')">
+          ☀ Light
+        </button>
+        <button type="button" id="btn-theme-dark" class="theme-mode-btn" aria-pressed="false" onclick="setThemeMode('dark')">
+          ☾ Dark
+        </button>
+      </div>
+
       <div class="proto-control-group">
-        <label for="sim-role">Papel / Subpapel:</label>
+        <label for="sim-role">Papel:</label>
         <select id="sim-role" class="proto-select" onchange="setSimRole(this.value)">
           <option value="jogador">Jogador (Ofensiva — WR / KR)</option>
-          <option value="head_coach">Staff — Head Coach (Todas as unidades)</option>
+          <option value="head_coach">Staff — Head Coach</option>
           <option value="coordenador_ofensivo">Staff — Coordenador Ofensivo</option>
-          <option value="staff_pendente">Staff — Pendente (Aguardando Head Coach)</option>
+          <option value="staff_pendente">Staff — Pendente</option>
         </select>
       </div>
 
       <div class="proto-control-group">
-        <label for="sim-state">Estado da Tela:</label>
+        <label for="sim-state">Estado:</label>
         <select id="sim-state" class="proto-select" onchange="setSimState(this.value)">
           <option value="default">Padrão / Sucesso</option>
           <option value="loading">Carregando (Skeleton)</option>
           <option value="empty">Vazio (Empty State)</option>
-          <option value="error">Erro (Falha de Rede / Validação)</option>
+          <option value="error">Erro (Falha / Validação)</option>
         </select>
       </div>
 
@@ -44,12 +55,16 @@
         <label for="sim-viewport">Viewport:</label>
         <select id="sim-viewport" class="proto-select" onchange="setSimViewport(this.value)">
           <option value="auto">Responsivo Automático</option>
-          <option value="mobile">Simular Celular (390×844 iOS Safe Area)</option>
+          <option value="mobile">Celular (390×844 Safe Area)</option>
         </select>
       </div>
 
-      <button type="button" class="btn btn--secondary" style="min-height: 38px; padding: 4px 12px; font-size: 0.8125rem;" onclick="toggleOnboardingModal(true)">
-        Fluxo Cadastro &amp; Papel
+      <button type="button" data-slot="button" data-variant="default" class="btn btn--primary" style="min-height: 36px; padding: 0 12px; font-size: 12px;" onclick="switchScreen('design-system')">
+        🎨 Design System (Figma Kit)
+      </button>
+
+      <button type="button" data-slot="button" data-variant="outline" class="btn btn--secondary" style="min-height: 36px; padding: 0 12px; font-size: 12px;" onclick="toggleOnboardingModal(true)">
+        Fluxo Cadastro
       </button>
     </div>
   </aside>
@@ -58,64 +73,101 @@
        PALCO DO VIEWPORT E SHELL DO APP
        ==================================================================== -->
   <div id="viewport-stage" class="viewport-stage">
-    <div id="app-shell" class="app-shell">
+    <div id="app-shell" data-slot="app-shell" class="app-shell">
 
-      <!-- NAVEGAÇÃO LATERAL FIXA (DESKTOP >= 1024px) -->
-      <nav class="app-sidebar active-member-only" aria-label="Navegação principal desktop">
+      <!-- NAVEGAÇÃO LATERAL FIXA (DESKTOP >= 1024px — Padrão shadcn Sidebar) -->
+      <nav data-slot="sidebar" class="app-sidebar active-member-only" aria-label="Navegação principal desktop">
         <div>
           <div class="sidebar-team-header">
-            <div class="sidebar-team-name">
-              <span aria-hidden="true">⚓</span>
-              <span>Navigators FA</span>
-            </div>
-            <div id="sidebar-role-indicator" class="sidebar-user-meta">
-              Papel: Jogador • WR / KR (Ofensiva &amp; Special teams)
+            <div class="sidebar-brand-mark" aria-hidden="true">NF</div>
+            <div>
+              <div class="sidebar-team-name">Navigators FA</div>
+              <div id="sidebar-role-indicator" class="sidebar-user-meta">
+                Jogador • WR / KR (Ofensiva)
+              </div>
             </div>
           </div>
 
+          <div class="sidebar-nav-group-label">Plataforma Tática</div>
           <ul class="sidebar-nav-list">
             <li>
               <button type="button" class="nav-item-btn" data-nav="home" aria-current="page" onclick="switchScreen('home')">
-                <span class="nav-item-btn__label"><span aria-hidden="true">🏠</span> Home</span>
-                <span class="badge badge--new tabular">2</span>
+                <span class="nav-item-btn__label">
+                  <svg data-slot="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                  <span>Home</span>
+                </span>
+                <span data-slot="badge" data-variant="new" class="badge badge--new tabular">2</span>
               </button>
             </li>
             <li>
               <button type="button" class="nav-item-btn" data-nav="evento" onclick="switchScreen('evento')">
-                <span class="nav-item-btn__label"><span aria-hidden="true">📋</span> Evento (Treino)</span>
-                <span class="badge badge--unavailable tabular">!</span>
+                <span class="nav-item-btn__label">
+                  <svg data-slot="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  <span>Evento (Treino)</span>
+                </span>
+                <span data-slot="badge" data-variant="warning" class="badge badge--unavailable tabular">!</span>
               </button>
             </li>
             <li>
               <button type="button" class="nav-item-btn" data-nav="playbook" onclick="switchScreen('playbook')">
-                <span class="nav-item-btn__label"><span aria-hidden="true">📖</span> Playbook</span>
-                <span class="badge badge--new tabular">NOVO</span>
+                <span class="nav-item-btn__label">
+                  <svg data-slot="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                  <span>Playbook</span>
+                </span>
+                <span data-slot="badge" data-variant="new" class="badge badge--new tabular">NOVO</span>
               </button>
             </li>
             <li>
               <button type="button" class="nav-item-btn" data-nav="jogo" onclick="switchScreen('jogo')">
-                <span class="nav-item-btn__label"><span aria-hidden="true">🏟️</span> Jogo &amp; Game Plan</span>
+                <span class="nav-item-btn__label">
+                  <svg data-slot="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+                  <span>Jogo &amp; Game Plan</span>
+                </span>
               </button>
             </li>
             <!-- Aba Elenco: Oculta para Jogador por regra estrita do spec -->
             <li class="staff-only">
               <button type="button" class="nav-item-btn" data-nav="elenco" onclick="switchScreen('elenco')">
-                <span class="nav-item-btn__label"><span aria-hidden="true">👥</span> Elenco (Staff)</span>
-                <span class="badge badge--unavailable hc-only tabular">2</span>
+                <span class="nav-item-btn__label">
+                  <svg data-slot="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                  <span>Elenco (Staff)</span>
+                </span>
+                <span data-slot="badge" data-variant="warning" class="badge badge--unavailable hc-only tabular">2</span>
               </button>
             </li>
             <li>
               <button type="button" class="nav-item-btn" data-nav="perfil" onclick="switchScreen('perfil')">
-                <span class="nav-item-btn__label"><span aria-hidden="true">⚙️</span> Perfil</span>
+                <span class="nav-item-btn__label">
+                  <svg data-slot="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  <span>Perfil</span>
+                </span>
+              </button>
+            </li>
+          </ul>
+
+          <div class="sidebar-nav-group-label" style="margin-top: var(--sc-space-4);">Referência Figma</div>
+          <ul class="sidebar-nav-list">
+            <li>
+              <button type="button" class="nav-item-btn" data-nav="design-system" onclick="switchScreen('design-system')">
+                <span class="nav-item-btn__label">
+                  <svg data-slot="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                  <span>Design System (Vega)</span>
+                </span>
+                <span data-slot="badge" data-variant="outline" class="badge badge--position">v3</span>
               </button>
             </li>
           </ul>
         </div>
 
-        <div class="card" style="padding: var(--space-3); font-size: var(--text-xs);">
-          <div style="font-weight: 700; margin-bottom: 4px;">Status do elenco</div>
-          <span class="badge badge--available">✓ Disponível</span>
-          <div style="color: var(--color-text-muted); margin-top: 6px;">Fuso: America/Sao_Paulo</div>
+        <!-- ProfileCard (@shadcncraft/profile-card adaptado no rodapé da Sidebar) -->
+        <div data-slot="profile-card" class="card" style="padding: var(--sc-space-3); gap: 6px;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <strong style="font-size: var(--text-xs);">Rafael Costa #14</strong>
+            <span data-slot="badge" data-variant="available" class="badge badge--available">✓ Disponível</span>
+          </div>
+          <div style="font-size: 11px; color: var(--muted-foreground);">
+            Status do elenco • America/Sao_Paulo
+          </div>
         </div>
       </nav>
 
@@ -1451,34 +1503,145 @@
               </div>
             </section>
 
+            <!-- ============================================================
+                 TELA 7 (CATÁLOGO): DESIGN SYSTEM BASEADO NO FIGMA (shadcncraft v3 / Vega)
+                 ============================================================ -->
+            <section id="screen-design-system" class="screen-section" aria-labelledby="ds-title">
+              <div class="stack-md">
+                <div data-slot="section-heading">
+                  <div>
+                    <div data-slot="tagline">Figma Reference • bl5eJw33wjuSWJwGZ3KUnl (node 7050-2702)</div>
+                    <h2 id="ds-title" data-slot="section-heading-title">Design System — Navigators Playbook (Style: Vega)</h2>
+                    <p data-slot="section-heading-body">
+                      Fonte de verdade visual e estrutural: 3 coleções de variáveis (Tailwind Primitives &rarr; Style Vega &rarr; Mode Light/Dark), anatomia <code>data-slot</code> 1:1, alvos de toque de 44px e contraste WCAG AA.
+                    </p>
+                  </div>
+                </div>
+
+                <!-- 1. Tokens Semânticos Mode (Light & Dark) -->
+                <div data-slot="card" class="card">
+                  <div data-slot="card-header">
+                    <h3 data-slot="card-title">1. Tokens Semânticos (Collection 3: Mode — alterne ☀ Light / ☾ Dark no topo)</h3>
+                    <p data-slot="card-description">Sincronizados via região gerenciada <code>/* shadcncraft:tokens:start */</code></p>
+                  </div>
+                  <div class="ds-swatch-grid">
+                    <div class="ds-swatch"><div class="ds-swatch__color" style="background: var(--background);"></div><div class="ds-swatch__meta">--background</div></div>
+                    <div class="ds-swatch"><div class="ds-swatch__color" style="background: var(--card);"></div><div class="ds-swatch__meta">--card</div></div>
+                    <div class="ds-swatch"><div class="ds-swatch__color" style="background: var(--primary);"></div><div class="ds-swatch__meta">--primary</div></div>
+                    <div class="ds-swatch"><div class="ds-swatch__color" style="background: var(--secondary);"></div><div class="ds-swatch__meta">--secondary</div></div>
+                    <div class="ds-swatch"><div class="ds-swatch__color" style="background: var(--muted);"></div><div class="ds-swatch__meta">--muted</div></div>
+                    <div class="ds-swatch"><div class="ds-swatch__color" style="background: var(--accent);"></div><div class="ds-swatch__meta">--accent</div></div>
+                    <div class="ds-swatch"><div class="ds-swatch__color" style="background: var(--destructive);"></div><div class="ds-swatch__meta">--destructive</div></div>
+                    <div class="ds-swatch"><div class="ds-swatch__color" style="background: var(--ring);"></div><div class="ds-swatch__meta">--ring (focus)</div></div>
+                  </div>
+                </div>
+
+                <!-- 2. Matriz de Estados de Botões e Campos (default, hover, focus, disabled, loading, aria-invalid) -->
+                <div class="grid-2col">
+                  <div data-slot="card" class="card">
+                    <div data-slot="card-header">
+                      <h3 data-slot="card-title">2. Botões (<code>data-slot="button"</code> — min 44×44px)</h3>
+                      <p data-slot="card-description">Variantes e estados interativos obrigatórios</p>
+                    </div>
+                    <div class="btn-row">
+                      <button type="button" data-slot="button" data-variant="default">Default (Primary)</button>
+                      <button type="button" data-slot="button" data-variant="outline">Outline / Secondary</button>
+                      <button type="button" data-slot="button" data-variant="success">✓ Vou (Success)</button>
+                      <button type="button" data-slot="button" data-variant="destructive">✕ Não vou (Destructive)</button>
+                      <button type="button" data-slot="button" data-variant="default" aria-busy="true">Salvando (Loading)</button>
+                      <button type="button" data-slot="button" data-variant="outline" disabled>Prazo encerrado (Disabled)</button>
+                    </div>
+                  </div>
+
+                  <div data-slot="card" class="card">
+                    <div data-slot="card-header">
+                      <h3 data-slot="card-title">3. Badges de Domínio (<code>data-slot="badge"</code> — nunca só cor)</h3>
+                      <p data-slot="card-description">Unidades, Status do elenco e Novidade com ícone + texto + borda</p>
+                    </div>
+                    <div class="badge-row">
+                      <span data-slot="badge" data-variant="offense">OFENSIVA</span>
+                      <span data-slot="badge" data-variant="defense">DEFESA</span>
+                      <span data-slot="badge" data-variant="st">SPECIAL TEAMS</span>
+                      <span data-slot="badge" data-variant="new">★ NOVO • v3</span>
+                      <span data-slot="badge" data-variant="available">✓ Disponível</span>
+                      <span data-slot="badge" data-variant="unavailable">! Indisponível</span>
+                      <span data-slot="badge" data-variant="injured">+ Lesionado</span>
+                      <span data-slot="badge" data-variant="retired">— Reformado</span>
+                      <span data-slot="badge" data-variant="outline">3rd &amp; 6–10</span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 3. Campos (Field) em Estado Normal, Foco e Erro (aria-invalid) + Componentes shadcncraft -->
+                <div class="grid-2col">
+                  <div data-slot="card" class="card">
+                    <div data-slot="card-header">
+                      <h3 data-slot="card-title">4. Field &amp; Input States (<code>data-slot="field|input"</code>)</h3>
+                      <p data-slot="card-description">Contraste <code>--bg-input-30</code> e halo de erro <code>aria-invalid="true"</code></p>
+                    </div>
+                    <div data-slot="field" style="margin-bottom: var(--sc-space-3);">
+                      <label data-slot="field-label" for="ds-input-ok">Campo válido (16px evita zoom no iOS):</label>
+                      <input id="ds-input-ok" data-slot="input" type="text" value="Flood Right Z-Post" />
+                    </div>
+                    <div data-slot="field" style="margin-bottom: 0;">
+                      <label data-slot="field-label" for="ds-input-err">Justificativa obrigatória (Estado <code>aria-invalid="true"</code>):</label>
+                      <input id="ds-input-err" data-slot="input" type="text" aria-invalid="true" placeholder="Informe a justificativa ao recusar..." />
+                      <div data-slot="field-error" role="alert">⚠ A justificativa é obrigatória ao responder "Não vou".</div>
+                    </div>
+                  </div>
+
+                  <div data-slot="card" class="card">
+                    <div data-slot="card-header">
+                      <h3 data-slot="card-title">5. FeaturedIcon, AvatarStack &amp; Tabs</h3>
+                      <p data-slot="card-description">Componentes gratuitos adaptados do shadcncraft Starter Kit</p>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: var(--sc-space-4); flex-wrap: wrap;">
+                      <div data-slot="featured-icon" aria-label="Featured Icon">
+                        <svg data-slot="icon" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                      </div>
+                      <div data-slot="avatar-stack" aria-label="Pilha de jogadores confirmados">
+                        <span>RC</span><span>GR</span><span>LM</span><span>DA</span>
+                        <span data-slot="avatar-stack-overflow">+24</span>
+                      </div>
+                      <div data-slot="tabs-list" style="margin-bottom: 0;">
+                        <button type="button" data-slot="tabs-trigger" aria-pressed="true">Ofensiva</button>
+                        <button type="button" data-slot="tabs-trigger" aria-pressed="false">Defesa</button>
+                        <button type="button" data-slot="tabs-trigger" aria-pressed="false">Special teams</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
           </div>
         </main>
 
         <!-- BARRA DE NAVEGAÇÃO INFERIOR (MOBILE < 1024px — Respeita Safe Area iOS) -->
-        <nav class="app-bottom-nav active-member-only" aria-label="Navegação principal mobile">
+        <nav data-slot="bottom-nav" class="app-bottom-nav active-member-only" aria-label="Navegação principal mobile">
           <button type="button" class="bottom-nav-btn" data-nav="home" aria-current="page" onclick="switchScreen('home')">
-            <span class="bottom-nav-icon" aria-hidden="true">🏠</span>
+            <svg data-slot="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
             <span>Home</span>
           </button>
           <button type="button" class="bottom-nav-btn" data-nav="evento" onclick="switchScreen('evento')">
-            <span class="bottom-nav-icon" aria-hidden="true">📋</span>
+            <svg data-slot="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             <span>Evento</span>
           </button>
           <button type="button" class="bottom-nav-btn" data-nav="playbook" onclick="switchScreen('playbook')">
-            <span class="bottom-nav-icon" aria-hidden="true">📖</span>
+            <svg data-slot="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
             <span>Playbook</span>
           </button>
           <button type="button" class="bottom-nav-btn" data-nav="jogo" onclick="switchScreen('jogo')">
-            <span class="bottom-nav-icon" aria-hidden="true">🏟️</span>
+            <svg data-slot="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
             <span>Jogo</span>
           </button>
           <!-- Aba Elenco: estritamente oculta para Jogador no mobile também -->
           <button type="button" class="bottom-nav-btn staff-only" data-nav="elenco" onclick="switchScreen('elenco')">
-            <span class="bottom-nav-icon" aria-hidden="true">👥</span>
+            <svg data-slot="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             <span>Elenco</span>
           </button>
           <button type="button" class="bottom-nav-btn" data-nav="perfil" onclick="switchScreen('perfil')">
-            <span class="bottom-nav-icon" aria-hidden="true">⚙️</span>
+            <svg data-slot="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             <span>Perfil</span>
           </button>
         </nav>
@@ -1614,8 +1777,17 @@
       playbook: 'Playbook — Jogadas por Unidade',
       jogo: 'Jogo — Disponibilidade e Game Plan',
       elenco: 'Elenco — Gestão de Status e Staff (Exclusivo Staff)',
-      perfil: 'Meu Perfil — Posições, Status e Notificações'
+      perfil: 'Meu Perfil — Posições, Status e Notificações',
+      'design-system': 'Design System — shadcncraft v3 (Style: Vega)'
     };
+
+    function setThemeMode(mode) {
+      document.documentElement.setAttribute('data-theme', mode);
+      document.body.setAttribute('data-theme', mode);
+      document.documentElement.classList.toggle('dark', mode === 'dark');
+      document.getElementById('btn-theme-light').setAttribute('aria-pressed', String(mode === 'light'));
+      document.getElementById('btn-theme-dark').setAttribute('aria-pressed', String(mode === 'dark'));
+    }
 
     const roleLabels = {
       jogador: 'Papel: Jogador • WR / KR (Ofensiva & Special teams)',
