@@ -246,7 +246,7 @@ describe('Design system data-slot', () => {
       expect(screen.getByRole('heading', { name: /próximos eventos/i })).toBeInTheDocument()
     })
 
-    const allBadges = document.querySelectorAll('.badge')
+    const allBadges = document.querySelectorAll('[data-slot="badge"]')
     expect(allBadges.length).toBeGreaterThan(0)
     for (const badge of Array.from(allBadges)) {
       expect(badge).toHaveAttribute('data-slot', 'badge')
@@ -277,7 +277,7 @@ describe('Design system data-slot', () => {
     })
 
     const iconGlyphs = /[\u2713\u2715\u0021\u2605\u23F3\u{1F4F2}\u2694\u{1F6E1}\u{1F9B6}\u002B\u2014]/u
-    const allBadges = document.querySelectorAll('.badge')
+    const allBadges = document.querySelectorAll('[data-slot="badge"]')
     expect(allBadges.length).toBeGreaterThan(0)
     for (const badge of Array.from(allBadges)) {
       expect(badge.textContent).not.toMatch(iconGlyphs)

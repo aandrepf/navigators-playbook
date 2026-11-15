@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { Button, Card, CardContent, CardDescription, CardTitle } from './ui'
 
 export function EmptyState({
   title,
@@ -14,19 +15,18 @@ export function EmptyState({
   const navigate = useNavigate()
 
   return (
-    <div className="empty-state-box">
-      <h2 className="section-title">{title}</h2>
-      <p
-        className="section-subtitle"
-        style={{ maxWidth: 440, margin: 'var(--space-2) auto var(--space-4)' }}
-      >
-        {subtitle}
-      </p>
-      {actionLabel && actionTo && (
-        <button type="button" className="btn btn--primary" onClick={() => navigate(actionTo)}>
-          {actionLabel}
-        </button>
-      )}
-    </div>
+    <Card className="empty-state-box">
+      <CardContent>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription className="empty-state-box__description">
+          {subtitle}
+        </CardDescription>
+        {actionLabel && actionTo && (
+          <Button variant="default" onClick={() => navigate(actionTo)}>
+            {actionLabel}
+          </Button>
+        )}
+      </CardContent>
+    </Card>
   )
 }

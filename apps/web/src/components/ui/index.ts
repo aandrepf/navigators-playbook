@@ -24,6 +24,7 @@ export {
 } from './primitives/section-heading'
 export { Banner, type BannerProps } from './primitives/banner'
 export { Spinner, type SpinnerProps } from './primitives/spinner'
+export { Skeleton, type SkeletonProps } from './primitives/skeleton'
 
 // Composed
 export {
