@@ -211,12 +211,12 @@
             <section id="screen-home" class="screen-section is-active" aria-labelledby="home-title">
               <div class="stack-md">
 
-                <!-- Convite de instalação do PWA na tela inicial (exibido uma vez — História 74 / ADR-0002) -->
-                <div id="pwa-install-banner" class="card card--highlight" role="region" aria-label="Instalação do aplicativo na tela inicial">
-                  <div class="card__header">
+                <!-- Convite de instalação do PWA na tela inicial (exibido uma vez — História 74 / ADR-0002 / adaptado de @shadcncraft/banner-10) -->
+                <aside id="pwa-install-banner" data-slot="banner" class="card card--highlight" role="banner" aria-label="Instalação do aplicativo na tela inicial">
+                  <div data-slot="card-header" class="card__header">
                     <div>
-                      <span class="badge badge--new">📲 PWA + WEB PUSH</span>
-                      <h2 class="card__title" style="margin-top: var(--space-2);">
+                      <span data-slot="badge" data-variant="warning" class="badge badge--new">📲 PWA + WEB PUSH</span>
+                      <h2 data-slot="card-title" class="card__title" style="margin-top: var(--space-2);">
                         Instale o Playbook na tela inicial para receber avisos push
                       </h2>
                     </div>
@@ -232,7 +232,7 @@
                       🔔 Ativar notificações push neste aparelho
                     </button>
                   </div>
-                </div>
+                </aside>
 
                 <!-- Card Prioritário Exclusivo Head Coach: Cadastros de Staff Pendentes (Histórias 9, 76) -->
                 <div class="card card--warning hc-only">
@@ -274,8 +274,19 @@
                         </div>
                         <span id="home-treino-status" class="badge badge--unavailable">! Sem resposta</span>
                       </div>
-                      <h3 class="card__title">Treino Tático — Instalação Red Zone</h3>
+                      <h3 data-slot="card-title" class="card__title">Treino Tático — Instalação Red Zone</h3>
                       <p class="card__meta">Sáb, 16/11/2026 • 14:00 às 17:00 • Campo Suplementar Sul</p>
+
+                      <!-- AvatarStack (@shadcncraft/avatar-stack adaptado) -->
+                      <div style="display: flex; align-items: center; gap: var(--space-2); margin: var(--space-2) 0;">
+                        <div data-slot="avatar-stack" aria-label="28 jogadores confirmados">
+                          <span title="Rafael Costa (WR)">RC</span>
+                          <span title="Gabriel Rocha (QB)">GR</span>
+                          <span title="Mateus Faria (TE)">MF</span>
+                          <span data-slot="avatar-stack-overflow">+25</span>
+                        </div>
+                        <span class="card__meta tabular">28 confirmados no elenco</span>
+                      </div>
 
                       <!-- Contadores consolidados só para Staff -->
                       <div class="staff-only card__meta tabular" style="margin: var(--space-2) 0; padding: var(--space-2); background: var(--color-bg-elevated); border-radius: var(--radius-sm);">
@@ -713,11 +724,11 @@
                       </button>
                     </div>
 
-                    <!-- Imagem da Jogada Anexada pelo Coach (Histórias 22, 40; ADR-0003) -->
+                    <!-- Imagem da Jogada Anexada pelo Coach (Histórias 22, 40; ADR-0003; @shadcncraft/image-zoom adaptado) -->
                     <div class="play-diagram-box" role="img" aria-label="Desenho tático anexado pelo coach para a jogada Flood Right Z-Post em formação Shotgun Trips Right">
                       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-2);">
                         <span class="mono" style="font-size: var(--text-xs); color: #86EFAC;">🖼 IMAGEM ANEXADA PELO COACH (flood-right-v3.png)</span>
-                        <button type="button" class="btn btn--secondary" style="min-height: 36px; padding: 2px 10px; font-size: var(--text-xs);" onclick="alert('Lightbox da imagem aberto em tela cheia com suporte a zoom por pinça.')">
+                        <button type="button" class="btn btn--secondary" style="min-height: 44px; padding: 4px 12px; font-size: var(--text-xs);" onclick="document.getElementById('image-zoom-dialog').showModal()">
                           🔍 Ampliar imagem
                         </button>
                       </div>
@@ -1549,6 +1560,49 @@
       </div>
     </div>
   </div>
+
+  <!-- ====================================================================
+       DIALOG NATIVO DE ZOOM DA IMAGEM DA JOGADA (História 40 / @shadcncraft/image-zoom)
+       ==================================================================== -->
+  <dialog id="image-zoom-dialog" data-slot="image-zoom-dialog" aria-labelledby="zoom-dialog-title">
+    <div class="card" style="width: 100%; max-width: 920px;">
+      <div data-slot="card-header" class="card__header">
+        <div>
+          <span data-slot="badge" class="badge badge--offense">OFENSIVA • v3</span>
+          <h2 id="zoom-dialog-title" data-slot="card-title" class="section-title" style="margin-top: 4px;">
+            Flood Right Z-Post — Imagem Anexada pelo Coach
+          </h2>
+        </div>
+        <button type="button" class="btn btn--secondary" onclick="document.getElementById('image-zoom-dialog').close()">
+          ✕ Fechar zoom (Esc)
+        </button>
+      </div>
+      <div class="play-diagram-box" style="margin: 0;">
+        <svg viewBox="0 0 500 190" width="100%" height="320" aria-label="Diagrama ampliado da jogada Flood Right Z-Post" style="display: block; background: #0B241B; border-radius: 6px;">
+          <line x1="0" y1="130" x2="500" y2="130" stroke="#1E4631" stroke-width="2" stroke-dasharray="6 4" />
+          <line x1="0" y1="65" x2="500" y2="65" stroke="#1E4631" stroke-width="1" />
+          <rect x="190" y="124" width="12" height="12" fill="#94A3B8" />
+          <rect x="210" y="124" width="12" height="12" fill="#94A3B8" />
+          <rect x="230" y="124" width="12" height="12" fill="#F8FAFC" />
+          <rect x="250" y="124" width="12" height="12" fill="#94A3B8" />
+          <rect x="270" y="124" width="12" height="12" fill="#94A3B8" />
+          <circle cx="236" cy="162" r="8" fill="#60A5FA" />
+          <text x="230" y="182" fill="#CBD5E1" font-size="10" font-family="monospace">QB</text>
+          <circle cx="270" cy="162" r="8" fill="#60A5FA" />
+          <path d="M 278 162 Q 350 155 430 115" fill="none" stroke="#60A5FA" stroke-width="2.5" />
+          <circle cx="80" cy="130" r="8" fill="#38BDF8" />
+          <path d="M 80 122 L 80 72 L 155 72" fill="none" stroke="#38BDF8" stroke-width="2.5" />
+          <text x="68" y="148" fill="#F8FAFC" font-size="10" font-family="monospace">WR-X (Dig 12yd)</text>
+          <circle cx="330" cy="138" r="8" fill="#60A5FA" />
+          <path d="M 330 130 L 330 78 L 465 78" fill="none" stroke="#60A5FA" stroke-width="2.5" />
+          <text x="306" y="156" fill="#CBD5E1" font-size="10" font-family="monospace">Slot-Y (Out 10yd)</text>
+          <circle cx="435" cy="130" r="9" fill="#FACC15" />
+          <path d="M 435 120 L 435 55 L 365 18" fill="none" stroke="#FACC15" stroke-width="3" />
+          <text x="395" y="148" fill="#FACC15" font-weight="bold" font-size="11" font-family="monospace">WR-Z ★ (Post 18yd)</text>
+        </svg>
+      </div>
+    </div>
+  </dialog>
 
   <!-- ====================================================================
        SCRIPT LEVE DE INTERAÇÃO DO PROTÓTIPO (Zero dependências externas)
