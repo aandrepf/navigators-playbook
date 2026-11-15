@@ -174,8 +174,9 @@ No modo instalado na tela inicial (`display: standalone`), o layout aplica:
 - [`flows/aprovacao-staff.md`](./flows/aprovacao-staff.md) — Estado pendente do recém-cadastrado como staff, notificação ao head coach, aprovação/recusa, concessão cumulativa de coordenador de special teams e remoção do papel de staff.
 - [`flows/instalacao-pwa.md`](./flows/instalacao-pwa.md) — Convite não intrusivo (exibido uma única vez na Home) para adicionar à tela inicial no iOS/Android, ativação de Web Push por gesto do usuário e fallback automático por e-mail.
 
-### Referência Figma & Questões em Aberto (`docs/design/`)
-- [`FIGMA-REFERENCE.md`](./FIGMA-REFERENCE.md) — Análise do arquivo público **shadcn UI Kit – shadcncraft – Free Starter Kit (`node-id=7050-2702`)**, cadeia de variáveis v3 (`Tailwind` → `Style` → `Mode`), anatomia `data-slot` 1:1, o que foi adotado, o que foi rejeitado, diagnóstico de login do Figma e recomendações enxutas de dependências para o frontend.
+### Referência Figma, Plano da Biblioteca de Componentes & Questões em Aberto (`docs/design/`)
+- [`COMPONENT-LIBRARY-PLAN.md`](./COMPONENT-LIBRARY-PLAN.md) — Plano arquitetural completo da biblioteca reutilizável em 3 camadas (`Primitives`, `Composed Components` e `Domain Patterns`), prioridades `P0`/`P1`/`P2`, API TypeScript sugerida, anatomia `data-slot`, matriz de estados, acessibilidade, itens fora do escopo e política de dependências/licenças para `apps/web/src/components/`.
+- [`FIGMA-REFERENCE.md`](./FIGMA-REFERENCE.md) — Análise do arquivo público **shadcn UI Kit – shadcncraft – Free Starter Kit (`node-id=7050-2702`)**, cadeia de variáveis v3 (`Tailwind` → `Style` → `Mode`), anatomia `data-slot` 1:1, o que foi adotado, o que foi rejeitado, diagnóstico de login do Figma e comparação visual antes/depois.
 - [`OPEN-QUESTIONS.md`](./OPEN-QUESTIONS.md) — Decisões de produto não cobertas pelo spec registradas formalmente para validação antes ou durante a implementação.
 
 ---
