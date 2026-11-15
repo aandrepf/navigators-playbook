@@ -35,7 +35,7 @@ export function Evento() {
           <div className="badge-row" style={{ marginBottom: 'var(--space-1)' }}>
             <UnitBadge unit="ofensiva" />
             <span className="badge badge--available" data-slot="badge" data-variant="available">ESTADO: ATIVO</span>
-            <span className="badge badge--unavailable mono" data-slot="badge" data-variant="unavailable">
+            <span className="badge badge--unavailable" data-slot="badge" data-variant="unavailable">
               Prazo de resposta: 15/11 às 14:00 (24h antes)
             </span>
           </div>
@@ -82,7 +82,7 @@ export function Evento() {
               <div>
                 <strong>Gabriel Rocha</strong> <span className="badge badge--position" data-slot="badge" data-variant="position">QB</span>
               </div>
-              <span className="badge badge--available" data-slot="badge" data-variant="available">✓ Confirmado</span>
+              <span className="badge badge--available" data-slot="badge" data-variant="available">Confirmado</span>
             </div>
             <div
               className="assignment-item"
@@ -91,7 +91,7 @@ export function Evento() {
               <div>
                 <strong>Diego Almeida</strong> <span className="badge badge--position" data-slot="badge" data-variant="position">LB</span>
               </div>
-              <span className="badge badge--retired" data-slot="badge" data-variant="retired">✕ Ausente</span>
+              <span className="badge badge--retired" data-slot="badge" data-variant="retired">Ausente</span>
             </div>
           </div>
         </div>

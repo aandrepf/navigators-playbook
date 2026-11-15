@@ -9,7 +9,7 @@ Especificação visual, tokens, arquitetura de componentes, acessibilidade e han
 1. **Mobile-first de beira de campo**: desenhado primeiro para operação com uma mão no celular (`360px–430px`), sob luz solar direta ou vestiário, com barra de navegação inferior fixa respeitando as áreas seguras do iOS (`env(safe-area-inset-bottom)`). No desktop (`>= 1024px`), expande-se com navegação lateral fixa para o trabalho tático do staff (montagem de game plan, gestão do elenco e revisão do playbook).
 2. **Clareza tática imediata**: hierarquia tipográfica forte, números tabulares para down/distância, prazos e contagens consolidadas, e distinção inequívoca entre **status do elenco** (`disponivel`, `indisponivel`, `lesionado`, `reformado`), **presença** (treino) e **marcação / disponibilidade** (jogo).
 3. **Autorização e privacidade refletidas na interface**: o jogador nunca vê a aba **Elenco** na navegação principal, nunca vê a **justificativa** de ausência de outros jogadores (vê apenas "Ausente"), e nunca vê controles de edição de jogadas, eventos, game plan ou status do elenco. Membros do staff com cadastro **pendente** veem um estado dedicado de bloqueio informativo até aprovação por um head coach.
-4. **Acessibilidade inegociável (WCAG 2.1 AA)**: contraste mínimo de `4.5:1` para texto normal e `3:1` para elementos gráficos e texto grande; alvos de toque mínimos de `44×44px`; foco visível de alto contraste em todos os elementos interativos; nenhum estado transmitido apenas por cor (sempre cor + ícone + rótulo textual).
+4. **Acessibilidade inegociável (WCAG 2.1 AA)**: contraste mínimo de `4.5:1` para texto normal e `3:1` para elementos gráficos e texto grande; alvos de toque mínimos de `44×44px`; foco visível de alto contraste em todos os elementos interativos; nenhum estado transmitido apenas por cor (sempre cor + variante + rótulo textual).
 5. **Vocabulário estrito do domínio**: toda a interface utiliza exclusivamente os termos definidos em `GLOSSARY.md` (**jogada**, **playbook**, **unidade**, **posição**, **atribuição**, **formação**, **situação**, **game plan**, **time**, **elenco**, **jogador**, **staff**, **papel**, **subpapel**, **coordenador de special teams**, **pendente**, **status do elenco**, **lesionado**, **reformado**, **evento**, **presença**, **marcação**, **disponibilidade**, **justificativa**).
 
 ---
@@ -48,7 +48,7 @@ Paleta inspirada em quadro tático escuro de alto contraste (tema padrão escuro
 > **Paridade com o Figma Reference (`shadcncraft v3` — Estilo Base `Vega`)**: Em `docs/design/prototype/styles.css`, todos os tokens semânticos padrão do shadcn (`--background`, `--foreground`, `--card`, `--card-foreground`, `--popover`, `--primary`, `--secondary`, `--muted`, `--accent`, `--destructive`, `--success`, `--warning`, `--info`, `--border`, `--input`, `--ring`, `--radius`, `--sidebar-*`) são exportados dentro da região gerenciada `/* shadcncraft:tokens:start */ ... /* shadcncraft:tokens:end */`, permitindo sincronização direta com o frontend sem perder os tokens de domínio. Veja [`FIGMA-REFERENCE.md`](./FIGMA-REFERENCE.md).
 
 > **Regra de independência de cor**: nenhum status do elenco, unidade, presença ou marcação usa apenas cor. Todo emblema combina:
-> 1. Ícone vetorial distinto (`✓` disponível/vou, `✕` não vou/ausente, `+` lesionado, `!` indisponível/pendente, `—` reformado);
+> 1. Variante visual distinta (borda sólida, tracejada, dupla ou pontilhada) com rótulo textual;
 > 2. Rótulo textual explícito em português;
 > 3. Borda com estilo diferenciado (sólida para confirmado/disponível, tracejada para pendente/sem resposta, dupla/acentuada para lesionado/erro).
 
@@ -73,7 +73,7 @@ Paleta inspirada em quadro tático escuro de alto contraste (tema padrão escuro
 
 | Token | Valor | Uso principal |
 | :--- | :--- | :--- |
-| `--space-1` | `0.25rem` (`4px`) | Espaço entre ícone e texto em emblemas |
+| `--space-1` | `0.25rem` (`4px`) | Espaço interno de emblemas |
 | `--space-2` | `0.5rem` (`8px`) | Gap entre chips de filtro e tags de posição |
 | `--space-3` | `0.75rem` (`12px`) | Padding interno compacto de células e itens de lista |
 | `--space-4` | `1rem` (`16px`) | Padding padrão de cartão e margem lateral mobile |
@@ -208,8 +208,8 @@ Todos os componentes seguem a convenção `data-slot="<component>"` e `data-vari
 | :--- | :--- | :--- | :--- | :--- |
 | `<AppShell>` | `app-shell`, `sidebar`, `bottom-nav` | Todas as 6 telas | `role: 'jogador' \| 'staff'`, `approvalStatus: 'ativo' \| 'pendente'`. Esconde a aba **Elenco** quando `role === 'jogador'`. | Responsivo: bottom bar (`< 1024px`) com safe-area iOS e sidebar (`>= 1024px`). |
 | `<SectionHeading>` | `section-heading`, `tagline`, `section-heading-title`, `section-heading-body` | Todas as 6 telas | Adaptado de `@shadcncraft/section-heading` com suporte a ações laterais (`section-heading-actions`). | Hierarquia semântica `<h2>`/`<h3>` e contraste AA. |
-| `<UnitBadge>` | `badge` (`data-variant="offense \| defense \| st"`) | Home, Playbook, Jogo, Elenco, Perfil | `unit: 'ofensiva' \| 'defesa' \| 'special_teams'` | Cor semântica + ícone + texto em caixa alta (`OFENSIVA`, `DEFESA`, `SPECIAL TEAMS`). |
-| `<RosterStatusBadge>` | `badge` (`data-variant="available \| unavailable \| injured \| retired"`) | Jogo, Elenco, Perfil | `status: 'disponivel' \| 'indisponivel' \| 'lesionado' \| 'reformado'`, `returnDate?: string` | Ícone (`✓`, `!`, `+`, `—`) + texto + borda distinta (nunca apenas cor). |
+| `<UnitBadge>` | `badge` (`data-variant="offense \| defense \| st"`) | Home, Playbook, Jogo, Elenco, Perfil | `unit: 'ofensiva' \| 'defesa' \| 'special_teams'` | Cor semântica + texto em caixa alta (`OFENSIVA`, `DEFESA`, `SPECIAL TEAMS`). |
+| `<RosterStatusBadge>` | `badge` (`data-variant="available \| unavailable \| injured \| retired"`) | Jogo, Elenco, Perfil | `status: 'disponivel' \| 'indisponivel' \| 'lesionado' \| 'reformado'`, `returnDate?: string` | Texto + variante + borda distinta (nunca apenas cor). |
 | `<AvatarStack>` | `avatar-stack`, `avatar-stack-overflow` | Home, Evento, Jogo | Adaptado de `@shadcncraft/avatar-stack`: pilha compacta de iniciais dos confirmados com contador `+N`. | Anel `ring-2 ring-background` e rótulo acessível com total de confirmados. |
 | `<EventResponseCard>` | `card`, `card-header`, `card-title`, `card-content` | Home, Evento, Jogo | `type: 'treino' \| 'jogo'`, `deadline: string`, `isPastDeadline: boolean`, `currentResponse?: 'vou' \| 'nao_vou'` | `default`, `focus-visible`, `loading` (salvando), `disabled` (prazo vencido), `error` (recusa sem justificativa). |
 | `<JustificationSheet>` | `field`, `field-label`, `field-error` | Evento, Jogo | Lista de motivos rápidos + `<textarea>` complementar obrigatório quando "Outro" ou opcional para detalhar. | Validação de campo obrigatório (`aria-invalid="true"` + halo destrutivo), `loading` no envio, `error` de rede. |

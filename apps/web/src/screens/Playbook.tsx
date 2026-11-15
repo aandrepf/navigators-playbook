@@ -68,10 +68,10 @@ export function Playbook() {
           <article className="card card--highlight" data-slot="card" data-variant="highlight">
             <div className="card__header" data-slot="card-header">
               <div className="badge-row">
-                <span className="badge badge--new" data-slot="badge" data-variant="new">★ NOVO • v3</span>
+                <span className="badge badge--new" data-slot="badge" data-variant="new">NOVO • v3</span>
                 <UnitBadge unit="ofensiva" />
               </div>
-              <span className="mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)' }}>
+              <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)' }}>
                 3rd & 6–10
               </span>
             </div>
@@ -82,10 +82,10 @@ export function Playbook() {
           <article className="card" data-slot="card">
             <div className="card__header" data-slot="card-header">
               <div className="badge-row">
-                <span className="badge badge--new" data-slot="badge" data-variant="new">★ NOVO • v2</span>
+                <span className="badge badge--new" data-slot="badge" data-variant="new">NOVO • v2</span>
                 <UnitBadge unit="special_teams" />
               </div>
-              <span className="mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)' }}>
+              <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)' }}>
                 Kickoff
               </span>
             </div>
@@ -98,9 +98,9 @@ export function Playbook() {
           <div className="card__header" data-slot="card-header">
             <div>
               <div className="badge-row" style={{ marginBottom: 'var(--space-1)' }}>
-                <span className="badge badge--new" data-slot="badge" data-variant="new">★ NOVIDADE NÃO ESTUDADA</span>
+                <span className="badge badge--new" data-slot="badge" data-variant="new">NOVIDADE NÃO ESTUDADA</span>
                 <UnitBadge unit="ofensiva" />
-                <span className="badge badge--position mono" data-slot="badge" data-variant="position">Versão atual: v3</span>
+                <span className="badge badge--position" data-slot="badge" data-variant="position">Versão atual: v3</span>
               </div>
               <h3 className="section-title" data-slot="card-title">Flood Right Z-Post</h3>
               <p className="card__meta" data-slot="card-content">

@@ -23,11 +23,11 @@ export function TopBar() {
       <div className="badge-row">
         {user?.role === 'jogador' && (
           <span className="badge badge--available" data-slot="badge" data-variant="available" title="Seu status do elenco atual">
-            ✓ Disponível
+            Disponível
           </span>
         )}
         {user?.approvalState === 'pendente' && (
-          <span className="badge badge--unavailable" data-slot="badge" data-variant="unavailable">! Cadastro Pendente</span>
+          <span className="badge badge--unavailable" data-slot="badge" data-variant="unavailable">Cadastro Pendente</span>
         )}
       </div>
     </header>

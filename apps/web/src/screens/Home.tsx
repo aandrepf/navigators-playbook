@@ -30,7 +30,7 @@ export function Home() {
         <div className="card card--warning" data-slot="card" data-variant="warning">
           <div className="card__header" data-slot="card-header">
             <div>
-              <span className="badge badge--unavailable" data-slot="badge" data-variant="unavailable">! APROVAÇÃO DE STAFF PENDENTE</span>
+              <span className="badge badge--unavailable" data-slot="badge" data-variant="unavailable">APROVAÇÃO DE STAFF PENDENTE</span>
               <h2 className="card__title" data-slot="card-title" style={{ marginTop: 'var(--space-1)' }}>
                 Cadastros de staff aguardam sua aprovação
               </h2>
@@ -60,9 +60,9 @@ export function Home() {
             <div className="card__header" data-slot="card-header">
               <div className="badge-row">
                 <UnitBadge unit="ofensiva" />
-                <span className="badge badge--unavailable mono" data-slot="badge" data-variant="unavailable">⏳ Prazo: Sex 15/11 • 14:00</span>
+                <span className="badge badge--unavailable" data-slot="badge" data-variant="unavailable">Prazo: Sex 15/11 • 14:00</span>
               </div>
-              <span className="badge badge--unavailable" data-slot="badge" data-variant="unavailable">! Sem resposta</span>
+              <span className="badge badge--unavailable" data-slot="badge" data-variant="unavailable">Sem resposta</span>
             </div>
             <h3 className="card__title" data-slot="card-title">Treino Tático — Instalação Red Zone</h3>
             <p className="card__meta" data-slot="card-content">Sáb, 16/11/2026 • 14:00 às 17:00 • Campo Suplementar Sul</p>
@@ -93,11 +93,11 @@ export function Home() {
           <article className="card card--highlight" data-slot="card" data-variant="highlight">
             <div className="card__header" data-slot="card-header">
               <div className="badge-row">
-                <span className="badge badge--new" data-slot="badge" data-variant="new">★ NOVO • v3</span>
+                <span className="badge badge--new" data-slot="badge" data-variant="new">NOVO • v3</span>
                 <UnitBadge unit="ofensiva" />
                 <span className="badge badge--position" data-slot="badge" data-variant="position">Shotgun Trips Right</span>
               </div>
-              <span className="mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)' }}>
+              <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)' }}>
                 3rd & 6–10
               </span>
             </div>
@@ -116,7 +116,7 @@ function PendingStaffHome({ user }: { user: User }) {
   return (
     <section className="card card--warning" data-slot="card" data-variant="warning" aria-labelledby="pending-staff-heading">
       <div className="badge-row" style={{ marginBottom: 'var(--space-3)' }}>
-        <span className="badge badge--unavailable" data-slot="badge" data-variant="unavailable">! Aguardando aprovação do Head Coach</span>
+        <span className="badge badge--unavailable" data-slot="badge" data-variant="unavailable">Aguardando aprovação do Head Coach</span>
       </div>
       <h2 id="pending-staff-heading" className="section-title" data-slot="section-heading-title">
         Seu cadastro como Staff está pendente

@@ -39,7 +39,7 @@ export function Perfil() {
                 <span className="form-label">E-mail:</span>{' '}
                 <span>{user?.email}</span>
                 <span className="badge badge--available" data-slot="badge" data-variant="available" style={{ marginLeft: 'var(--space-2)' }}>
-                  ✓ Confirmado
+                  Confirmado
                 </span>
               </div>
               <div>
