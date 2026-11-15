@@ -284,15 +284,31 @@ describe('Design system data-slot', () => {
     }
   })
 
-  it('does not render generic icons in primary action buttons', async () => {
-    renderWithAuth(<App />, { route: '/' })
+  it('does not render icons inside any button', async () => {
+    server.use(
+      http.get('/auth/session', () => {
+        return HttpResponse.json({
+          user: {
+            id: 'usr-2',
+            email: 'coach@navigators.fa',
+            name: 'Carlos Eduardo',
+            role: 'staff',
+            approvalState: 'ativo',
+            subRoles: ['head_coach'],
+          },
+        })
+      }),
+    )
+
+    renderWithAuth(<App />, { route: '/elenco' })
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /próximos eventos/i })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: /elenco/i })).toBeInTheDocument()
     })
 
-    const iconGlyphs = /[\u2713\u2715\u002B\u271A\u2795\u26A0\u21BB\u1F514]/u
+    const iconGlyphs = /[\u2713\u2715\u002B\u271A\u2795\u26A0\u21BB\u2191\u2193\u2190\u2192\u1F514]/u
     const buttons = screen.getAllByRole('button')
+    expect(buttons.length).toBeGreaterThan(0)
     for (const button of buttons) {
       expect(button.textContent).not.toMatch(iconGlyphs)
     }
@@ -309,5 +325,23 @@ describe('Design system data-slot', () => {
     expect(highlighted).toBeInTheDocument()
     const bgImage = window.getComputedStyle(highlighted!).backgroundImage
     expect(bgImage === 'none' || bgImage === '').toBe(true)
+  })
+
+  it('does not use mono font-family anywhere in the rendered app', async () => {
+    renderWithAuth(<App />, { route: '/' })
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /próximos eventos/i })).toBeInTheDocument()
+    })
+
+    expect(document.querySelector('.mono')).not.toBeInTheDocument()
+
+    const allElements = document.querySelectorAll('*')
+    for (const element of Array.from(allElements)) {
+      const fontFamily = window.getComputedStyle(element).fontFamily
+      expect(fontFamily).not.toMatch(
+        /JetBrains Mono|SFMono-Regular|SFMono|Menlo|Monaco|Consolas/i,
+      )
+    }
   })
 })
