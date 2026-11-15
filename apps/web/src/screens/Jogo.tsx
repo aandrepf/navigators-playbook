@@ -30,25 +30,25 @@ export function Jogo() {
 
   return (
     <section aria-labelledby="jogo-title" className="stack-md">
-      <div className="section-header">
+      <div className="section-header" data-slot="section-heading">
         <div>
           <div className="badge-row" style={{ marginBottom: 'var(--space-1)' }}>
             <UnitBadge unit="special_teams" />
-            <span className="badge badge--available mono">Prazo: Sex 22/11 • 10:00</span>
+            <span className="badge badge--available mono" data-slot="badge" data-variant="available">Prazo: Sex 22/11 • 10:00</span>
           </div>
-          <h2 id="jogo-title" className="section-title">
+          <h2 id="jogo-title" className="section-title" data-slot="section-heading-title">
             Navigators FA vs. Tritões FA
           </h2>
-          <p className="section-subtitle">
+          <p className="section-subtitle" data-slot="section-heading-body">
             Dom, 24/11/2026 • Kickoff 10:00 (America/Sao_Paulo) • Estádio Municipal
           </p>
         </div>
       </div>
 
       <div className="grid-2col">
-        <div className="card">
-          <h3 className="card__title">Marcação de Disponibilidade</h3>
-          <p className="card__meta" style={{ marginTop: 'var(--space-1)' }}>
+        <div className="card" data-slot="card">
+          <h3 className="card__title" data-slot="card-title">Marcação de Disponibilidade</h3>
+          <p className="card__meta" data-slot="card-content" style={{ marginTop: 'var(--space-1)' }}>
             Informe sua disponibilidade para este jogo. A recusa exige justificativa visível apenas para o staff.
           </p>
           <div className="btn-row" style={{ marginTop: 'var(--space-3)' }}>
@@ -61,15 +61,15 @@ export function Jogo() {
           </div>
         </div>
 
-        <div className="card">
-          <div className="card__header">
+        <div className="card" data-slot="card">
+          <div className="card__header" data-slot="card-header">
             <div>
-              <h3 className="card__title">Game Plan</h3>
-              <p className="card__meta">Jogadas escolhidas para o confronto</p>
+              <h3 className="card__title" data-slot="card-title">Game Plan</h3>
+              <p className="card__meta" data-slot="card-content">Jogadas escolhidas para o confronto</p>
             </div>
           </div>
           <div className="stack-sm">
-            <div className="gameplan-item">
+            <div className="gameplan-item" data-slot="card" data-variant="highlight">
               <div className="gameplan-order-num">1</div>
               <div>
                 <strong>Flood Right Z-Post</strong>

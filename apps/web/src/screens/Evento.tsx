@@ -30,28 +30,28 @@ export function Evento() {
 
   return (
     <section aria-labelledby="evento-title" className="stack-md">
-      <div className="section-header">
+      <div className="section-header" data-slot="section-heading">
         <div>
           <div className="badge-row" style={{ marginBottom: 'var(--space-1)' }}>
             <UnitBadge unit="ofensiva" />
-            <span className="badge badge--available">ESTADO: ATIVO</span>
-            <span className="badge badge--unavailable mono">
+            <span className="badge badge--available" data-slot="badge" data-variant="available">ESTADO: ATIVO</span>
+            <span className="badge badge--unavailable mono" data-slot="badge" data-variant="unavailable">
               Prazo de resposta: 15/11 às 14:00 (24h antes)
             </span>
           </div>
-          <h2 id="evento-title" className="section-title">
+          <h2 id="evento-title" className="section-title" data-slot="section-heading-title">
             Treino Tático — Instalação Red Zone
           </h2>
-          <p className="section-subtitle">
+          <p className="section-subtitle" data-slot="section-heading-body">
             Sáb, 16/11/2026 • 14:00–17:00 (America/Sao_Paulo) • Campo Suplementar Sul
           </p>
         </div>
       </div>
 
       <div className="grid-2col">
-        <div className="card">
-          <h3 className="card__title">Minha Resposta de Presença</h3>
-          <p className="card__meta" style={{ marginTop: 'var(--space-1)' }}>
+        <div className="card" data-slot="card">
+          <h3 className="card__title" data-slot="card-title">Minha Resposta de Presença</h3>
+          <p className="card__meta" data-slot="card-content" style={{ marginTop: 'var(--space-1)' }}>
             Você pode mudar sua resposta livremente enquanto o prazo não vencer. A recusa exige justificativa visível apenas
             para o staff.
           </p>
@@ -65,11 +65,11 @@ export function Evento() {
           </div>
         </div>
 
-        <div className="card">
-          <div className="card__header">
+        <div className="card" data-slot="card">
+          <div className="card__header" data-slot="card-header">
             <div>
-              <h3 className="card__title">Participantes do Treino</h3>
-              <p className="card__meta">
+              <h3 className="card__title" data-slot="card-title">Participantes do Treino</h3>
+              <p className="card__meta" data-slot="card-content">
                 Por privacidade, justificativas pessoais nunca aparecem para jogadores.
               </p>
             </div>
@@ -80,18 +80,18 @@ export function Evento() {
               style={{ gridTemplateColumns: '1fr auto' }}
             >
               <div>
-                <strong>Gabriel Rocha</strong> <span className="badge badge--position">QB</span>
+                <strong>Gabriel Rocha</strong> <span className="badge badge--position" data-slot="badge" data-variant="position">QB</span>
               </div>
-              <span className="badge badge--available">✓ Confirmado</span>
+              <span className="badge badge--available" data-slot="badge" data-variant="available">✓ Confirmado</span>
             </div>
             <div
               className="assignment-item"
               style={{ gridTemplateColumns: '1fr auto' }}
             >
               <div>
-                <strong>Diego Almeida</strong> <span className="badge badge--position">LB</span>
+                <strong>Diego Almeida</strong> <span className="badge badge--position" data-slot="badge" data-variant="position">LB</span>
               </div>
-              <span className="badge badge--retired">✕ Ausente</span>
+              <span className="badge badge--retired" data-slot="badge" data-variant="retired">✕ Ausente</span>
             </div>
           </div>
         </div>

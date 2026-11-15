@@ -26,8 +26,16 @@ export function RosterStatusBadge({
   returnDate?: string
 }) {
   const config = STATUS_CONFIG[status]
+  const variant =
+    status === 'disponivel'
+      ? 'available'
+      : status === 'indisponivel'
+        ? 'unavailable'
+        : status === 'lesionado'
+          ? 'injured'
+          : 'retired'
   return (
-    <span className={`badge ${config.className}`}>
+    <span className={`badge ${config.className}`} data-slot="badge" data-variant={variant}>
       <span aria-hidden="true">{config.icon}</span>
       {config.label}
       {status === 'lesionado' && returnDate && (

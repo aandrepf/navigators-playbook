@@ -30,31 +30,34 @@ export function Playbook() {
 
   return (
     <section aria-labelledby="playbook-title" className="stack-md">
-      <div className="section-header">
+      <div className="section-header" data-slot="section-heading">
         <div>
-          <h2 id="playbook-title" className="section-title">
+          <h2 id="playbook-title" className="section-title" data-slot="section-heading-title">
             Playbook do Time
           </h2>
-          <p className="section-subtitle">
+          <p className="section-subtitle" data-slot="section-heading-body">
             Jogadas estruturadas por unidade, formação, situação e atribuição por posição.
           </p>
         </div>
         {state.status === 'authenticated' && state.user.role === 'staff' && (
-          <button type="button" className="btn btn--primary">
-            + Criar jogada
-          </button>
+          <div data-slot="section-heading-actions">
+            <button type="button" className="btn btn--primary">
+              + Criar jogada
+            </button>
+          </div>
         )}
       </div>
 
-      <div className="card">
-        <div className="form-group" style={{ marginBottom: 0 }}>
-          <label htmlFor="playbook-search" className="form-label">
+      <div className="card" data-slot="card">
+        <div className="form-group" data-slot="field" style={{ marginBottom: 0 }}>
+          <label htmlFor="playbook-search" className="form-label" data-slot="field-label">
             Buscar jogada por nome:
           </label>
           <input
             type="search"
             id="playbook-search"
             className="form-input"
+            data-slot="field-input"
             placeholder="Ex.: Flood Right, Inside Zone, Return..."
           />
         </div>
@@ -62,45 +65,45 @@ export function Playbook() {
 
       <div className="split-master-detail">
         <div className="stack-sm">
-          <article className="card card--highlight">
-            <div className="card__header">
+          <article className="card card--highlight" data-slot="card" data-variant="highlight">
+            <div className="card__header" data-slot="card-header">
               <div className="badge-row">
-                <span className="badge badge--new">★ NOVO • v3</span>
+                <span className="badge badge--new" data-slot="badge" data-variant="new">★ NOVO • v3</span>
                 <UnitBadge unit="ofensiva" />
               </div>
               <span className="mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)' }}>
                 3rd & 6–10
               </span>
             </div>
-            <h3 className="card__title">Flood Right Z-Post</h3>
-            <p className="card__meta">Formação: <strong>Shotgun Trips Right</strong></p>
+            <h3 className="card__title" data-slot="card-title">Flood Right Z-Post</h3>
+            <p className="card__meta" data-slot="card-content">Formação: <strong>Shotgun Trips Right</strong></p>
           </article>
 
-          <article className="card">
-            <div className="card__header">
+          <article className="card" data-slot="card">
+            <div className="card__header" data-slot="card-header">
               <div className="badge-row">
-                <span className="badge badge--new">★ NOVO • v2</span>
+                <span className="badge badge--new" data-slot="badge" data-variant="new">★ NOVO • v2</span>
                 <UnitBadge unit="special_teams" />
               </div>
               <span className="mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)' }}>
                 Kickoff
               </span>
             </div>
-            <h3 className="card__title">Return Left Wedge Wall</h3>
-            <p className="card__meta">Formação: <strong>Kickoff Return Left</strong> • Visível para todo o time</p>
+            <h3 className="card__title" data-slot="card-title">Return Left Wedge Wall</h3>
+            <p className="card__meta" data-slot="card-content">Formação: <strong>Kickoff Return Left</strong> • Visível para todo o time</p>
           </article>
         </div>
 
-        <div className="card">
-          <div className="card__header">
+        <div className="card" data-slot="card">
+          <div className="card__header" data-slot="card-header">
             <div>
               <div className="badge-row" style={{ marginBottom: 'var(--space-1)' }}>
-                <span className="badge badge--new">★ NOVIDADE NÃO ESTUDADA</span>
+                <span className="badge badge--new" data-slot="badge" data-variant="new">★ NOVIDADE NÃO ESTUDADA</span>
                 <UnitBadge unit="ofensiva" />
-                <span className="badge badge--position mono">Versão atual: v3</span>
+                <span className="badge badge--position mono" data-slot="badge" data-variant="position">Versão atual: v3</span>
               </div>
-              <h3 className="section-title">Flood Right Z-Post</h3>
-              <p className="card__meta">
+              <h3 className="section-title" data-slot="card-title">Flood Right Z-Post</h3>
+              <p className="card__meta" data-slot="card-content">
                 <strong>Formação:</strong> Shotgun Trips Right • <strong>Situação:</strong> 3rd & 6–10
               </p>
             </div>
@@ -115,7 +118,7 @@ export function Playbook() {
           <div className="assignment-list">
             <div className="assignment-item assignment-item--mine">
               <div>
-                <span className="badge badge--position">WR-Z</span>
+                <span className="badge badge--position" data-slot="badge" data-variant="position">WR-Z</span>
                 <div style={{ fontSize: 11, color: 'var(--color-brand-primary)', fontWeight: 700, marginTop: 2 }}>
                   SUA POSIÇÃO
                 </div>

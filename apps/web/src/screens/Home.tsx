@@ -27,11 +27,11 @@ export function Home() {
       <PwaInstallBanner />
 
       {user?.subRoles.includes('head_coach') && (
-        <div className="card card--warning">
-          <div className="card__header">
+        <div className="card card--warning" data-slot="card" data-variant="warning">
+          <div className="card__header" data-slot="card-header">
             <div>
-              <span className="badge badge--unavailable">! APROVAÇÃO DE STAFF PENDENTE</span>
-              <h2 className="card__title" style={{ marginTop: 'var(--space-1)' }}>
+              <span className="badge badge--unavailable" data-slot="badge" data-variant="unavailable">! APROVAÇÃO DE STAFF PENDENTE</span>
+              <h2 className="card__title" data-slot="card-title" style={{ marginTop: 'var(--space-1)' }}>
                 Cadastros de staff aguardam sua aprovação
               </h2>
             </div>
@@ -39,7 +39,7 @@ export function Home() {
               Revisar no Elenco →
             </a>
           </div>
-          <p className="card__meta" style={{ margin: 0 }}>
+          <p className="card__meta" data-slot="card-content" style={{ margin: 0 }}>
             Acesse a tela Elenco para aprovar ou recusar novos membros do staff.
           </p>
         </div>
@@ -47,25 +47,25 @@ export function Home() {
 
       <div className="grid-2col">
         <div className="stack-md">
-          <div className="section-header" style={{ marginBottom: 0 }}>
+          <div className="section-header" data-slot="section-heading" style={{ marginBottom: 0 }}>
             <div>
-              <h2 id="home-title" className="section-title">
+              <h2 id="home-title" className="section-title" data-slot="section-heading-title">
                 Próximos Eventos
               </h2>
-              <p className="section-subtitle">Responda antes do prazo para atualizar presença e marcação</p>
+              <p className="section-subtitle" data-slot="section-heading-body">Responda antes do prazo para atualizar presença e marcação</p>
             </div>
           </div>
 
-          <article className="card">
-            <div className="card__header">
+          <article className="card" data-slot="card">
+            <div className="card__header" data-slot="card-header">
               <div className="badge-row">
                 <UnitBadge unit="ofensiva" />
-                <span className="badge badge--unavailable mono">⏳ Prazo: Sex 15/11 • 14:00</span>
+                <span className="badge badge--unavailable mono" data-slot="badge" data-variant="unavailable">⏳ Prazo: Sex 15/11 • 14:00</span>
               </div>
-              <span className="badge badge--unavailable">! Sem resposta</span>
+              <span className="badge badge--unavailable" data-slot="badge" data-variant="unavailable">! Sem resposta</span>
             </div>
-            <h3 className="card__title">Treino Tático — Instalação Red Zone</h3>
-            <p className="card__meta">Sáb, 16/11/2026 • 14:00 às 17:00 • Campo Suplementar Sul</p>
+            <h3 className="card__title" data-slot="card-title">Treino Tático — Instalação Red Zone</h3>
+            <p className="card__meta" data-slot="card-content">Sáb, 16/11/2026 • 14:00 às 17:00 • Campo Suplementar Sul</p>
             <div className="btn-row" style={{ marginTop: 'var(--space-3)' }}>
               <button type="button" className="btn btn--success">
                 ✓ Vou ao treino
@@ -78,29 +78,31 @@ export function Home() {
         </div>
 
         <div className="stack-md">
-          <div className="section-header" style={{ marginBottom: 0 }}>
+          <div className="section-header" data-slot="section-heading" style={{ marginBottom: 0 }}>
             <div>
-              <h2 className="section-title">Novidades do Playbook</h2>
-              <p className="section-subtitle">Jogadas visíveis atualizadas desde seu último estudo</p>
+              <h2 className="section-title" data-slot="section-heading-title">Novidades do Playbook</h2>
+              <p className="section-subtitle" data-slot="section-heading-body">Jogadas visíveis atualizadas desde seu último estudo</p>
             </div>
-            <a href="/playbook" className="btn btn--secondary">
-              Abrir Playbook
-            </a>
+            <div data-slot="section-heading-actions">
+              <a href="/playbook" className="btn btn--secondary">
+                Abrir Playbook
+              </a>
+            </div>
           </div>
 
-          <article className="card card--highlight">
-            <div className="card__header">
+          <article className="card card--highlight" data-slot="card" data-variant="highlight">
+            <div className="card__header" data-slot="card-header">
               <div className="badge-row">
-                <span className="badge badge--new">★ NOVO • v3</span>
+                <span className="badge badge--new" data-slot="badge" data-variant="new">★ NOVO • v3</span>
                 <UnitBadge unit="ofensiva" />
-                <span className="badge badge--position">Shotgun Trips Right</span>
+                <span className="badge badge--position" data-slot="badge" data-variant="position">Shotgun Trips Right</span>
               </div>
               <span className="mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)' }}>
                 3rd & 6–10
               </span>
             </div>
-            <h3 className="card__title">Flood Right Z-Post</h3>
-            <p className="card__meta">
+            <h3 className="card__title" data-slot="card-title">Flood Right Z-Post</h3>
+            <p className="card__meta" data-slot="card-content">
               Sua atribuição (<strong>WR-Z</strong>): Rota Post profunda (18–20 jardas) atacando o terço médio contra Cover 3.
             </p>
           </article>
@@ -112,11 +114,11 @@ export function Home() {
 
 function PendingStaffHome({ user }: { user: User }) {
   return (
-    <section className="card card--warning" aria-labelledby="pending-staff-heading">
+    <section className="card card--warning" data-slot="card" data-variant="warning" aria-labelledby="pending-staff-heading">
       <div className="badge-row" style={{ marginBottom: 'var(--space-3)' }}>
-        <span className="badge badge--unavailable">! Aguardando aprovação do Head Coach</span>
+        <span className="badge badge--unavailable" data-slot="badge" data-variant="unavailable">! Aguardando aprovação do Head Coach</span>
       </div>
-      <h2 id="pending-staff-heading" className="section-title">
+      <h2 id="pending-staff-heading" className="section-title" data-slot="section-heading-title">
         Seu cadastro como Staff está pendente
       </h2>
       <p className="section-subtitle" style={{ marginTop: 'var(--space-2)', fontSize: 'var(--text-base)' }}>

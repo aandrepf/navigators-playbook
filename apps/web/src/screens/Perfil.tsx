@@ -22,14 +22,14 @@ export function Perfil() {
 
   return (
     <section aria-labelledby="perfil-title" className="stack-md">
-      <h2 id="perfil-title" className="section-title">
+      <h2 id="perfil-title" className="section-title" data-slot="section-heading-title">
         Perfil
       </h2>
 
       <div className="grid-2col">
         <div className="stack-md">
-          <div className="card">
-            <h3 className="card__title">Identidade e Papel</h3>
+          <div className="card" data-slot="card">
+            <h3 className="card__title" data-slot="card-title">Identidade e Papel</h3>
             <div className="stack-sm" style={{ marginTop: 'var(--space-3)' }}>
               <div>
                 <span className="form-label">Nome:</span>{' '}
@@ -38,7 +38,7 @@ export function Perfil() {
               <div>
                 <span className="form-label">E-mail:</span>{' '}
                 <span>{user?.email}</span>
-                <span className="badge badge--available" style={{ marginLeft: 'var(--space-2)' }}>
+                <span className="badge badge--available" data-slot="badge" data-variant="available" style={{ marginLeft: 'var(--space-2)' }}>
                   ✓ Confirmado
                 </span>
               </div>
@@ -56,8 +56,8 @@ export function Perfil() {
           </div>
 
           {user?.role === 'jogador' && (
-            <div className="card">
-              <h3 className="card__title">Meu Status do Elenco</h3>
+            <div className="card" data-slot="card">
+              <h3 className="card__title" data-slot="card-title">Meu Status do Elenco</h3>
               <div style={{ marginTop: 'var(--space-3)' }}>
                 <RosterStatusBadge status="disponivel" />
               </div>
@@ -70,9 +70,9 @@ export function Perfil() {
         </div>
 
         <div className="stack-md">
-          <div className="card">
-            <h3 className="card__title">Sessão e Privacidade</h3>
-            <p className="card__meta" style={{ marginTop: 'var(--space-2)' }}>
+          <div className="card" data-slot="card">
+            <h3 className="card__title" data-slot="card-title">Sessão e Privacidade</h3>
+            <p className="card__meta" data-slot="card-content" style={{ marginTop: 'var(--space-2)' }}>
               Você permanece conectado entre visitas neste aparelho.
             </p>
             <div className="btn-row" style={{ marginTop: 'var(--space-3)' }}>
@@ -82,9 +82,9 @@ export function Perfil() {
             </div>
           </div>
 
-          <div className="card card--danger">
-            <h3 className="card__title">Zona de Perigo</h3>
-            <p className="card__meta" style={{ marginTop: 'var(--space-2)' }}>
+          <div className="card card--danger" data-slot="card" data-variant="danger">
+            <h3 className="card__title" data-slot="card-title">Zona de Perigo</h3>
+            <p className="card__meta" data-slot="card-content" style={{ marginTop: 'var(--space-2)' }}>
               A exclusão da conta é irreversível.
             </p>
             <div className="btn-row" style={{ marginTop: 'var(--space-3)' }}>

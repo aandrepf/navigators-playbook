@@ -149,14 +149,14 @@ export function AuthScreen() {
   if (step === 'welcome') {
     return (
       <div className="auth-layout">
-        <div className="auth-card">
-          <div className="auth-card__header">
-            <h1 className="auth-card__title">Playbook do Time</h1>
-            <p className="auth-card__subtitle">Acesse o playbook, eventos e status do elenco do seu time.</p>
+        <div className="auth-card" data-slot="card">
+          <div className="auth-card__header" data-slot="card-header">
+            <h1 className="auth-card__title" data-slot="card-title">Playbook do Time</h1>
+            <p className="auth-card__subtitle" data-slot="card-content">Acesse o playbook, eventos e status do elenco do seu time.</p>
           </div>
 
           {error && (
-            <div className="field-error-msg" role="alert" style={{ marginBottom: 'var(--space-3)' }}>
+            <div className="field-error-msg" data-slot="field-error" role="alert" style={{ marginBottom: 'var(--space-3)' }}>
               ⚠ {error}
             </div>
           )}
@@ -186,20 +186,21 @@ export function AuthScreen() {
   if (step === 'email') {
     return (
       <div className="auth-layout">
-        <form className="auth-card" onSubmit={handleRequestCode}>
-          <div className="auth-card__header">
-            <h1 className="auth-card__title">Criar conta ou entrar</h1>
-            <p className="auth-card__subtitle">Informe o código do time, seu nome e e-mail para receber um código de uso único.</p>
+        <form className="auth-card" data-slot="card" onSubmit={handleRequestCode}>
+          <div className="auth-card__header" data-slot="card-header">
+            <h1 className="auth-card__title" data-slot="card-title">Criar conta ou entrar</h1>
+            <p className="auth-card__subtitle" data-slot="card-content">Informe o código do time, seu nome e e-mail para receber um código de uso único.</p>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="team-code" className="form-label">
+          <div className="form-group" data-slot="field">
+            <label htmlFor="team-code" className="form-label" data-slot="field-label">
               Código do time:
             </label>
             <input
               id="team-code"
               type="text"
               className="form-input mono"
+              data-slot="field-input"
               value={teamCode}
               onChange={(e) => setTeamCode(e.target.value.toUpperCase())}
               autoCapitalize="characters"
@@ -209,28 +210,30 @@ export function AuthScreen() {
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="name" className="form-label">
+          <div className="form-group" data-slot="field">
+            <label htmlFor="name" className="form-label" data-slot="field-label">
               Nome completo:
             </label>
             <input
               id="name"
               type="text"
               className="form-input"
+              data-slot="field-input"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="email" className="form-label">
+          <div className="form-group" data-slot="field">
+            <label htmlFor="email" className="form-label" data-slot="field-label">
               E-mail:
             </label>
             <input
               id="email"
               type="email"
               className="form-input"
+              data-slot="field-input"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -239,7 +242,7 @@ export function AuthScreen() {
           </div>
 
           {error && (
-            <div className="field-error-msg" role="alert" style={{ marginBottom: 'var(--space-3)' }}>
+            <div className="field-error-msg" data-slot="field-error" role="alert" style={{ marginBottom: 'var(--space-3)' }}>
               ⚠ {error}
             </div>
           )}
@@ -266,18 +269,19 @@ export function AuthScreen() {
       <div className="auth-layout">
         <form
           className="auth-card"
+          data-slot="card"
           onSubmit={(e) => {
             e.preventDefault()
             setStep('role')
           }}
         >
-          <div className="auth-card__header">
-            <h1 className="auth-card__title">Verifique seu e-mail</h1>
-            <p className="auth-card__subtitle">Digite o código de 6 dígitos enviado para {email}.</p>
+          <div className="auth-card__header" data-slot="card-header">
+            <h1 className="auth-card__title" data-slot="card-title">Verifique seu e-mail</h1>
+            <p className="auth-card__subtitle" data-slot="card-content">Digite o código de 6 dígitos enviado para {email}.</p>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="code" className="form-label">
+          <div className="form-group" data-slot="field">
+            <label htmlFor="code" className="form-label" data-slot="field-label">
               Código de verificação:
             </label>
             <input
@@ -286,6 +290,7 @@ export function AuthScreen() {
               inputMode="numeric"
               autoComplete="one-time-code"
               className="form-input mono"
+              data-slot="field-input"
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
               required
@@ -294,7 +299,7 @@ export function AuthScreen() {
               aria-invalid={Boolean(error)}
             />
             {error && (
-              <div className="field-error-msg" role="alert">
+              <div className="field-error-msg" data-slot="field-error" role="alert">
                 ⚠ {error}
               </div>
             )}
@@ -320,10 +325,10 @@ export function AuthScreen() {
   if (step === 'role') {
     return (
       <div className="auth-layout">
-        <div className="auth-card">
-          <div className="auth-card__header">
-            <h1 className="auth-card__title">Como você participa do time?</h1>
-            <p className="auth-card__subtitle">Escolha seu papel para personalizar o acesso.</p>
+        <div className="auth-card" data-slot="card">
+          <div className="auth-card__header" data-slot="card-header">
+            <h1 className="auth-card__title" data-slot="card-title">Como você participa do time?</h1>
+            <p className="auth-card__subtitle" data-slot="card-content">Escolha seu papel para personalizar o acesso.</p>
           </div>
 
           <button
@@ -366,24 +371,25 @@ export function AuthScreen() {
       <div className="auth-layout">
         <form
           className="auth-card"
+          data-slot="card"
           onSubmit={(e) => {
             e.preventDefault()
             handleConfirmRole()
           }}
         >
-          <div className="auth-card__header">
-            <h1 className="auth-card__title">Unidades e Posições</h1>
-            <p className="auth-card__subtitle">Escolha onde joga. Special teams é incluída automaticamente.</p>
+          <div className="auth-card__header" data-slot="card-header">
+            <h1 className="auth-card__title" data-slot="card-title">Unidades e Posições</h1>
+            <p className="auth-card__subtitle" data-slot="card-content">Escolha onde joga. Special teams é incluída automaticamente.</p>
           </div>
 
           {error && (
-            <div className="field-error-msg" role="alert" style={{ marginBottom: 'var(--space-3)' }}>
+            <div className="field-error-msg" data-slot="field-error" role="alert" style={{ marginBottom: 'var(--space-3)' }}>
               ⚠ {error}
             </div>
           )}
 
-          <div className="form-group">
-            <span className="form-label">Unidades:</span>
+          <div className="form-group" data-slot="field">
+            <span className="form-label" data-slot="field-label">Unidades:</span>
             <div className="chip-bar" role="group" aria-label="Unidades de atuação">
               {availableUnits.map((unit) => (
                 <button
@@ -402,8 +408,8 @@ export function AuthScreen() {
           </div>
 
           {availablePositions.length > 0 && (
-            <div className="form-group">
-              <span className="form-label">Posições:</span>
+            <div className="form-group" data-slot="field">
+              <span className="form-label" data-slot="field-label">Posições:</span>
               <div className="chip-bar" role="group" aria-label="Posições">
                 {availablePositions.map((position) => (
                   <button
@@ -442,24 +448,25 @@ export function AuthScreen() {
       <div className="auth-layout">
         <form
           className="auth-card"
+          data-slot="card"
           onSubmit={(e) => {
             e.preventDefault()
             handleConfirmRole()
           }}
         >
-          <div className="auth-card__header">
-            <h1 className="auth-card__title">Subpapel do Staff</h1>
-            <p className="auth-card__subtitle">Escolha sua função no staff.</p>
+          <div className="auth-card__header" data-slot="card-header">
+            <h1 className="auth-card__title" data-slot="card-title">Subpapel do Staff</h1>
+            <p className="auth-card__subtitle" data-slot="card-content">Escolha sua função no staff.</p>
           </div>
 
           {error && (
-            <div className="field-error-msg" role="alert" style={{ marginBottom: 'var(--space-3)' }}>
+            <div className="field-error-msg" data-slot="field-error" role="alert" style={{ marginBottom: 'var(--space-3)' }}>
               ⚠ {error}
             </div>
           )}
 
-          <div className="form-group">
-            <span className="form-label">Subpapel principal:</span>
+          <div className="form-group" data-slot="field">
+            <span className="form-label" data-slot="field-label">Subpapel principal:</span>
             {STAFF_ROLES.map((option) => (
               <label key={option.value} className="role-option" style={{ display: 'block' }}>
                 <input
@@ -476,7 +483,7 @@ export function AuthScreen() {
             ))}
           </div>
 
-          <div className="form-group">
+          <div className="form-group" data-slot="field">
             <label className="role-option" style={{ display: 'flex', alignItems: 'center' }}>
               <input
                 type="checkbox"
@@ -492,6 +499,8 @@ export function AuthScreen() {
 
           <div
             className="card card--warning"
+            data-slot="card"
+            data-variant="warning"
             style={{ marginBottom: 'var(--space-4)', fontSize: 'var(--text-sm)' }}
           >
             Para proteger os dados de saúde, justificativas e sigilo do playbook, cadastros de staff ficam pendentes até
@@ -508,9 +517,9 @@ export function AuthScreen() {
 
   return (
     <div className="auth-layout">
-      <div className="auth-card" style={{ textAlign: 'center' }}>
-        <h1 className="auth-card__title">Cadastro pendente</h1>
-        <p className="auth-card__subtitle">
+      <div className="auth-card" data-slot="card" style={{ textAlign: 'center' }}>
+        <h1 className="auth-card__title" data-slot="card-title">Cadastro pendente</h1>
+        <p className="auth-card__subtitle" data-slot="card-content">
           Seu cadastro como staff está aguardando aprovação de um Head Coach. Você receberá uma notificação quando for
           liberado.
         </p>
