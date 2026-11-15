@@ -4,18 +4,11 @@ export type RosterStatus =
   | 'lesionado'
   | 'reformado'
 
-const STATUS_CONFIG: Record<
-  RosterStatus,
-  { label: string; className: string; icon: string }
-> = {
-  disponivel: { label: 'Disponível', className: 'badge--available', icon: '✓' },
-  indisponivel: {
-    label: 'Indisponível',
-    className: 'badge--unavailable',
-    icon: '!',
-  },
-  lesionado: { label: 'Lesionado', className: 'badge--injured', icon: '+' },
-  reformado: { label: 'Reformado', className: 'badge--retired', icon: '—' },
+const STATUS_CONFIG: Record<RosterStatus, { label: string; className: string }> = {
+  disponivel: { label: 'Disponível', className: 'badge--available' },
+  indisponivel: { label: 'Indisponível', className: 'badge--unavailable' },
+  lesionado: { label: 'Lesionado', className: 'badge--injured' },
+  reformado: { label: 'Reformado', className: 'badge--retired' },
 }
 
 export function RosterStatusBadge({
@@ -36,12 +29,9 @@ export function RosterStatusBadge({
           : 'retired'
   return (
     <span className={`badge ${config.className}`} data-slot="badge" data-variant={variant}>
-      <span aria-hidden="true">{config.icon}</span>
       {config.label}
       {status === 'lesionado' && returnDate && (
-        <span className="mono" style={{ marginLeft: 'var(--space-1)' }}>
-          (retorno {returnDate})
-        </span>
+        <span style={{ marginLeft: 'var(--space-1)' }}>(retorno {returnDate})</span>
       )}
     </span>
   )

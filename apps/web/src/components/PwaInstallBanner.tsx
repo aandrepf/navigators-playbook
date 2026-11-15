@@ -36,7 +36,7 @@ export function PwaInstallBanner() {
     <div className="card card--highlight" data-slot="banner" data-variant="highlight" role="region" aria-label="Instalação do aplicativo na tela inicial">
       <div className="card__header" data-slot="card-header">
         <div>
-          <span className="badge badge--new" data-slot="badge" data-variant="new">📲 PWA + WEB PUSH</span>
+          <span className="badge badge--new" data-slot="badge" data-variant="new">PWA + WEB PUSH</span>
           <h2 className="card__title" data-slot="card-title" style={{ marginTop: 'var(--space-2)' }}>
             Instale o Playbook na tela inicial para receber avisos push
           </h2>

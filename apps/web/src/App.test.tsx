@@ -253,4 +253,34 @@ describe('Design system data-slot', () => {
       expect(badge).toHaveAttribute('data-variant')
     }
   })
+
+  it('does not render icons inside badges', async () => {
+    server.use(
+      http.get('/auth/session', () => {
+        return HttpResponse.json({
+          user: {
+            id: 'usr-2',
+            email: 'coach@navigators.fa',
+            name: 'Carlos Eduardo',
+            role: 'staff',
+            approvalState: 'ativo',
+            subRoles: ['head_coach'],
+          },
+        })
+      }),
+    )
+
+    renderWithAuth(<App />, { route: '/elenco' })
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /elenco/i })).toBeInTheDocument()
+    })
+
+    const iconGlyphs = /[\u2713\u2715\u0021\u2605\u23F3\u{1F4F2}\u2694\u{1F6E1}\u{1F9B6}\u002B\u2014]/u
+    const allBadges = document.querySelectorAll('.badge')
+    expect(allBadges.length).toBeGreaterThan(0)
+    for (const badge of Array.from(allBadges)) {
+      expect(badge.textContent).not.toMatch(iconGlyphs)
+    }
+  })
 })

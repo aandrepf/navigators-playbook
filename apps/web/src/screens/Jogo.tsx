@@ -34,7 +34,7 @@ export function Jogo() {
         <div>
           <div className="badge-row" style={{ marginBottom: 'var(--space-1)' }}>
             <UnitBadge unit="special_teams" />
-            <span className="badge badge--available mono" data-slot="badge" data-variant="available">Prazo: Sex 22/11 • 10:00</span>
+            <span className="badge badge--available" data-slot="badge" data-variant="available">Prazo: Sex 22/11 • 10:00</span>
           </div>
           <h2 id="jogo-title" className="section-title" data-slot="section-heading-title">
             Navigators FA vs. Tritões FA

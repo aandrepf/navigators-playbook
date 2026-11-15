@@ -105,7 +105,7 @@
                   <svg data-slot="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                   <span>Evento (Treino)</span>
                 </span>
-                <span data-slot="badge" data-variant="warning" class="badge badge--unavailable tabular">!</span>
+                <span data-slot="badge" data-variant="warning" class="badge badge--unavailable tabular"></span>
               </button>
             </li>
             <li>
@@ -163,7 +163,7 @@
         <div data-slot="profile-card" class="card" style="padding: var(--sc-space-3); gap: 6px;">
           <div style="display: flex; align-items: center; justify-content: space-between;">
             <strong style="font-size: var(--text-xs);">Rafael Costa #14</strong>
-            <span data-slot="badge" data-variant="available" class="badge badge--available">✓ Disponível</span>
+            <span data-slot="badge" data-variant="available" class="badge badge--available">Disponível</span>
           </div>
           <div style="font-size: 11px; color: var(--muted-foreground);">
             Status do elenco • America/Sao_Paulo
@@ -181,8 +181,8 @@
             </div>
           </div>
           <div class="badge-row">
-            <span class="badge badge--available active-member-only" title="Seu status do elenco atual">✓ Status: Disponível</span>
-            <span class="badge badge--unavailable pending-staff-only">! Cadastro Pendente</span>
+            <span class="badge badge--available active-member-only" title="Seu status do elenco atual">Status: Disponível</span>
+            <span class="badge badge--unavailable pending-staff-only">Cadastro Pendente</span>
           </div>
         </header>
 
@@ -193,7 +193,7 @@
                ============================================================== -->
           <section class="card card--warning pending-staff-only" aria-labelledby="pending-staff-heading">
             <div class="badge-row" style="margin-bottom: var(--space-3);">
-              <span class="badge badge--unavailable">! Aguardando aprovação do Head Coach</span>
+              <span class="badge badge--unavailable">Aguardando aprovação do Head Coach</span>
             </div>
             <h2 id="pending-staff-heading" class="section-title">Seu cadastro como Staff está pendente</h2>
             <p class="section-subtitle" style="margin-top: var(--space-2); font-size: var(--text-base);">
@@ -290,7 +290,7 @@
                 <div class="card card--warning hc-only">
                   <div class="card__header">
                     <div>
-                      <span class="badge badge--unavailable">! APROVAÇÃO DE STAFF PENDENTE</span>
+                      <span class="badge badge--unavailable">APROVAÇÃO DE STAFF PENDENTE</span>
                       <h2 class="card__title" style="margin-top: var(--space-1);">
                         2 cadastros de staff aguardam sua aprovação
                       </h2>
@@ -322,9 +322,9 @@
                       <div class="card__header">
                         <div class="badge-row">
                           <span class="badge badge--offense">TREINO</span>
-                          <span class="badge badge--unavailable mono">⏳ Prazo: Sex 15/11 • 14:00</span>
+                          <span class="badge badge--unavailable">⏳ Prazo: Sex 15/11 • 14:00</span>
                         </div>
-                        <span id="home-treino-status" class="badge badge--unavailable">! Sem resposta</span>
+                        <span id="home-treino-status" class="badge badge--unavailable">Sem resposta</span>
                       </div>
                       <h3 data-slot="card-title" class="card__title">Treino Tático — Instalação Red Zone</h3>
                       <p class="card__meta">Sáb, 16/11/2026 • 14:00 às 17:00 • Campo Suplementar Sul</p>
@@ -363,9 +363,9 @@
                       <div class="card__header">
                         <div class="badge-row">
                           <span class="badge badge--st">JOGO OFICIAL</span>
-                          <span class="badge badge--available mono">Prazo: Sex 22/11 • 10:00</span>
+                          <span class="badge badge--available">Prazo: Sex 22/11 • 10:00</span>
                         </div>
-                        <span class="badge badge--available">✓ Marcação: Disponível</span>
+                        <span class="badge badge--available">Marcação: Disponível</span>
                       </div>
                       <h3 class="card__title">Navigators FA vs. Tritões FA</h3>
                       <p class="card__meta">Dom, 24/11/2026 • Kickoff 10:00 • Estádio Municipal</p>
@@ -392,7 +392,7 @@
                     <article class="card">
                       <div class="card__header">
                         <div class="badge-row">
-                          <span id="badge-new-play-1" class="badge badge--new">★ NOVO • v3</span>
+                          <span id="badge-new-play-1" class="badge badge--new">NOVO • v3</span>
                           <span class="badge badge--offense">OFENSIVA</span>
                           <span class="badge badge--position">Shotgun Trips Right</span>
                         </div>
@@ -412,7 +412,7 @@
                     <article class="card">
                       <div class="card__header">
                         <div class="badge-row">
-                          <span class="badge badge--new">★ NOVO • v2</span>
+                          <span class="badge badge--new">NOVO • v2</span>
                           <span class="badge badge--st">SPECIAL TEAMS</span>
                           <span class="badge badge--position">Kickoff Return Left</span>
                         </div>
@@ -443,7 +443,7 @@
                     <div class="badge-row" style="margin-bottom: var(--space-1);">
                       <span class="badge badge--offense">EVENTO: TREINO</span>
                       <span class="badge badge--available">ESTADO: ATIVO</span>
-                      <span class="badge badge--unavailable mono">Prazo de resposta: 15/11 às 14:00 (24h antes)</span>
+                      <span class="badge badge--unavailable">Prazo de resposta: 15/11 às 14:00 (24h antes)</span>
                     </div>
                     <h2 id="evento-title" class="section-title">Treino Tático — Instalação Red Zone</h2>
                     <p class="section-subtitle">Sáb, 16/11/2026 • 14:00–17:00 (America/Sao_Paulo) • Campo Suplementar Sul</p>
@@ -522,7 +522,7 @@
                     <div class="card">
                       <div class="card__header">
                         <h3 class="card__title">Meu Registro de Comparecimento</h3>
-                        <span class="badge badge--available">✓ Contado como Presente (Último treino)</span>
+                        <span class="badge badge--available">Contado como Presente (Último treino)</span>
                       </div>
                       <p class="card__meta" style="margin: 0 0 var(--space-3) 0;">
                         No treino anterior (12/11), sua presença real foi confirmada em campo pelo staff. Sua taxa acumulada: <strong class="tabular">92% (11/12 treinos)</strong>.
@@ -556,7 +556,7 @@
                         <div class="assignment-item" style="grid-template-columns: 1fr auto;">
                           <div>
                             <strong>Rafael Costa (WR / KR)</strong>
-                            <span class="badge badge--available" style="margin-left: 6px;">✓ Respondeu: Vou</span>
+                            <span class="badge badge--available" style="margin-left: 6px;">Respondeu: Vou</span>
                             <div class="card__meta tabular">Taxa de comparecimento: 92% (11/12 treinos)</div>
                           </div>
                           <div>
@@ -571,7 +571,7 @@
                         <div class="assignment-item" style="grid-template-columns: 1fr auto; border-color: var(--color-status-injured);">
                           <div>
                             <strong>Diego Almeida (LB)</strong>
-                            <span class="badge badge--injured" style="margin-left: 6px;">✕ Respondeu: Não vou</span>
+                            <span class="badge badge--injured" style="margin-left: 6px;">Respondeu: Não vou</span>
                             <div style="margin-top: 6px; padding: 8px; background: var(--color-bg-canvas); border-radius: var(--radius-sm); font-size: var(--text-sm);">
                               <strong>Justificativa (só staff vê):</strong> [Trabalho / Escala] — "Plantão obrigatório no hospital sábado das 12h às 20h."
                             </div>
@@ -589,7 +589,7 @@
                         <div class="assignment-item" style="grid-template-columns: 1fr auto; border-color: var(--color-status-unavailable);">
                           <div>
                             <strong>Bruno Tavares (OL)</strong>
-                            <span class="badge badge--unavailable" style="margin-left: 6px;">! Sem resposta</span>
+                            <span class="badge badge--unavailable" style="margin-left: 6px;">Sem resposta</span>
                             <div class="card__meta tabular">Taxa de comparecimento: 67% (8/12 treinos)</div>
                           </div>
                           <div>
@@ -614,20 +614,20 @@
                           <div>
                             <strong>Gabriel Rocha</strong> <span class="badge badge--position">QB</span>
                           </div>
-                          <span class="badge badge--available">✓ Confirmado</span>
+                          <span class="badge badge--available">Confirmado</span>
                         </div>
                         <div class="assignment-item" style="grid-template-columns: 1fr auto;">
                           <div>
                             <strong>Rafael Costa (Você)</strong> <span class="badge badge--position">WR / KR</span>
                           </div>
-                          <span class="badge badge--available">✓ Confirmado</span>
+                          <span class="badge badge--available">Confirmado</span>
                         </div>
                         <div class="assignment-item" style="grid-template-columns: 1fr auto;">
                           <div>
                             <strong>Diego Almeida</strong> <span class="badge badge--position">LB</span>
                           </div>
                           <!-- Apenas "Ausente", sem qualquer menção à justificativa -->
-                          <span class="badge badge--retired">✕ Ausente</span>
+                          <span class="badge badge--retired">Ausente</span>
                         </div>
                       </div>
                     </div>
@@ -703,7 +703,7 @@
                     <article class="card card--highlight" data-play-name="flood right z-post">
                       <div class="card__header">
                         <div class="badge-row">
-                          <span id="play-list-new-badge" class="badge badge--new">★ NOVO • v3</span>
+                          <span id="play-list-new-badge" class="badge badge--new">NOVO • v3</span>
                           <span class="badge badge--offense">OFENSIVA</span>
                         </div>
                         <span class="mono" style="font-size: var(--text-xs); color: var(--color-text-secondary);">3rd &amp; 6–10</span>
@@ -718,7 +718,7 @@
                     <article class="card" data-play-name="inside zone split">
                       <div class="card__header">
                         <div class="badge-row">
-                          <span class="badge badge--available">✓ Estudada • v2</span>
+                          <span class="badge badge--available">Estudada • v2</span>
                           <span class="badge badge--offense">OFENSIVA</span>
                         </div>
                         <span class="mono" style="font-size: var(--text-xs); color: var(--color-text-secondary);">1st &amp; 10</span>
@@ -730,7 +730,7 @@
                     <article class="card" data-play-name="return left wedge wall">
                       <div class="card__header">
                         <div class="badge-row">
-                          <span class="badge badge--new">★ NOVO • v2</span>
+                          <span class="badge badge--new">NOVO • v2</span>
                           <span class="badge badge--st">SPECIAL TEAMS</span>
                         </div>
                         <span class="mono" style="font-size: var(--text-xs); color: var(--color-text-secondary);">Kickoff</span>
@@ -744,7 +744,7 @@
                       <div class="card__header">
                         <div class="badge-row">
                           <span class="badge badge--defense">DEFESA (Liberada p/ estudo)</span>
-                          <span class="badge badge--position mono">v1</span>
+                          <span class="badge badge--position">v1</span>
                         </div>
                         <span class="mono" style="font-size: var(--text-xs); color: var(--color-text-secondary);">3rd &amp; Long</span>
                       </div>
@@ -760,9 +760,9 @@
                     <div class="card__header">
                       <div>
                         <div class="badge-row" style="margin-bottom: var(--space-1);">
-                          <span id="detail-new-badge" class="badge badge--new">★ NOVIDADE NÃO ESTUDADA</span>
+                          <span id="detail-new-badge" class="badge badge--new">NOVIDADE NÃO ESTUDADA</span>
                           <span class="badge badge--offense">UNIDADE DONA: OFENSIVA</span>
-                          <span class="badge badge--position mono">Versão atual: v3</span>
+                          <span class="badge badge--position">Versão atual: v3</span>
                         </div>
                         <h3 class="section-title">Flood Right Z-Post</h3>
                         <p class="card__meta">
@@ -883,7 +883,7 @@
                         </label>
                       </div>
 
-                      <div class="card__meta mono" style="margin-bottom: var(--space-3); padding: var(--space-2); background: var(--color-bg-canvas); border-radius: var(--radius-sm);">
+                      <div class="card__meta" style="margin-bottom: var(--space-3); padding: var(--space-2); background: var(--color-bg-canvas); border-radius: var(--radius-sm);">
                         <strong>Histórico de revisões (play_revision):</strong><br />
                         • v3 (Atual) — 14/11 10:15 — Ajustada profundidade do Z-Post para 18 jardas<br />
                         • v2 — 08/11 19:40 — Adicionada imagem anexada do quadro tático<br />
@@ -916,7 +916,7 @@
                   <div>
                     <div class="badge-row" style="margin-bottom: var(--space-1);">
                       <span class="badge badge--st">EVENTO: JOGO OFICIAL</span>
-                      <span class="badge badge--available mono">Prazo de marcação: Sex 22/11 às 10:00 (48h antes)</span>
+                      <span class="badge badge--available">Prazo de marcação: Sex 22/11 às 10:00 (48h antes)</span>
                     </div>
                     <h2 id="jogo-title" class="section-title">Navigators FA vs. Tritões FA</h2>
                     <p class="section-subtitle">Dom, 24/11/2026 • Kickoff 10:00 (America/Sao_Paulo) • Estádio Municipal</p>
@@ -929,7 +929,7 @@
                     <div class="card">
                       <div class="card__header">
                         <h3 class="card__title">Minha Marcação de Disponibilidade</h3>
-                        <span id="jogo-marcacao-badge" class="badge badge--available">✓ Disponível para o jogo</span>
+                        <span id="jogo-marcacao-badge" class="badge badge--available">Disponível para o jogo</span>
                       </div>
                       <p class="card__meta">
                         A <strong>marcação</strong> define sua disponibilidade para este confronto específico e não altera seu <strong>status do elenco</strong> cadastral (História 19). Recusar o jogo também exige justificativa.
@@ -981,7 +981,7 @@
                           <div>
                             <strong>Lucas Mendes (RB)</strong>
                             <div class="badge-row" style="margin-top: 4px;">
-                              <span class="badge badge--injured">+ Status do elenco: Lesionado (Retorno: 05/12)</span>
+                              <span class="badge badge--injured">Status do elenco: Lesionado (Retorno: 05/12)</span>
                               <span class="badge badge--retired">Marcação: Não vou</span>
                             </div>
                             <div class="card__meta" style="margin-top: 4px;">
@@ -995,7 +995,7 @@
                           <div>
                             <strong>Henrique Bastos (DL)</strong>
                             <div class="badge-row" style="margin-top: 4px;">
-                              <span class="badge badge--retired">— Status do elenco: Reformado</span>
+                              <span class="badge badge--retired">Status do elenco: Reformado</span>
                             </div>
                           </div>
                           <span class="badge badge--retired">Reformado</span>
@@ -1028,8 +1028,8 @@
                         <div>
                           <div class="badge-row">
                             <span class="badge badge--offense">OFENSIVA</span>
-                            <span class="badge badge--position mono">Shotgun Trips Right • 3rd &amp; 6–10</span>
-                            <span class="badge badge--available mono">Ref: Playbook v3</span>
+                            <span class="badge badge--position">Shotgun Trips Right • 3rd &amp; 6–10</span>
+                            <span class="badge badge--available">Ref: Playbook v3</span>
                           </div>
                           <h4 style="margin: 6px 0 2px 0; font-size: var(--text-lg);">Flood Right Z-Post</h4>
                           <div class="gameplan-note">
@@ -1056,8 +1056,8 @@
                         <div>
                           <div class="badge-row">
                             <span class="badge badge--offense">OFENSIVA</span>
-                            <span class="badge badge--position mono">I-Formation Twins • 1st &amp; 10</span>
-                            <span class="badge badge--available mono">Ref: Playbook v2</span>
+                            <span class="badge badge--position">I-Formation Twins • 1st &amp; 10</span>
+                            <span class="badge badge--available">Ref: Playbook v2</span>
                           </div>
                           <h4 style="margin: 6px 0 2px 0; font-size: var(--text-lg);">Inside Zone Split</h4>
                           <div class="gameplan-note">
@@ -1084,8 +1084,8 @@
                         <div>
                           <div class="badge-row">
                             <span class="badge badge--st">SPECIAL TEAMS</span>
-                            <span class="badge badge--position mono">Kickoff Return Left</span>
-                            <span class="badge badge--available mono">Ref: Playbook v2</span>
+                            <span class="badge badge--position">Kickoff Return Left</span>
+                            <span class="badge badge--available">Ref: Playbook v2</span>
                           </div>
                           <h4 style="margin: 6px 0 2px 0; font-size: var(--text-lg);">Return Left Wedge Wall</h4>
                           <div class="gameplan-note">
@@ -1146,10 +1146,10 @@
                           <span class="badge badge--defense" style="margin-top: 4px;">Subpapel solicitado: Coordenador Defensivo</span>
                         </div>
                         <div class="btn-row">
-                          <button type="button" class="btn btn--success" style="min-height: 44px; padding: 4px 12px;" onclick="document.getElementById('pending-staff-item-1').innerHTML='<span class=\'badge badge--available\'>✓ Carlos Eduardo Silva aprovado como Coordenador Defensivo!</span>'">
+                          <button type="button" class="btn btn--success" style="min-height: 44px; padding: 4px 12px;" onclick="document.getElementById('pending-staff-item-1').innerHTML='<span class=\'badge badge--available\'>Carlos Eduardo Silva aprovado como Coordenador Defensivo!</span>'">
                             ✓ Aprovar
                           </button>
-                          <button type="button" class="btn btn--danger" style="min-height: 44px; padding: 4px 12px;" onclick="document.getElementById('pending-staff-item-1').innerHTML='<span class=\'badge badge--injured\'>✕ Cadastro recusado pelo Head Coach</span>'">
+                          <button type="button" class="btn btn--danger" style="min-height: 44px; padding: 4px 12px;" onclick="document.getElementById('pending-staff-item-1').innerHTML='<span class=\'badge badge--injured\'>Cadastro recusado pelo Head Coach</span>'">
                             ✕ Recusar
                           </button>
                         </div>
@@ -1165,7 +1165,7 @@
                           <strong>André Figueiredo</strong>
                           <div class="badge-row" style="margin-top: 4px;">
                             <span class="badge badge--offense">Coordenador Ofensivo</span>
-                            <span id="st-role-badge" class="badge badge--st">✓ + Coordenador de Special Teams</span>
+                            <span id="st-role-badge" class="badge badge--st">Coordenador de Special Teams</span>
                           </div>
                         </div>
                         <div class="btn-row">
@@ -1235,7 +1235,7 @@
                             <span class="badge badge--position">KR</span>
                           </div>
                         </div>
-                        <span class="badge badge--available">✓ Disponível</span>
+                        <span class="badge badge--available">Disponível</span>
                       </div>
                       <p class="card__meta tabular" style="margin: 0;">
                         Taxa de comparecimento em treinos: <strong>92% (11/12)</strong> • Observação: Sem restrições.
@@ -1251,7 +1251,7 @@
                             <span class="badge badge--position">RB</span>
                           </div>
                         </div>
-                        <span id="lucas-status-badge" class="badge badge--injured">+ Lesionado</span>
+                        <span id="lucas-status-badge" class="badge badge--injured">Lesionado</span>
                       </div>
                       <p id="lucas-status-details" class="card__meta tabular" style="margin: 0;">
                         <strong>Data prevista de retorno:</strong> 05/12/2026 &bull; <strong>Observação:</strong> Estiramento grau 1 posterior da coxa direita; em fisioterapia. &bull; Comparecimento: <strong>90%</strong>
@@ -1267,7 +1267,7 @@
                             <span class="badge badge--position">CB</span>
                           </div>
                         </div>
-                        <span class="badge badge--unavailable">! Indisponível</span>
+                        <span class="badge badge--unavailable">Indisponível</span>
                       </div>
                       <p class="card__meta tabular" style="margin: 0;">
                         <strong>Observação:</strong> Suspenso por 1 partida (regulamento do campeonato). &bull; Comparecimento: <strong>85%</strong>
@@ -1283,7 +1283,7 @@
                             <span class="badge badge--position">DL</span>
                           </div>
                         </div>
-                        <span class="badge badge--retired">— Reformado</span>
+                        <span class="badge badge--retired">Reformado</span>
                       </div>
                       <p class="card__meta" style="margin: 0;">
                         Encerrou a prática em campo em 2026, permanece registrado no histórico do elenco.
@@ -1313,7 +1313,7 @@
                         <label for="edit-return-date" class="form-label">
                           Data prevista de retorno (opcional, aplicável quando Lesionado — História 17):
                         </label>
-                        <input type="date" id="edit-return-date" class="form-input mono" value="2026-12-05" />
+                        <input type="date" id="edit-return-date" class="form-input" value="2026-12-05" />
                       </div>
 
                       <div class="form-group">
@@ -1364,7 +1364,7 @@
                           Meu Status do Elenco (História 20)
                         </div>
                         <div class="badge-row" style="margin-top: var(--space-1);">
-                          <span class="badge badge--available">✓ Disponível (disponivel)</span>
+                          <span class="badge badge--available">Disponível (disponivel)</span>
                         </div>
                         <p class="form-hint" style="margin: var(--space-1) 0 0 0;">
                           Registrado pelo staff. Caso esteja lesionado ou indisponível, avise o staff pelo canal abaixo.
@@ -1418,19 +1418,19 @@
                       <div class="stack-sm" style="margin-top: var(--space-3);">
                         <div class="assignment-item" style="grid-template-columns: 1fr auto;">
                           <div><strong>Gabriel Rocha</strong> • Ofensiva • <span class="mono">QB</span></div>
-                          <span class="badge badge--available">✓ Disponível</span>
+                          <span class="badge badge--available">Disponível</span>
                         </div>
                         <div class="assignment-item" style="grid-template-columns: 1fr auto;">
                           <div><strong>Lucas Mendes</strong> • Ofensiva • <span class="mono">RB</span></div>
-                          <span class="badge badge--injured">+ Lesionado</span>
+                          <span class="badge badge--injured">Lesionado</span>
                         </div>
                         <div class="assignment-item" style="grid-template-columns: 1fr auto;">
                           <div><strong>Matheus Nogueira</strong> • Defesa • <span class="mono">CB</span></div>
-                          <span class="badge badge--unavailable">! Indisponível</span>
+                          <span class="badge badge--unavailable">Indisponível</span>
                         </div>
                         <div class="assignment-item" style="grid-template-columns: 1fr auto;">
                           <div><strong>Henrique Bastos</strong> • Defesa • <span class="mono">DL</span></div>
-                          <span class="badge badge--retired">— Reformado</span>
+                          <span class="badge badge--retired">Reformado</span>
                         </div>
                       </div>
                     </div>
@@ -1671,7 +1671,7 @@
       <div class="stack-md">
         <div class="form-group" style="margin-bottom: 0;">
           <label for="team-code-input" class="form-label">1. Código do time (História 1):</label>
-          <input type="text" id="team-code-input" class="form-input mono" value="NAVIGATORS-2026" autocapitalize="characters" />
+          <input type="text" id="team-code-input" class="form-input" value="NAVIGATORS-2026" autocapitalize="characters" />
         </div>
 
         <div class="form-group" style="margin-bottom: 0;">
