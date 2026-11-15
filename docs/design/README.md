@@ -18,34 +18,31 @@ Especificação visual, tokens, arquitetura de componentes, acessibilidade e han
 
 Os tokens abaixo são a fonte única de estilo em `docs/design/prototype/styles.css` e devem ser copiados diretamente pelo frontend em `apps/web`.
 
-### 2.1. Cores e Contraste (WCAG AA)
+### 2.1. Cores e Contraste (WCAG AA — Vega Light Padrão & Vega Dark Alternativo)
 
-Paleta inspirada em quadro tático escuro de alto contraste (tema padrão escuro de baixa fadiga visual em reuniões e alto contraste para leitura rápida) com superfícies bem delimitadas.
+Extraídos diretamente das 3 coleções de variáveis da sessão autenticada do Figma ([`FIGMA-COMPONENT-INVENTORY.md`](./FIGMA-COMPONENT-INVENTORY.md): `Tailwind` → `Style: Vega` → `Mode: Light & Dark`) e sincronizados com a biblioteca React P0 em [`apps/web/src/components/ui/`](../../apps/web/src/components/ui/README.md). O modo **Vega Light (`[data-theme="light"]`)** é o padrão de abertura (sem estética genérica de IA ou quadro tático neon), com **Vega Dark (`[data-theme="dark"]`)** como alternativo.
 
-| Token | Alias Semântico shadcn (`Mode`) | Valor Hex | Uso semântico | Contraste sobre fundo |
+| Token Semântico (`Mode`) | Alias de Domínio | Valor em `Vega Light` (Padrão) | Valor em `Vega Dark` (Alternativo) | Uso Semântico & Contraste WCAG AA |
 | :--- | :--- | :--- | :--- | :--- |
-| `--color-bg-canvas` | `--background` | `#0B111E` | Fundo principal da aplicação | — |
-| `--color-bg-surface` | `--card` | `#131C2E` | Cartões de evento, jogada e listas | — |
-| `--color-bg-elevated` | `--popover` / `--secondary` | `#1C2841` | Modais, gavetas, cabeçalhos fixos, hover | — |
-| `--color-bg-input` | `--bg-input-30` | `#0E1626` | Campos de busca, seleção e texto livre | — |
-| `--color-border-subtle` | `--border` | `#263554` | Divisores de lista e bordas de cartão | — |
-| `--color-border-strong` | `--input` | `#3E5480` | Bordas de campos de formulário (`3.1:1`) | `3.1:1` (AA UI) |
-| `--color-text-primary` | `--foreground` / `--card-foreground` | `#F8FAFC` | Títulos, nomes de jogadas, dados principais | `17.4:1` sobre canvas |
-| `--color-text-secondary` | `--secondary-foreground` | `#CBD5E1` | Subtítulos, formação, local, metadados | `11.8:1` sobre surface |
-| `--color-text-muted` | `--muted-foreground` | `#94A3B8` | Rótulos auxiliares, carimbos de versão | `5.8:1` sobre surface (AA) |
-| `--color-brand-primary` | `--accent` | `#38BDF8` | Ação primária, aba ativa, links e foco | `8.9:1` sobre canvas |
-| `--color-brand-primary-strong` | `--primary` | `#0284C7` | Fundo de botão primário com `--primary-foreground: #FFFFFF` | `4.6:1` com `#FFFFFF` (AA) |
-| `--color-accent-new` | `--warning` / `--ring` | `#FACC15` | Selo de **Novidade** em jogada não estudada | `11.6:1` com texto `#0B111E` |
-| `--color-unit-offense` | `--info` | `#60A5FA` | Emblema de unidade: **Ofensiva** | `7.2:1` sobre surface |
-| `--color-unit-defense` | — | `#F87171` | Emblema de unidade: **Defesa** | `6.1:1` sobre surface |
-| `--color-unit-st` | — | `#C084FC` | Emblema de unidade: **Special teams** | `6.5:1` sobre surface |
-| `--color-status-available` | `--success` | `#34D399` | Status `disponivel` / resposta **Vou** / presente | `9.2:1` sobre surface |
-| `--color-status-unavailable` | `--warning` | `#FBBF24` | Status `indisponivel` / pendente de resposta | `10.8:1` sobre surface |
-| `--color-status-injured` | `--destructive` | `#FB7185` | Status `lesionado` / resposta **Não vou** / erro | `6.3:1` sobre surface |
-| `--color-status-retired` | `--muted` | `#94A3B8` | Status `reformado` / jogada arquivada | `5.8:1` sobre surface |
-| `--color-focus-ring` | `--ring` | `#FACC15` | Anel de foco de teclado (`2px solid` + halo `3px`) | `12.1:1` sobre canvas |
+| `--background` / `--canvas` | `--color-bg-canvas` | `#FFFFFF` / `#FAFAFA` | `#0A0A0A` | Superfície de fundo principal da aplicação |
+| `--card` | `--color-bg-surface` | `#FFFFFF` | `#171717` (`neutral-900`) | Cartões de evento, jogada, elenco e painéis |
+| `--foreground` / `--card-foreground` | `--color-text-primary` | `#0A0A0A` (`neutral-950`) | `#FAFAFA` (`neutral-50`) | Títulos, nomes de jogadas e dados principais (`> 17:1` AAA) |
+| `--primary` / `--primary-foreground` | `--color-brand-primary` | `#171717` / `#FAFAFA` | `#E5E5E5` / `#171717` | Ação primária do estilo Vega (`Button variant="default"`) |
+| `--secondary` / `--secondary-foreground` | `--color-bg-elevated` | `#F5F5F5` / `#171717` | `#262626` / `#FAFAFA` | Controles secundários, chips e superfícies de apoio |
+| `--muted` / `--muted-foreground` | `--color-text-muted` | `#F5F5F5` / `#525252` | `#262626` / `#A3A3A3` | Metadados, legendas e carimbos (`7.5:1` Light / `6.9:1` Dark AA) |
+| `--border` | `--color-border-subtle` | `#E5E5E5` (`neutral-200`) | `#262626` (`neutral-800`) | Divisores de seção e bordas de cartão (`1px`) |
+| `--input` / `--bg-input-30` | `--color-border-strong` | `#D4D4D4` / `#FFFFFF` | `#404040` / `#1D1D1D` | Bordas e fundo de `<Input>`, `<Select>` e `<Textarea>` |
+| `--ring` / `--ring-focus` | `--color-focus-ring` | `#171717` / `rgba(23,23,23,0.16)` | `#D4D4D4` / `rgba(212,212,212,0.24)` | Anel de foco de `3px` (`effect: focus/button` e `focus/input`) |
+| `--success` / `--color-status-available` | Status `disponivel` / `Vou` | `#15803D` sobre `#ECFDF5` | `#05DF72` sobre `#002C22` | Resposta **Vou**, presença **Confirmado** e status `disponivel` |
+| `--warning` / `--color-status-unavailable` | Status `indisponivel` / Prazo | `#B45309` sobre `#FFFBEB` | `#FFD230` sobre `#461901` | Status `indisponivel`, pendência de resposta e fila de aprovação |
+| `--destructive` / `--color-status-injured` | Status `lesionado` / `Não vou` | `#DC2626` sobre `#FEF2F2` | `#FF6467` sobre `#3B0A0C` | Erro (`aria-invalid="true"`), recusa **Não vou** e status `lesionado` |
+| `--color-status-retired` | Status `reformado` | `#525252` sobre `#F5F5F5` | `#A3A3A3` sobre `#262626` | Status `reformado` e ausência consolidada |
+| `--info` / `--color-unit-offense` | Unidade `Ofensiva` | `#0369A1` sobre `#F0F9FF` | `#74D4FF` sobre `#052F4A` | Emblema da unidade **Ofensiva** e banner PWA |
+| `--color-unit-defense` | Unidade `Defesa` | `#B91C1C` sobre `#FEF2F2` | `#FF6467` sobre `#3B0A0C` | Emblema da unidade **Defesa** |
+| `--color-unit-st` | Unidade `Special teams` | `#6D28D9` sobre `#F5F3FF` | `#C4B5FD` sobre `#2E1065` | Emblema da unidade **Special teams** |
+| `--color-accent-new` | Selo `NOVO` (`!play_read`) | `#92400E` sobre `#FEF3C7` | `#FFD230` sobre `#461901` | Selo de **Novidade** em jogada não estudada |
 
-> **Paridade com o Figma Reference (`shadcncraft v3` — Estilo Base `Vega`)**: Em `docs/design/prototype/styles.css`, todos os tokens semânticos padrão do shadcn (`--background`, `--foreground`, `--card`, `--card-foreground`, `--popover`, `--primary`, `--secondary`, `--muted`, `--accent`, `--destructive`, `--success`, `--warning`, `--info`, `--border`, `--input`, `--ring`, `--radius`, `--sidebar-*`) são exportados dentro da região gerenciada `/* shadcncraft:tokens:start */ ... /* shadcncraft:tokens:end */`, permitindo sincronização direta com o frontend sem perder os tokens de domínio. Veja [`FIGMA-REFERENCE.md`](./FIGMA-REFERENCE.md).
+> **Paridade com o Figma Reference (`shadcncraft v3` — Estilo `Vega`) e Biblioteca React P0 (`apps/web/src/components/ui/`)**: Em `docs/design/prototype/styles.css`, todos os tokens das 3 coleções (`Tailwind` → `Style: Vega` → `Mode: Light & Dark`) são exportados dentro da região `/* shadcncraft:tokens:start */ ... /* shadcncraft:tokens:end */` e consumidos pelos seletores `[data-slot]` e classes `.ui-*`. Veja [`FIGMA-COMPONENT-INVENTORY.md`](./FIGMA-COMPONENT-INVENTORY.md) e [`FIGMA-REFERENCE.md`](./FIGMA-REFERENCE.md).
 
 > **Regra de independência de cor**: nenhum status do elenco, unidade, presença ou marcação usa apenas cor. Todo emblema combina:
 > 1. Variante visual distinta (borda sólida, tracejada, dupla ou pontilhada) com rótulo textual;
@@ -198,13 +195,15 @@ python3 -m http.server 4173 --directory docs/design/prototype
 ```
 
 No topo do protótipo há uma **Barra de Simulação de Handoff** que permite alternar instantaneamente:
+- **Modo de Cor (`Mode`)**: `☀ Vega Light` (padrão) e `☾ Vega Dark` (alternativo).
 - **Papel / Subpapel**: `Jogador (Ofensiva — WR/KR)`, `Staff — Head Coach`, `Staff — Coordenador Ofensivo`, `Staff — Pendente`.
-- **Estado da Tela**: `Padrão (Sucesso)`, `Carregando (Skeleton)`, `Vazio (Empty State)`, `Erro (Falha de Rede/Validação)`.
-- **Tela Ativa**: `Home`, `Evento`, `Playbook`, `Jogo`, `Elenco (Staff)`, `Perfil` (além dos modais de Cadastro/Login e Zoom da Imagem da Jogada).
+- **Estado da Tela**: `Padrão / Sucesso`, `Carregando (Skeleton / Spinner)`, `Vazio (Empty State)`, `Erro (Falha / Validação)`.
+- **Viewport**: `Responsivo (1440 Desktop / 390 Mobile)` e `Frame Mobile (390×844 Safe Area)`.
+- **Tela Ativa**: `Home`, `Evento`, `Playbook`, `Jogo`, `Elenco (Staff)`, `Perfil` e `Componentes Figma & P0` (além dos modais `<Dialog>` nativos de Cadastro/Login, Exclusão de Conta e Zoom da Imagem da Jogada).
 
-### 6.2. Componentes Reutilizáveis e Anatomia `data-slot` (Padrão shadcncraft / shadcn)
+### 6.2. Componentes Reutilizáveis e Anatomia `data-slot` (`apps/web/src/components/ui/` + Padrões de Domínio)
 
-Todos os componentes seguem a convenção `data-slot="<component>"` e `data-variant="<variant>"` do kit de referência (`FIGMA-REFERENCE.md`), sem exigir bibliotecas pesadas (podem ser implementados diretamente em React 19 + CSS de `docs/design/prototype/styles.css`):
+Todos os componentes seguem a convenção `data-slot="<component>"`, `data-variant="<variant>"`, `data-size` e `data-state` implementada na biblioteca React P0 ([`apps/web/src/components/ui/FIGMA-REACT-MATRIX.md`](../../apps/web/src/components/ui/FIGMA-REACT-MATRIX.md)) e no inventário do Figma ([`FIGMA-COMPONENT-INVENTORY.md`](./FIGMA-COMPONENT-INVENTORY.md)):
 
 | Componente | `data-slot` | Telas onde aparece | Props / Variantes principais | Estados obrigatórios |
 | :--- | :--- | :--- | :--- | :--- |
