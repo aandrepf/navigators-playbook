@@ -12,7 +12,7 @@ const UNIT_CONFIG: Record<
 export function UnitBadge({ unit }: { unit: Unit }) {
   const config = UNIT_CONFIG[unit]
   return (
-    <span className={`badge ${config.className}`}>
+    <span className={`badge ${config.className}`} data-slot="badge" data-variant={unit === 'special_teams' ? 'st' : unit === 'ofensiva' ? 'offense' : 'defense'}>
       <span aria-hidden="true">{config.icon}</span>
       {config.label}
     </span>

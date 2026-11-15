@@ -48,7 +48,7 @@ export function GoogleCallback() {
   if (error) {
     return (
       <div className="auth-layout">
-        <div className="auth-card">
+        <div className="auth-card" data-slot="card">
           <ErrorState message={error} onRetry={() => navigate('/login')} />
         </div>
       </div>
@@ -57,7 +57,7 @@ export function GoogleCallback() {
 
   return (
     <div className="auth-layout">
-      <div className="auth-card">
+      <div className="auth-card" data-slot="card">
         <LoadingState label="Confirmando login com Google" />
       </div>
     </div>

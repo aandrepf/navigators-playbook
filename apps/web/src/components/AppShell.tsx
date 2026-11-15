@@ -33,12 +33,12 @@ export function AppShell() {
   const navItems = isStaff ? STAFF_NAV : PLAYER_NAV
 
   return (
-    <div className="app-shell">
+    <div className="app-shell" data-slot="app-shell">
       <a href="#conteudo-principal" className="skip-link">
         Pular para o conteúdo principal
       </a>
 
-      <nav className="app-sidebar" aria-label="Navegação principal desktop">
+      <nav className="app-sidebar" data-slot="sidebar" aria-label="Navegação principal desktop">
         <div>
           <div className="sidebar-team-header">
             <div className="sidebar-team-name">
@@ -93,7 +93,7 @@ export function AppShell() {
         </main>
       </div>
 
-      <nav className="app-bottom-nav" aria-label="Navegação principal mobile">
+      <nav className="app-bottom-nav" data-slot="bottom-nav" aria-label="Navegação principal mobile">
         {navItems.map((item) => (
           <NavLink
             key={item.to}

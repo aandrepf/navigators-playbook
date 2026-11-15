@@ -185,3 +185,57 @@ describe('Google login regression', () => {
     expect(screen.getByRole('button', { name: /tentar novamente/i })).toBeInTheDocument()
   })
 })
+
+describe('Design system data-slot', () => {
+  it('renders app shell with data-slot and responsive navigation', async () => {
+    renderWithAuth(<App />, { route: '/' })
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /próximos eventos/i })).toBeInTheDocument()
+    })
+
+    expect(document.querySelector('[data-slot="app-shell"]')).toBeInTheDocument()
+    expect(document.querySelector('[data-slot="sidebar"]')).toBeInTheDocument()
+    expect(document.querySelector('[data-slot="bottom-nav"]')).toBeInTheDocument()
+  })
+
+  it('renders cards and badges with data-slot on Home', async () => {
+    renderWithAuth(<App />, { route: '/' })
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /próximos eventos/i })).toBeInTheDocument()
+    })
+
+    expect(document.querySelectorAll('[data-slot="card"]').length).toBeGreaterThan(0)
+    expect(document.querySelectorAll('[data-slot="badge"]').length).toBeGreaterThan(0)
+    expect(document.querySelector('[data-slot="section-heading"]')).toBeInTheDocument()
+  })
+
+  it('renders UnitBadge and RosterStatusBadge with data-variant', async () => {
+    server.use(
+      http.get('/auth/session', () => {
+        return HttpResponse.json({
+          user: {
+            id: 'usr-2',
+            email: 'coach@navigators.fa',
+            name: 'Carlos Eduardo',
+            role: 'staff',
+            approvalState: 'ativo',
+            subRoles: ['head_coach'],
+          },
+        })
+      }),
+    )
+
+    renderWithAuth(<App />, { route: '/elenco' })
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /elenco/i })).toBeInTheDocument()
+    })
+
+    const badges = document.querySelectorAll('[data-slot="badge"]')
+    expect(badges.length).toBeGreaterThan(0)
+    expect(Array.from(badges).some((b) => b.getAttribute('data-variant') === 'position')).toBe(true)
+    expect(Array.from(badges).some((b) => b.getAttribute('data-variant') === 'available')).toBe(true)
+  })
+})
