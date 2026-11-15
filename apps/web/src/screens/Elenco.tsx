@@ -3,6 +3,16 @@ import { LoadingState } from '../components/LoadingState'
 import { ErrorState } from '../components/ErrorState'
 import { EmptyState } from '../components/EmptyState'
 import { RosterStatusBadge } from '../components/RosterStatusBadge'
+import {
+  Badge,
+  Button,
+  Card,
+  CardDescription,
+  Field,
+  FieldLabel,
+  Input,
+  SectionHeading,
+} from '../components/ui'
 
 export function Elenco() {
   const { state } = useAuth()
@@ -35,41 +45,35 @@ export function Elenco() {
 
   return (
     <section aria-labelledby="elenco-title" className="stack-md">
-      <div className="section-header" data-slot="section-heading">
-        <div>
-          <h2 id="elenco-title" className="section-title" data-slot="section-heading-title">
-            Elenco
-          </h2>
-          <p className="section-subtitle" data-slot="section-heading-body">Lista completa do time com posições, unidades e status do elenco.</p>
-        </div>
-        <div data-slot="section-heading-actions">
-          <button type="button" className="btn btn--primary">
-            Registrar jogador
-          </button>
-        </div>
-      </div>
+      <SectionHeading
+        title="Elenco"
+        body="Lista completa do time com posições, unidades e status do elenco."
+        justification="space-between"
+      >
+        <Button variant="default">Registrar jogador</Button>
+      </SectionHeading>
 
-      <div className="card" data-slot="card">
-        <div className="form-group" data-slot="field" style={{ marginBottom: 0 }}>
-          <label htmlFor="elenco-search" className="form-label" data-slot="field-label">
-            Buscar jogador:
-          </label>
-          <input type="search" id="elenco-search" className="form-input" data-slot="field-input" placeholder="Nome ou posição..." />
-        </div>
-      </div>
+      <Card>
+        <Field style={{ marginBottom: 0 }}>
+          <FieldLabel htmlFor="elenco-search">Buscar jogador:</FieldLabel>
+          <Input type="search" id="elenco-search" placeholder="Nome ou posição..." />
+        </Field>
+      </Card>
 
       <div className="stack-sm">
         <div className="assignment-item" data-slot="card" style={{ gridTemplateColumns: '1fr auto' }}>
           <div>
-            <strong>Rafael Costa</strong> <span className="badge badge--position" data-slot="badge" data-variant="position">WR / KR</span>
-            <div className="card__meta" data-slot="card-content">Taxa de comparecimento: 92% (11/12 treinos)</div>
+            <strong>Rafael Costa</strong>{' '}
+            <Badge variant="position">WR / KR</Badge>
+            <CardDescription>Taxa de comparecimento: 92% (11/12 treinos)</CardDescription>
           </div>
           <RosterStatusBadge status="disponivel" />
         </div>
         <div className="assignment-item" data-slot="card" style={{ gridTemplateColumns: '1fr auto' }}>
           <div>
-            <strong>Diego Almeida</strong> <span className="badge badge--position" data-slot="badge" data-variant="position">LB</span>
-            <div className="card__meta" data-slot="card-content">Taxa de comparecimento: 83% (10/12 treinos)</div>
+            <strong>Diego Almeida</strong>{' '}
+            <Badge variant="position">LB</Badge>
+            <CardDescription>Taxa de comparecimento: 83% (10/12 treinos)</CardDescription>
           </div>
           <RosterStatusBadge status="lesionado" returnDate="30/11" />
         </div>

@@ -2,19 +2,20 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { TopBar } from './TopBar'
 import { RosterStatusBadge } from './RosterStatusBadge'
+import { Badge, Avatar } from './ui'
 
 const PLAYER_NAV = [
-  { to: '/', label: 'Home', icon: '🏠' },
-  { to: '/evento', label: 'Evento', icon: '📋' },
-  { to: '/playbook', label: 'Playbook', icon: '📖' },
-  { to: '/jogo', label: 'Jogo', icon: '🏟️' },
-  { to: '/perfil', label: 'Perfil', icon: '⚙️' },
+  { to: '/', label: 'Home' },
+  { to: '/evento', label: 'Evento' },
+  { to: '/playbook', label: 'Playbook' },
+  { to: '/jogo', label: 'Jogo' },
+  { to: '/perfil', label: 'Perfil' },
 ] as const
 
 const STAFF_NAV = [
   ...PLAYER_NAV.slice(0, 4),
-  { to: '/elenco', label: 'Elenco', icon: '👥' },
-  { to: '/perfil', label: 'Perfil', icon: '⚙️' },
+  { to: '/elenco', label: 'Elenco' },
+  { to: '/perfil', label: 'Perfil' },
 ] as const
 
 function isActive(to: string, pathname: string) {
@@ -66,10 +67,7 @@ export function AppShell() {
                   className="nav-item-btn"
                   aria-current={isActive(item.to, location.pathname) ? 'page' : undefined}
                 >
-                  <span className="nav-item-btn__label">
-                    <span aria-hidden="true">{item.icon}</span>
-                    {item.label}
-                  </span>
+                  <span className="nav-item-btn__label">{item.label}</span>
                 </NavLink>
               </li>
             ))}
@@ -81,6 +79,24 @@ export function AppShell() {
             <div className="sidebar-roster-widget__label">Status do elenco</div>
             <RosterStatusBadge status="disponivel" />
             <div className="sidebar-roster-widget__meta">Fuso: America/Sao_Paulo</div>
+          </div>
+        )}
+
+        {user && (
+          <div className="sidebar-profile-card" data-slot="profile-card">
+            <Avatar alt={user.name ?? user.email} size="default" />
+            <div data-slot="profile-card-details">
+              <span data-slot="profile-card-name">{user.name ?? user.email}</span>
+              <span data-slot="profile-card-body">
+                {user.role === 'staff' ? 'Staff' : 'Jogador'}
+                {user.subRoles.length > 0 && ` • ${user.subRoles.join(', ')}`}
+              </span>
+            </div>
+            {isPending ? (
+              <Badge variant="unavailable">Pendente</Badge>
+            ) : (
+              <Badge variant="available">Ativo</Badge>
+            )}
           </div>
         )}
       </nav>
@@ -100,9 +116,6 @@ export function AppShell() {
             className="bottom-nav-btn"
             aria-current={isActive(item.to, location.pathname) ? 'page' : undefined}
           >
-            <span className="bottom-nav-icon" aria-hidden="true">
-              {item.icon}
-            </span>
             <span>{item.label}</span>
           </NavLink>
         ))}

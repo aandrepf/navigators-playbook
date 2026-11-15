@@ -2,6 +2,19 @@ import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { api, ApiClientError } from '../api/client'
+import {
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Field,
+  FieldError,
+  FieldHint,
+  FieldLabel,
+  Input,
+} from '../components/ui'
 
 type Step =
   | 'welcome'
@@ -116,7 +129,6 @@ export function AuthScreen() {
   function handleUnitChange(unit: string) {
     setUnits((prev) => {
       const next = prev.includes(unit) ? prev.filter((u) => u !== unit) : [...prev, unit]
-      // Remove posições de unidades desmarcadas
       setPositions((pos) =>
         pos.filter((p) =>
           next.some(
@@ -133,7 +145,6 @@ export function AuthScreen() {
     setError(null)
     try {
       await api.auth.checkGoogleLogin(googleErrorFlag)
-      // Se o backend respondeu 302 manual, o fetch não segue; redirecionamos explicitamente.
       window.location.href = `/auth/google${googleErrorFlag ? `?forceError=${googleErrorFlag}` : ''}`
     } catch (err) {
       setError(
@@ -149,36 +160,34 @@ export function AuthScreen() {
   if (step === 'welcome') {
     return (
       <div className="auth-layout">
-        <div className="auth-card" data-slot="card">
-          <div className="auth-card__header" data-slot="card-header">
-            <h1 className="auth-card__title" data-slot="card-title">Playbook do Time</h1>
-            <p className="auth-card__subtitle" data-slot="card-content">Acesse o playbook, eventos e status do elenco do seu time.</p>
-          </div>
+        <Card className="auth-card">
+          <CardHeader className="auth-card__header">
+            <CardTitle className="auth-card__title">Playbook do Time</CardTitle>
+            <CardDescription className="auth-card__subtitle">
+              Acesse o playbook, eventos e status do elenco do seu time.
+            </CardDescription>
+          </CardHeader>
 
           {error && (
-            <div className="field-error-msg" data-slot="field-error" role="alert" style={{ marginBottom: 'var(--space-3)' }}>
-              {error}
-            </div>
+            <FieldError style={{ marginBottom: 'var(--space-3)' }}>{error}</FieldError>
           )}
 
-          <button
-            type="button"
-            className="btn btn--secondary btn--block"
+          <Button
+            variant="secondary"
+            style={{ width: '100%' }}
             onClick={handleGoogleLogin}
-            disabled={loading}
-            aria-busy={loading}
+            loading={loading}
+            loadingLabel="Conectando..."
           >
-            {loading ? 'Conectando...' : 'Continuar com Google'}
-          </button>
+            Continuar com Google
+          </Button>
 
-          <div className="or-divider">
-            ou
-          </div>
+          <div className="or-divider">ou</div>
 
-          <button type="button" className="btn btn--primary btn--block" onClick={() => setStep('email')}>
+          <Button variant="default" style={{ width: '100%' }} onClick={() => setStep('email')}>
             Entrar com código por e-mail
-          </button>
-        </div>
+          </Button>
+        </Card>
       </div>
     )
   }
@@ -186,80 +195,76 @@ export function AuthScreen() {
   if (step === 'email') {
     return (
       <div className="auth-layout">
-        <form className="auth-card" data-slot="card" onSubmit={handleRequestCode}>
-          <div className="auth-card__header" data-slot="card-header">
-            <h1 className="auth-card__title" data-slot="card-title">Criar conta ou entrar</h1>
-            <p className="auth-card__subtitle" data-slot="card-content">Informe o código do time, seu nome e e-mail para receber um código de uso único.</p>
-          </div>
+        <Card className="auth-card">
+          <form onSubmit={handleRequestCode}>
+            <CardHeader className="auth-card__header">
+              <CardTitle className="auth-card__title">Criar conta ou entrar</CardTitle>
+              <CardDescription className="auth-card__subtitle">
+                Informe o código do time, seu nome e e-mail para receber um código de uso único.
+              </CardDescription>
+            </CardHeader>
 
-          <div className="form-group" data-slot="field">
-            <label htmlFor="team-code" className="form-label" data-slot="field-label">
-              Código do time:
-            </label>
-            <input
-              id="team-code"
-              type="text"
-              className="form-input"
-              data-slot="field-input"
-              value={teamCode}
-              onChange={(e) => setTeamCode(e.target.value.toUpperCase())}
-              autoCapitalize="characters"
-              spellCheck="false"
-              required
-              placeholder="NAVIGATORS-2026"
-            />
-          </div>
+            <Field>
+              <FieldLabel htmlFor="team-code">Código do time:</FieldLabel>
+              <Input
+                id="team-code"
+                type="text"
+                value={teamCode}
+                onChange={(e) => setTeamCode(e.target.value.toUpperCase())}
+                autoCapitalize="characters"
+                spellCheck="false"
+                required
+                placeholder="NAVIGATORS-2026"
+              />
+            </Field>
 
-          <div className="form-group" data-slot="field">
-            <label htmlFor="name" className="form-label" data-slot="field-label">
-              Nome completo:
-            </label>
-            <input
-              id="name"
-              type="text"
-              className="form-input"
-              data-slot="field-input"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
+            <Field>
+              <FieldLabel htmlFor="name">Nome completo:</FieldLabel>
+              <Input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </Field>
 
-          <div className="form-group" data-slot="field">
-            <label htmlFor="email" className="form-label" data-slot="field-label">
-              E-mail:
-            </label>
-            <input
-              id="email"
-              type="email"
-              className="form-input"
-              data-slot="field-input"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-            />
-          </div>
+            <Field>
+              <FieldLabel htmlFor="email">E-mail:</FieldLabel>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+              />
+            </Field>
 
-          {error && (
-            <div className="field-error-msg" data-slot="field-error" role="alert" style={{ marginBottom: 'var(--space-3)' }}>
-              {error}
-            </div>
-          )}
+            {error && (
+              <FieldError style={{ marginBottom: 'var(--space-3)' }}>{error}</FieldError>
+            )}
 
-          <button type="submit" className="btn btn--primary btn--block" disabled={loading} aria-busy={loading}>
-            {loading ? 'Enviando código...' : 'Receber código de 6 dígitos'}
-          </button>
+            <Button
+              type="submit"
+              variant="default"
+              style={{ width: '100%' }}
+              loading={loading}
+              loadingLabel="Enviando código..."
+            >
+              Receber código de 6 dígitos
+            </Button>
 
-          <button
-            type="button"
-            className="btn btn--secondary btn--block"
-            style={{ marginTop: 'var(--space-3)' }}
-            onClick={() => setStep('welcome')}
-          >
-            Voltar
-          </button>
-        </form>
+            <Button
+              type="button"
+              variant="secondary"
+              style={{ width: '100%', marginTop: 'var(--space-3)' }}
+              onClick={() => setStep('welcome')}
+            >
+              Voltar
+            </Button>
+          </form>
+        </Card>
       </div>
     )
   }
@@ -267,57 +272,57 @@ export function AuthScreen() {
   if (step === 'code') {
     return (
       <div className="auth-layout">
-        <form
-          className="auth-card"
-          data-slot="card"
-          onSubmit={(e) => {
-            e.preventDefault()
-            setStep('role')
-          }}
-        >
-          <div className="auth-card__header" data-slot="card-header">
-            <h1 className="auth-card__title" data-slot="card-title">Verifique seu e-mail</h1>
-            <p className="auth-card__subtitle" data-slot="card-content">Digite o código de 6 dígitos enviado para {email}.</p>
-          </div>
-
-          <div className="form-group" data-slot="field">
-            <label htmlFor="code" className="form-label" data-slot="field-label">
-              Código de verificação:
-            </label>
-            <input
-              id="code"
-              type="text"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              className="form-input"
-              data-slot="field-input"
-              value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-              required
-              pattern="\d{6}"
-              placeholder="000000"
-              aria-invalid={Boolean(error)}
-            />
-            {error && (
-              <div className="field-error-msg" data-slot="field-error" role="alert">
-                {error}
-              </div>
-            )}
-          </div>
-
-          <button type="submit" className="btn btn--primary btn--block" disabled={loading} aria-busy={loading}>
-            Continuar
-          </button>
-
-          <button
-            type="button"
-            className="btn btn--secondary btn--block"
-            style={{ marginTop: 'var(--space-3)' }}
-            onClick={() => setStep('email')}
+        <Card className="auth-card">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              setStep('role')
+            }}
           >
-            Reenviar código
-          </button>
-        </form>
+            <CardHeader className="auth-card__header">
+              <CardTitle className="auth-card__title">Verifique seu e-mail</CardTitle>
+              <CardDescription className="auth-card__subtitle">
+                Digite o código de 6 dígitos enviado para {email}.
+              </CardDescription>
+            </CardHeader>
+
+            <Field>
+              <FieldLabel htmlFor="code">Código de verificação:</FieldLabel>
+              <Input
+                id="code"
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                required
+                pattern="\d{6}"
+                placeholder="000000"
+                error={Boolean(error)}
+              />
+              {error && <FieldError>{error}</FieldError>}
+            </Field>
+
+            <Button
+              type="submit"
+              variant="default"
+              style={{ width: '100%' }}
+              loading={loading}
+              loadingLabel="Verificando..."
+            >
+              Continuar
+            </Button>
+
+            <Button
+              type="button"
+              variant="secondary"
+              style={{ width: '100%', marginTop: 'var(--space-3)' }}
+              onClick={() => setStep('email')}
+            >
+              Reenviar código
+            </Button>
+          </form>
+        </Card>
       </div>
     )
   }
@@ -325,11 +330,13 @@ export function AuthScreen() {
   if (step === 'role') {
     return (
       <div className="auth-layout">
-        <div className="auth-card" data-slot="card">
-          <div className="auth-card__header" data-slot="card-header">
-            <h1 className="auth-card__title" data-slot="card-title">Como você participa do time?</h1>
-            <p className="auth-card__subtitle" data-slot="card-content">Escolha seu papel para personalizar o acesso.</p>
-          </div>
+        <Card className="auth-card">
+          <CardHeader className="auth-card__header">
+            <CardTitle className="auth-card__title">Como você participa do time?</CardTitle>
+            <CardDescription className="auth-card__subtitle">
+              Escolha seu papel para personalizar o acesso.
+            </CardDescription>
+          </CardHeader>
 
           <button
             type="button"
@@ -341,7 +348,9 @@ export function AuthScreen() {
             }}
           >
             <span className="role-option__title">JOGADOR</span>
-            <span className="role-option__desc">Jogo em campo, consulto o playbook e respondo a eventos.</span>
+            <span className="role-option__desc">
+              Jogo em campo, consulto o playbook e respondo a eventos.
+            </span>
           </button>
 
           <button
@@ -354,9 +363,11 @@ export function AuthScreen() {
             }}
           >
             <span className="role-option__title">STAFF</span>
-            <span className="role-option__desc">Faço parte do staff técnico, edito playbook, eventos ou elenco.</span>
+            <span className="role-option__desc">
+              Faço parte do staff técnico, edito playbook, eventos ou elenco.
+            </span>
           </button>
-        </div>
+        </Card>
       </div>
     )
   }
@@ -364,81 +375,84 @@ export function AuthScreen() {
   if (step === 'player-units') {
     const availableUnits = ['ofensiva', 'defesa', 'special_teams']
     const availablePositions = Array.from(
-      new Set(units.flatMap((u) => POSITIONS_BY_UNIT[u] || []).concat(POSITIONS_BY_UNIT.special_teams)),
+      new Set(
+        units.flatMap((u) => POSITIONS_BY_UNIT[u] || []).concat(POSITIONS_BY_UNIT.special_teams),
+      ),
     )
 
     return (
       <div className="auth-layout">
-        <form
-          className="auth-card"
-          data-slot="card"
-          onSubmit={(e) => {
-            e.preventDefault()
-            handleConfirmRole()
-          }}
-        >
-          <div className="auth-card__header" data-slot="card-header">
-            <h1 className="auth-card__title" data-slot="card-title">Unidades e Posições</h1>
-            <p className="auth-card__subtitle" data-slot="card-content">Escolha onde joga. Special teams é incluída automaticamente.</p>
-          </div>
+        <Card className="auth-card">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              handleConfirmRole()
+            }}
+          >
+            <CardHeader className="auth-card__header">
+              <CardTitle className="auth-card__title">Unidades e Posições</CardTitle>
+              <CardDescription className="auth-card__subtitle">
+                Escolha onde joga. Special teams é incluída automaticamente.
+              </CardDescription>
+            </CardHeader>
 
-          {error && (
-            <div className="field-error-msg" data-slot="field-error" role="alert" style={{ marginBottom: 'var(--space-3)' }}>
-              {error}
-            </div>
-          )}
+            {error && (
+              <FieldError style={{ marginBottom: 'var(--space-3)' }}>{error}</FieldError>
+            )}
 
-          <div className="form-group" data-slot="field">
-            <span className="form-label" data-slot="field-label">Unidades:</span>
-            <div className="chip-bar" role="group" aria-label="Unidades de atuação">
-              {availableUnits.map((unit) => (
-                <button
-                  key={unit}
-                  type="button"
-                  className="chip"
-                  aria-pressed={units.includes(unit)}
-                  onClick={() => handleUnitChange(unit)}
-                >
-                  {unit === 'ofensiva' && 'Ofensiva'}
-                  {unit === 'defesa' && 'Defesa'}
-                  {unit === 'special_teams' && 'Special teams'}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {availablePositions.length > 0 && (
-            <div className="form-group" data-slot="field">
-              <span className="form-label" data-slot="field-label">Posições:</span>
-              <div className="chip-bar" role="group" aria-label="Posições">
-                {availablePositions.map((position) => (
+            <Field>
+              <FieldLabel>Unidades:</FieldLabel>
+              <div className="chip-bar" role="group" aria-label="Unidades de atuação">
+                {availableUnits.map((unit) => (
                   <button
-                    key={position}
+                    key={unit}
                     type="button"
                     className="chip"
-                    aria-pressed={positions.includes(position)}
-                    onClick={() => togglePosition(position)}
+                    aria-pressed={units.includes(unit)}
+                    onClick={() => handleUnitChange(unit)}
                   >
-                    {position}
+                    {unit === 'ofensiva' && 'Ofensiva'}
+                    {unit === 'defesa' && 'Defesa'}
+                    {unit === 'special_teams' && 'Special teams'}
                   </button>
                 ))}
               </div>
-              {positions.length === 0 && (
-                <span className="form-hint">Selecione pelo menos uma posição.</span>
-              )}
-            </div>
-          )}
+            </Field>
 
-          <button
-            type="submit"
-            className="btn btn--primary btn--block"
-            disabled={positions.length === 0 || loading}
-            aria-disabled={positions.length === 0 || loading}
-            aria-busy={loading}
-          >
-            {loading ? 'Criando conta...' : 'Criar conta'}
-          </button>
-        </form>
+            {availablePositions.length > 0 && (
+              <Field>
+                <FieldLabel>Posições:</FieldLabel>
+                <div className="chip-bar" role="group" aria-label="Posições">
+                  {availablePositions.map((position) => (
+                    <button
+                      key={position}
+                      type="button"
+                      className="chip"
+                      aria-pressed={positions.includes(position)}
+                      onClick={() => togglePosition(position)}
+                    >
+                      {position}
+                    </button>
+                  ))}
+                </div>
+                {positions.length === 0 && (
+                  <FieldHint>Selecione pelo menos uma posição.</FieldHint>
+                )}
+              </Field>
+            )}
+
+            <Button
+              type="submit"
+              variant="default"
+              style={{ width: '100%' }}
+              disabled={positions.length === 0 || loading}
+              loading={loading}
+              loadingLabel="Criando conta..."
+            >
+              Criar conta
+            </Button>
+          </form>
+        </Card>
       </div>
     )
   }
@@ -446,87 +460,98 @@ export function AuthScreen() {
   if (step === 'staff-role') {
     return (
       <div className="auth-layout">
-        <form
-          className="auth-card"
-          data-slot="card"
-          onSubmit={(e) => {
-            e.preventDefault()
-            handleConfirmRole()
-          }}
-        >
-          <div className="auth-card__header" data-slot="card-header">
-            <h1 className="auth-card__title" data-slot="card-title">Subpapel do Staff</h1>
-            <p className="auth-card__subtitle" data-slot="card-content">Escolha sua função no staff.</p>
-          </div>
+        <Card className="auth-card">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              handleConfirmRole()
+            }}
+          >
+            <CardHeader className="auth-card__header">
+              <CardTitle className="auth-card__title">Subpapel do Staff</CardTitle>
+              <CardDescription className="auth-card__subtitle">
+                Escolha sua função no staff.
+              </CardDescription>
+            </CardHeader>
 
-          {error && (
-            <div className="field-error-msg" data-slot="field-error" role="alert" style={{ marginBottom: 'var(--space-3)' }}>
-              {error}
-            </div>
-          )}
+            {error && (
+              <FieldError style={{ marginBottom: 'var(--space-3)' }}>{error}</FieldError>
+            )}
 
-          <div className="form-group" data-slot="field">
-            <span className="form-label" data-slot="field-label">Subpapel principal:</span>
-            {STAFF_ROLES.map((option) => (
-              <label key={option.value} className="role-option" style={{ display: 'block' }}>
+            <Field>
+              <FieldLabel>Subpapel principal:</FieldLabel>
+              {STAFF_ROLES.map((option) => (
+                <label key={option.value} className="role-option" style={{ display: 'block' }}>
+                  <input
+                    type="radio"
+                    name="staff-role"
+                    value={option.value}
+                    checked={staffRole === option.value}
+                    onChange={(e) => setStaffRole(e.target.value as typeof staffRole)}
+                    style={{ marginRight: 'var(--space-2)' }}
+                  />
+                  <span className="role-option__title">{option.label}</span>
+                  <span className="role-option__desc">{option.description}</span>
+                </label>
+              ))}
+            </Field>
+
+            <Field>
+              <label className="role-option" style={{ display: 'flex', alignItems: 'center' }}>
                 <input
-                  type="radio"
-                  name="staff-role"
-                  value={option.value}
-                  checked={staffRole === option.value}
-                  onChange={(e) => setStaffRole(e.target.value as typeof staffRole)}
+                  type="checkbox"
+                  checked={alsoSt}
+                  onChange={(e) => setAlsoSt(e.target.checked)}
                   style={{ marginRight: 'var(--space-2)' }}
                 />
-                <span className="role-option__title">{option.label}</span>
-                <span className="role-option__desc">{option.description}</span>
+                <span>
+                  <span className="role-option__title">
+                    Acumulo também o subpapel de Coordenador de special teams
+                  </span>
+                </span>
               </label>
-            ))}
-          </div>
+            </Field>
 
-          <div className="form-group" data-slot="field">
-            <label className="role-option" style={{ display: 'flex', alignItems: 'center' }}>
-              <input
-                type="checkbox"
-                checked={alsoSt}
-                onChange={(e) => setAlsoSt(e.target.checked)}
-                style={{ marginRight: 'var(--space-2)' }}
-              />
-              <span>
-                <span className="role-option__title">Acumulo também o subpapel de Coordenador de special teams</span>
-              </span>
-            </label>
-          </div>
+            <Card
+              variant="warning"
+              style={{ marginBottom: 'var(--space-4)', fontSize: 'var(--text-sm)' }}
+            >
+              <CardContent>
+                Para proteger os dados de saúde, justificativas e sigilo do playbook, cadastros de
+                staff ficam pendentes até aprovação de um Head Coach.
+              </CardContent>
+            </Card>
 
-          <div
-            className="card card--warning"
-            data-slot="card"
-            data-variant="warning"
-            style={{ marginBottom: 'var(--space-4)', fontSize: 'var(--text-sm)' }}
-          >
-            Para proteger os dados de saúde, justificativas e sigilo do playbook, cadastros de staff ficam pendentes até
-            aprovação de um Head Coach.
-          </div>
-
-          <button type="submit" className="btn btn--primary btn--block" disabled={!staffRole || loading} aria-busy={loading}>
-            {loading ? 'Criando conta...' : 'Criar conta'}
-          </button>
-        </form>
+            <Button
+              type="submit"
+              variant="default"
+              style={{ width: '100%' }}
+              disabled={!staffRole || loading}
+              loading={loading}
+              loadingLabel="Criando conta..."
+            >
+              Criar conta
+            </Button>
+          </form>
+        </Card>
       </div>
     )
   }
 
   return (
     <div className="auth-layout">
-      <div className="auth-card" data-slot="card" style={{ textAlign: 'center' }}>
-        <h1 className="auth-card__title" data-slot="card-title">Cadastro pendente</h1>
-        <p className="auth-card__subtitle" data-slot="card-content">
-          Seu cadastro como staff está aguardando aprovação de um Head Coach. Você receberá uma notificação quando for
-          liberado.
-        </p>
-        <button type="button" className="btn btn--primary btn--block" onClick={() => navigate('/')}>
+      <Card className="auth-card" style={{ textAlign: 'center' }}>
+        <CardHeader className="auth-card__header">
+          <CardTitle className="auth-card__title">Cadastro pendente</CardTitle>
+          <CardDescription className="auth-card__subtitle">
+            Seu cadastro como staff está aguardando aprovação de um Head Coach. Você receberá uma
+            notificação quando for liberado.
+          </CardDescription>
+        </CardHeader>
+        <Button variant="default" style={{ width: '100%' }} onClick={() => navigate('/')}>
           Ir para a tela inicial
-        </button>
-      </div>
+        </Button>
+      </Card>
     </div>
   )
 }
