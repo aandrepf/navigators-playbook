@@ -78,7 +78,7 @@ export function AppShell() {
         {user && user.role === 'jogador' && (
           <div className="card" style={{ padding: 'var(--space-3)', fontSize: 'var(--text-xs)' }}>
             <div style={{ fontWeight: 700, marginBottom: 4 }}>Status do elenco</div>
-            <span className="badge badge--available">✓ Disponível</span>
+            <span className="badge badge--available" data-slot="badge" data-variant="available">✓ Disponível</span>
             <div style={{ color: 'var(--color-text-muted)', marginTop: 6 }}>
               Fuso: America/Sao_Paulo
             </div>
