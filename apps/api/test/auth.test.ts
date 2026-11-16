@@ -55,7 +55,9 @@ describe('autenticação por código de e-mail', () => {
     const res = await registerViaEmail(ctx, {
       email: 'jogador@example.com',
       name: 'Jogador Um',
+      phone: '+351912345678',
       role: 'jogador',
+      positions: ['QB', 'LB'],
     });
 
     expect(res.statusCode).toBe(200);
@@ -65,6 +67,13 @@ describe('autenticação por código de e-mail', () => {
       role: 'jogador',
       approvalState: 'ativo',
       subRoles: [],
+      phone: '+351912345678',
+      positions: [
+        { unit: 'ofensiva', position: 'QB', approvalState: 'pendente' },
+        { unit: 'defesa', position: 'LB', approvalState: 'pendente' },
+      ],
+      units: [],
+      isAdmin: false,
     });
 
     const token = extractCookie(res, ctx.config.cookie.name);
@@ -115,46 +124,81 @@ describe('autenticação por código de e-mail', () => {
     expect(res.statusCode).toBe(202);
   });
 
-  it('retorna 409 ao registrar coordenador de unidade já ocupado', async () => {
-    // primeiro coordenador ofensivo entra normalmente
-    const first = await registerViaEmail(ctx, {
-      email: 'coord-a@example.com',
-      role: 'staff',
-      staffRole: 'coordenador_ofensivo',
+  it('cria jogador sem posições (skip) e devolve posições e unidades vazias', async () => {
+    const res = await registerViaEmail(ctx, {
+      email: 'jogador-skip@example.com',
+      name: 'Jogador Skip',
+      role: 'jogador',
     });
-    expect(first.statusCode).toBe(200);
 
-    // segundo cadastro para a mesma vaga exclusiva → conflito de domínio
+    expect(res.statusCode).toBe(200);
+    expect(res.json().user).toMatchObject({
+      role: 'jogador',
+      approvalState: 'ativo',
+      positions: [],
+      units: [],
+      isAdmin: false,
+    });
+  });
+
+  it('recusa posição inválida e subpapel no cadastro de staff', async () => {
+    const invalidPosition = await registerViaEmail(ctx, {
+      email: 'invalid-position@example.com',
+      role: 'jogador',
+      positions: ['K'],
+    });
+    expect(invalidPosition.statusCode).toBe(400);
+    expect(invalidPosition.json()).toMatchObject({
+      error: 'posição inválida para cadastro: K',
+    });
+
     const duplicate = await registerViaEmail(ctx, {
-      email: 'coord-b@example.com',
-      role: 'staff',
-      staffRole: 'coordenador_ofensivo',
+      email: 'dup-position@example.com',
+      role: 'jogador',
+      positions: ['QB', 'QB'],
     });
-    expect(duplicate.statusCode).toBe(409);
-    expect(duplicate.json()).toMatchObject({
-      error: 'este subpapel de staff já está ocupado',
+    expect(duplicate.statusCode).toBe(400);
+    expect(duplicate.json()).toMatchObject({ error: 'posição duplicada: QB' });
+
+    const staff = await registerViaEmail(ctx, {
+      email: 'staff-with-position@example.com',
+      role: 'staff',
+      positions: ['QB'],
+    });
+    expect(staff.statusCode).toBe(400);
+    expect(staff.json()).toMatchObject({
+      error: 'staff não pode enviar posições no cadastro',
     });
 
-    // outra unidade exclusiva continua livre
-    const defensive = await registerViaEmail(ctx, {
-      email: 'coord-c@example.com',
-      role: 'staff',
-      staffRole: 'coordenador_defensivo',
+    const unknown = await registerViaEmail(ctx, {
+      email: 'unknown-position@example.com',
+      role: 'jogador',
+      positions: ['WR-X'],
     });
-    expect(defensive.statusCode).toBe(200);
+    expect(unknown.statusCode).toBe(400);
+    expect(unknown.json()).toMatchObject({
+      error: 'posição inválida para cadastro: WR-X',
+    });
+  });
 
-    // coordenador de special teams é aditivo: não conflita
-    const st1 = await registerViaEmail(ctx, {
-      email: 'st1@example.com',
-      role: 'staff',
-      staffRole: 'coordenador_special_teams',
+  it('recusa código de time inválido com erro específico', async () => {
+    await ctx.app.inject({
+      method: 'POST',
+      url: '/auth/email/request',
+      payload: { email: 'wrong-team@example.com' },
     });
-    expect(st1.statusCode).toBe(200);
-    const st2 = await registerViaEmail(ctx, {
-      email: 'st2@example.com',
-      role: 'staff',
-      staffRole: 'coordenador_special_teams',
+    const code = ctx.mailer.lastCodeFor('wrong-team@example.com');
+    const res = await ctx.app.inject({
+      method: 'POST',
+      url: '/auth/email/verify',
+      payload: {
+        email: 'wrong-team@example.com',
+        code,
+        teamCode: 'WRONG',
+        role: 'jogador',
+      },
     });
-    expect(st2.statusCode).toBe(200);
+    expect(res.statusCode).toBe(400);
+    expect(res.json()).toMatchObject({ error: 'código do time inválido' });
   });
 });

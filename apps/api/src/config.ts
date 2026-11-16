@@ -39,6 +39,10 @@ export interface Config {
     email: string | null;
     name: string | null;
   };
+  seedAdmin: {
+    email: string | null;
+    name: string | null;
+  };
   mailer: 'console' | 'smtp';
   smtp: {
     host: string;
@@ -90,6 +94,10 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
     seedHeadCoach: {
       email: env.SEED_HEAD_COACH_EMAIL ?? null,
       name: env.SEED_HEAD_COACH_NAME ?? null,
+    },
+    seedAdmin: {
+      email: env.SEED_ADMIN_EMAIL ?? null,
+      name: env.SEED_ADMIN_NAME ?? null,
     },
     mailer: env.MAILER === 'smtp' ? 'smtp' : 'console',
     smtp: {
