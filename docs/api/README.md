@@ -82,10 +82,11 @@ a sessão.
 | Mutts | `MUTTS-2026` | indisponível |
 | Crusaders | `CRSD-2026` | indisponível |
 
-No cadastro, um código do catálogo desabilitado responde `409` (time
-indisponível) e um código desconhecido — incluindo códigos legados como
-`NAVIGATORS` — responde `400` (inválido). O código de e-mail é sempre
-emitido contra o time habilitado, preservando o fluxo de time único.
+No cadastro, um código que existe no banco mas está desabilitado — do catálogo
+ou legado preservado (como o antigo `NAVIGATORS`) — responde `409`
+(indisponível), e um código inexistente responde `400` (inválido). O código de
+e-mail é sempre emitido contra o time habilitado, preservando o fluxo de time
+único.
 
 ## Testes
 
