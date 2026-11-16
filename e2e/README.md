@@ -107,9 +107,11 @@ necessário. Dados vêm da API (`docs/api`), nunca de clique para semear estado.
 
 ## Status atual
 
-45 casos ativos e 15 marcados como `fixme`, cada um executado nos dois projetos.
-Na QA-02 (cadastro com papel e posições), três execuções com banco zerado deram o
-mesmo resultado: **90 verdes, 0 vermelhos e 30 `fixme`** (15 casos × 2 projetos).
+53 casos ativos e 15 marcados como `fixme`, cada um executado nos dois projetos.
+Na última execução completa (integração `feat/02-cadastro-papel-posicoes` incorporada
+na `qa`, Postgres 17 em Podman, banco `playbook_e2e` zerado): **106 verdes, 0 vermelhos
+e 30 `fixme`** (15 casos × 2 projetos). `times.spec.ts` cobre o Navigators
+(`NAVS-2026`) habilitado e os códigos indisponíveis (`409`) e desconhecidos (`400`).
 Os `fixme` não são falhas; cada um aponta a dependência que falta. Checagem de
 tipos: `npx tsc -p e2e/tsconfig.json`.
 
