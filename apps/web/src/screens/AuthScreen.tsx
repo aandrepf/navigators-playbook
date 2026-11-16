@@ -4,7 +4,6 @@ import { useAuth } from '../hooks/useAuth'
 import { api, ApiClientError } from '../api/client'
 import { POSITIONS_BY_UNIT } from '../domain/positions'
 import {
-  Badge,
   Button,
   Card,
   CardDescription,
@@ -208,9 +207,9 @@ export function AuthScreen() {
 
             <Field disabled>
               <FieldLabel>Equipe:</FieldLabel>
-              <Badge variant="outline" aria-label="Equipe atual: Navigators">
+              <span className="auth-readonly-value" aria-label="Equipe atual: Navigators">
                 Navigators
-              </Badge>
+              </span>
             </Field>
 
             <Field>
@@ -234,7 +233,6 @@ export function AuthScreen() {
                 autoComplete="tel"
                 placeholder="(11) 91234-5678"
               />
-              <FieldHint>Usaremos este dado para futuras notificações via WhatsApp.</FieldHint>
             </Field>
 
             <Field>
@@ -367,14 +365,7 @@ export function AuthScreen() {
               setStep('player-positions')
             }}
           >
-            <span style={{ display: 'block' }}>
-              <strong style={{ display: 'block', marginBottom: 'var(--space-1)' }}>
-                Jogador
-              </strong>
-              <span style={{ fontSize: 'var(--text-sm)', fontWeight: 400 }}>
-                Jogo em campo, consulto o playbook e respondo a eventos.
-              </span>
-            </span>
+            <strong style={{ display: 'block' }}>Jogador</strong>
           </Button>
 
           <Button
@@ -395,14 +386,7 @@ export function AuthScreen() {
               void handleConfirmRole('staff')
             }}
           >
-            <span style={{ display: 'block' }}>
-              <strong style={{ display: 'block', marginBottom: 'var(--space-1)' }}>
-                Staff
-              </strong>
-              <span style={{ fontSize: 'var(--text-sm)', fontWeight: 400 }}>
-                Faço parte do staff técnico, edito playbook, eventos ou elenco.
-              </span>
-            </span>
+            <strong style={{ display: 'block' }}>Staff</strong>
           </Button>
         </Card>
       </div>
