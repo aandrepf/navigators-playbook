@@ -27,8 +27,6 @@ services:
       PORT: 3000
       DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-playbook}
       SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
-      TEAM_NAME: ${TEAM_NAME:-Navigators}
-      TEAM_CODE: ${TEAM_CODE:-NAVIGATORS}
       SEED_HEAD_COACH_EMAIL: ${SEED_HEAD_COACH_EMAIL:-headcoach@example.com}
       SEED_HEAD_COACH_NAME: ${SEED_HEAD_COACH_NAME:-Head Coach}
       SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-admin@example.com}

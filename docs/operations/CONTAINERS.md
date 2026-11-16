@@ -83,11 +83,13 @@ POSTGRES_PASSWORD=postgres
 POSTGRES_DB=playbook
 POSTGRES_PORT=5432
 API_PORT=3000
-TEAM_NAME=Navigators
-TEAM_CODE=NAVIGATORS
 SEED_HEAD_COACH_EMAIL=headcoach@example.com
 SEED_HEAD_COACH_NAME=Head Coach
 ```
+
+Os times não são configurados por variável: o seed semeia os sete times do
+SnapIn (`apps/api/src/team.ts`) e só o Navigators (`NAVS-2026`) aceita
+cadastro. Não há `TEAM_NAME` nem `TEAM_CODE`.
 
 Segredos e credenciais reais não devem entrar no Compose nem no repositório.
 Em cloud, use o secret manager e injete `DATABASE_URL` e as demais variáveis
