@@ -3,7 +3,7 @@ import { buildApp } from './app.js';
 import { loadConfig } from './config.js';
 import { runMigrations } from './db/migrate.js';
 import { createPgDatabase } from './db/pg.js';
-import { seedHeadCoach } from './db/seed.js';
+import { seedAll } from './db/seed.js';
 
 async function main(): Promise<void> {
   const config = loadConfig();
@@ -16,7 +16,7 @@ async function main(): Promise<void> {
   const db = createPgDatabase(pool);
 
   await runMigrations(db);
-  await seedHeadCoach(db, config);
+  await seedAll(db, config);
 
   const app = await buildApp({ db, config });
   await app.listen({ port: config.port, host: config.host });

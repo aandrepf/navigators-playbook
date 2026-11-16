@@ -3,26 +3,33 @@ import type { Database } from './types.js';
 import { TEAM_CATALOG } from '../team.js';
 
 /**
- * Garante os times do catálogo (idempotente): insere os sete times com os
- * códigos e a habilitação corretos e desabilita qualquer time fora do
- * catálogo (ex.: código legado). Apenas o time habilitado aceita cadastro.
+ * Garante os times do catálogo (idempotente e não destrutivo): insere os sete
+ * times que faltam e sincroniza apenas a habilitação (`enabled`) dos que já
+ * existem no catálogo. Times fora do catálogo (dados legados) e nomes já
+ * existentes são preservados — o seed nunca desabilita nem renomeia um time
+ * que não pertence ao catálogo. Apenas o time habilitado aceita cadastro.
  */
 export async function seedTeams(db: Database): Promise<void> {
-  const codes = TEAM_CATALOG.map((team) => team.code);
-
-  await db.query(
-    'UPDATE team SET enabled = false WHERE NOT (code = ANY($1::text[]))',
-    [codes],
-  );
-
   for (const team of TEAM_CATALOG) {
     await db.query(
       `INSERT INTO team (name, code, enabled) VALUES ($1, $2, $3)
        ON CONFLICT (code) DO UPDATE
-         SET name = EXCLUDED.name, enabled = EXCLUDED.enabled`,
+         SET enabled = EXCLUDED.enabled`,
       [team.name, team.code, team.enabled],
     );
   }
+}
+
+/**
+ * Semeia tudo o que o arranque precisa (idempotente): os times do catálogo, o
+ * primeiro head coach e o admin geral. Usado pelo `server.ts` para que o admin
+ * configurado exista também em produção/deploy sem depender de um `db:seed`
+ * manual, e pelo `seed-cli.ts`.
+ */
+export async function seedAll(db: Database, config: Config): Promise<void> {
+  await seedTeams(db);
+  await seedHeadCoach(db, config);
+  await seedAdmin(db, config);
 }
 
 /** Devolve o id do único time habilitado, lançando se não houver nenhum. */

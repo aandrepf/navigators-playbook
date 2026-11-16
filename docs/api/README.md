@@ -64,9 +64,11 @@ special teams coexiste com ofensiva/defesa.
 
 ### Times do SnapIn (seed)
 
-O seed (`src/db/seed.ts`) semeia sete times de forma idempotente, mas o MVP
-continua atendendo **um time por vez**: apenas o time habilitado aceita
-cadastro e serve a sessão.
+O seed (`src/db/seed.ts`) semeia sete times de forma idempotente e **não
+destrutiva**: insere os times que faltam e sincroniza apenas a habilitação dos
+que já existem no catálogo. Times fora do catálogo (dados legados) e nomes já
+existentes são preservados. O MVP continua atendendo **um time por vez**:
+apenas o time habilitado aceita cadastro e serve a sessão.
 
 | Nome | Código | Cadastro |
 | --- | --- | --- |
@@ -95,6 +97,10 @@ Postgres real em WASM, criado por suíte):
   pendente lê o próprio estado e 403 na fila, staff ativo sem subpapel 403,
   head coach vê a fila, admin (semeado) administra a fila e a derivação de
   unidades apenas de posições aprovadas.
+- `test/seed.test.ts` — seed idempotente e não destrutivo: preserva times e
+  head coaches legados, não renomeia times existentes, semeia o admin geral no
+  arranque (head coach + admin juntos) e mantém `NAVS-2026` como único time
+  habilitado do catálogo.
 
 ## Variáveis de ambiente
 
@@ -102,8 +108,10 @@ Documentadas em `apps/api/.env.example` (sem segredos). Em produção, o Railway
 injeta `DATABASE_URL` ao anexar o Postgres; o resto é definido no painel do
 serviço. O `apps/api/railway.json` assume o **root directory do serviço =
 `apps/api`** (build `npm run build`, start `npm run start`, healthcheck
-`/health`). `SEED_ADMIN_EMAIL`/`SEED_ADMIN_NAME` semeiam o admin geral inicial
-(opcional em desenvolvimento).
+`/health`). `SEED_HEAD_COACH_EMAIL`/`SEED_HEAD_COACH_NAME` e
+`SEED_ADMIN_EMAIL`/`SEED_ADMIN_NAME` semeiam o head coach inicial e o admin
+geral no arranque do servidor (idempotente), sem depender de um `db:seed`
+manual.
 
 Para desenvolvimento local, o Postgres pode ser executado com Podman ou Docker
 usando [`docs/operations/CONTAINERS.md`](../operations/CONTAINERS.md). A
