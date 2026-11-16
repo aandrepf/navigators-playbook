@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth'
 import { api, ApiClientError } from '../api/client'
 import { POSITIONS_BY_UNIT } from '../domain/positions'
 import {
+  Badge,
   Button,
   Card,
   CardDescription,
@@ -14,6 +15,8 @@ import {
   FieldLabel,
   Input,
 } from '../components/ui'
+
+const TEAM_CODE = 'NAVIGATORS-2026'
 
 function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -66,7 +69,6 @@ export function AuthScreen() {
   const [code, setCode] = useState('')
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
-  const [teamCode, setTeamCode] = useState('')
   const [role, setRole] = useState<'jogador' | 'staff' | null>(null)
   const [positions, setPositions] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
@@ -97,7 +99,7 @@ export function AuthScreen() {
     const payload: Parameters<typeof loginWithEmail>[0] = {
       email,
       code,
-      teamCode,
+      teamCode: TEAM_CODE,
       name,
       phone: phone || null,
       role: nextRole,
@@ -200,22 +202,15 @@ export function AuthScreen() {
                 Criar conta ou entrar
               </h1>
               <CardDescription className="auth-card__subtitle">
-                Informe o código do time, seu nome e e-mail para receber um código de uso único.
+                Complete seus dados para receber um código de uso único.
               </CardDescription>
             </CardHeader>
 
-            <Field>
-              <FieldLabel htmlFor="team-code">Código do time:</FieldLabel>
-              <Input
-                id="team-code"
-                type="text"
-                value={teamCode}
-                onChange={(e) => setTeamCode(e.target.value.toUpperCase())}
-                autoCapitalize="characters"
-                spellCheck="false"
-                required
-                placeholder="NAVIGATORS-2026"
-              />
+            <Field disabled>
+              <FieldLabel>Equipe:</FieldLabel>
+              <Badge variant="outline" aria-label="Equipe atual: Navigators">
+                Navigators
+              </Badge>
             </Field>
 
             <Field>
