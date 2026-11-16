@@ -8,7 +8,6 @@ import {
   Card,
   CardDescription,
   CardHeader,
-  CardTitle,
   Field,
   FieldError,
   FieldHint,
@@ -55,7 +54,10 @@ export function AuthScreen() {
     }
   }
 
-  async function handleConfirmRole(nextRole = role) {
+  async function handleConfirmRole(
+    nextRole = role,
+    nextPositions?: string[],
+  ) {
     if (!nextRole) return
     setLoading(true)
     setError(null)
@@ -68,7 +70,9 @@ export function AuthScreen() {
       phone: phone || null,
       role: nextRole,
     }
-    if (nextRole === 'jogador') payload.positions = positions
+    if (nextRole === 'jogador') {
+      payload.positions = nextPositions ?? positions
+    }
 
     try {
       const user = await loginWithEmail(payload)
@@ -120,7 +124,9 @@ export function AuthScreen() {
       <div className="auth-layout">
         <Card className="auth-card">
           <CardHeader className="auth-card__header">
-            <CardTitle className="auth-card__title">Playbook do Time</CardTitle>
+            <h1 data-slot="card-title" className="auth-card__title ui-card__title">
+              Playbook do Time
+            </h1>
             <CardDescription className="auth-card__subtitle">
               Acesse o playbook, eventos e status do elenco do seu time.
             </CardDescription>
@@ -156,7 +162,9 @@ export function AuthScreen() {
         <Card className="auth-card">
           <form onSubmit={handleRequestCode}>
             <CardHeader className="auth-card__header">
-              <CardTitle className="auth-card__title">Criar conta ou entrar</CardTitle>
+              <h1 data-slot="card-title" className="auth-card__title ui-card__title">
+                Criar conta ou entrar
+              </h1>
               <CardDescription className="auth-card__subtitle">
                 Informe o código do time, seu nome e e-mail para receber um código de uso único.
               </CardDescription>
@@ -195,7 +203,7 @@ export function AuthScreen() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 autoComplete="tel"
-                placeholder="+351 912 345 678"
+                placeholder="(11) 91234-5678"
               />
               <FieldHint>Usaremos este dado para futuras notificações via WhatsApp.</FieldHint>
             </Field>
@@ -251,7 +259,9 @@ export function AuthScreen() {
             }}
           >
             <CardHeader className="auth-card__header">
-              <CardTitle className="auth-card__title">Verifique seu e-mail</CardTitle>
+              <h1 data-slot="card-title" className="auth-card__title ui-card__title">
+                Verifique seu e-mail
+              </h1>
               <CardDescription className="auth-card__subtitle">
                 Digite o código de 6 dígitos enviado para {email}.
               </CardDescription>
@@ -303,7 +313,9 @@ export function AuthScreen() {
       <div className="auth-layout">
         <Card className="auth-card">
           <CardHeader className="auth-card__header">
-            <CardTitle className="auth-card__title">Como você participa do time?</CardTitle>
+            <h1 data-slot="card-title" className="auth-card__title ui-card__title">
+              Como você participa do time?
+            </h1>
             <CardDescription className="auth-card__subtitle">
               Escolha seu papel para personalizar o acesso.
             </CardDescription>
@@ -312,34 +324,55 @@ export function AuthScreen() {
           <Button
             type="button"
             variant={role === 'jogador' ? 'default' : 'outline'}
-            style={{ width: '100%', marginBottom: 'var(--space-3)', minHeight: '72px' }}
+            style={{
+              width: '100%',
+              marginBottom: 'var(--space-3)',
+              minHeight: '72px',
+              justifyContent: 'flex-start',
+              textAlign: 'left',
+            }}
             aria-pressed={role === 'jogador'}
+            disabled={loading}
             onClick={() => {
               setRole('jogador')
               setStep('player-positions')
             }}
           >
-            <span>
-              <strong>JOGADOR</strong>
-              <br />
-              Jogo em campo, consulto o playbook e respondo a eventos.
+            <span style={{ display: 'block' }}>
+              <strong style={{ display: 'block', marginBottom: 'var(--space-1)' }}>
+                Jogador
+              </strong>
+              <span style={{ fontSize: 'var(--text-sm)', fontWeight: 400 }}>
+                Jogo em campo, consulto o playbook e respondo a eventos.
+              </span>
             </span>
           </Button>
 
           <Button
             type="button"
             variant={role === 'staff' ? 'default' : 'outline'}
-            style={{ width: '100%', minHeight: '72px' }}
+            style={{
+              width: '100%',
+              minHeight: '72px',
+              justifyContent: 'flex-start',
+              textAlign: 'left',
+            }}
             aria-pressed={role === 'staff'}
+            disabled={loading}
+            loading={loading && role === 'staff'}
+            loadingLabel="Enviando solicitação..."
             onClick={() => {
               setRole('staff')
               void handleConfirmRole('staff')
             }}
           >
-            <span>
-              <strong>STAFF</strong>
-              <br />
-              Faço parte do staff técnico, edito playbook, eventos ou elenco.
+            <span style={{ display: 'block' }}>
+              <strong style={{ display: 'block', marginBottom: 'var(--space-1)' }}>
+                Staff
+              </strong>
+              <span style={{ fontSize: 'var(--text-sm)', fontWeight: 400 }}>
+                Faço parte do staff técnico, edito playbook, eventos ou elenco.
+              </span>
             </span>
           </Button>
         </Card>
@@ -358,7 +391,9 @@ export function AuthScreen() {
             }}
           >
             <CardHeader className="auth-card__header">
-              <CardTitle className="auth-card__title">Suas posições</CardTitle>
+              <h1 data-slot="card-title" className="auth-card__title ui-card__title">
+                Suas posições
+              </h1>
               <CardDescription className="auth-card__subtitle">
                 Escolha posições de ofensiva e/ou defesa. Elas serão validadas pelo staff.
               </CardDescription>
@@ -413,7 +448,7 @@ export function AuthScreen() {
               disabled={loading}
               onClick={() => {
                 setPositions([])
-                void handleConfirmRole('jogador')
+                void handleConfirmRole('jogador', [])
               }}
             >
               Pular posições por agora
@@ -428,7 +463,9 @@ export function AuthScreen() {
     <div className="auth-layout">
       <Card className="auth-card" style={{ textAlign: 'center' }}>
         <CardHeader className="auth-card__header">
-          <CardTitle className="auth-card__title">Cadastro pendente</CardTitle>
+          <h1 data-slot="card-title" className="auth-card__title ui-card__title">
+            Cadastro pendente
+          </h1>
           <CardDescription className="auth-card__subtitle">
             Seu cadastro como staff está aguardando definição de um Admin ou Head Coach. Você
             receberá uma notificação quando for liberado.
