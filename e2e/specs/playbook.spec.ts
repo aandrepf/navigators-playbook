@@ -5,7 +5,8 @@ test.describe('Consulta de jogada', () => {
     // Smoke da tela. Os dados ainda são estáticos no front (sem GET de jogadas
     // em docs/api), então este teste não prova visibilidade: só que a tela existe.
     await openAs(page, jogador, '/playbook')
-    await expect(page.getByRole('heading', { name: 'Playbook do Time' })).toBeVisible()
+    // Marca do produto (h1) é SnapIn; a seção do playbook é o h2 "Playbook".
+    await expect(page.getByRole('heading', { name: 'Playbook', level: 2 })).toBeVisible()
     await expect(page.getByLabel('Buscar jogada por nome:')).toBeVisible()
   })
 

@@ -21,7 +21,6 @@ import {
   API_PORT,
   HEAD_COACH_EMAIL,
   RUNTIME_DIR,
-  TEAM_CODE,
   WEB_URL,
 } from '../support/constants.mjs'
 
@@ -60,7 +59,6 @@ const child = spawn('npx', ['tsx', 'src/server.ts'], {
     LOG_LEVEL: 'warn',
     MAILER: 'console',
     FRONTEND_URL: WEB_URL,
-    TEAM_CODE,
     SEED_HEAD_COACH_EMAIL: HEAD_COACH_EMAIL,
     SEED_HEAD_COACH_NAME: 'Head Coach E2E',
     SESSION_COOKIE_SECURE: 'false',

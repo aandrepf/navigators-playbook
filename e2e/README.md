@@ -26,6 +26,14 @@ Traces e screenshots das falhas ficam em `e2e/.results`.
 
 Para depurar visualmente: `npx playwright test --ui` (com a mesma variável).
 
+Se a porta 5173 (web) ou 3000 (API) já estiver ocupada, por exemplo por um
+`npm run dev` aberto, a suíte falha ao subir os servidores (ela não reaproveita
+servidores existentes). Troque as portas sem editar código:
+
+```bash
+E2E_WEB_PORT=5273 E2E_API_PORT=3100 E2E_DATABASE_URL=... npm run test:e2e
+```
+
 ## O que a suíte faz sozinha
 
 O `playwright.config.ts` sobe dois servidores antes dos testes:
@@ -39,6 +47,10 @@ O `playwright.config.ts` sobe dois servidores antes dos testes:
   `E2E_DATABASE_URL` e deixa as migrações e o seed do head coach rodarem do zero.
   Ele **se recusa** a rodar se o nome do banco não contém `e2e` ou `test`, para não
   apagar um banco de desenvolvimento por engano.
+- **Time de cadastro.** O cadastro usa o código `NAVS-2026` (Navigators), o
+  único habilitado. O usuário não digita o código: a tela já mostra a equipe
+  atual. Os testes de disponibilidade (`times.spec.ts`) chamam a API direta com
+  os códigos desabilitados e um código desconhecido, e esperam `409` e `400`.
 - **Código de acesso sem endpoint de teste.** A API roda com o mailer `console`,
   que escreve o código em log. O script grava esse log em
   `e2e/.runtime/api.log`, e os helpers leem o código de lá. Nenhuma rota fora de
@@ -74,7 +86,8 @@ e2e/
   scripts/start-api.mjs       API de testes (zera o banco, grava o log)
   specs/
     auth.spec.ts              login por e-mail, Google, sessão e logout
-    cadastro.spec.ts          código do time, jogador com/sem posições, staff sem subpapel, contrato
+    cadastro.spec.ts          jogador com/sem posições, staff sem subpapel, contrato
+    times.spec.ts             Navigators habilitado, códigos indisponíveis e desconhecidos
     autorizacao.spec.ts       jogador, staff pendente, head coach
     acessibilidade.spec.ts    teclado, skip link, landmarks, títulos
     playbook.spec.ts          consulta de jogada (smoke + bloqueados)
