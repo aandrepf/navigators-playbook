@@ -14,7 +14,7 @@ async function freshDb(): Promise<Database> {
 }
 
 describe('seed dos times (não destrutivo)', () => {
-  it('preserva time legado fora do catálogo, sem desabilitar nem renomear', async () => {
+  it('preserva time legado fora do catálogo, mas o desabilita', async () => {
     const db = await freshDb();
     try {
       // Time legado (código fora do catálogo) com head coach já vinculado.
@@ -38,13 +38,15 @@ describe('seed dos times (não destrutivo)', () => {
 
       await seedTeams(db);
 
+      // O registro legado é preservado (nome e código intactos), mas fica
+      // desabilitado: só NAVS-2026 pode estar habilitado.
       const legacyRow = await db.query<{
         name: string;
         enabled: boolean;
       }>('SELECT name, enabled FROM team WHERE code = $1', ['NAVIGATORS']);
       expect(legacyRow.rows[0]).toMatchObject({
         name: 'Navigators Antigo',
-        enabled: true,
+        enabled: false,
       });
 
       // O head coach legado permanece vinculado ao time, sem alteração.
@@ -66,6 +68,12 @@ describe('seed dos times (não destrutivo)', () => {
       for (const team of TEAM_CATALOG) {
         expect(codes.rows.some((r) => r.code === team.code)).toBe(true);
       }
+
+      // Em todo o banco (catálogo + legado), apenas NAVS-2026 fica habilitado.
+      const enabled = await db.query<{ code: string }>(
+        'SELECT code FROM team WHERE enabled = true',
+      );
+      expect(enabled.rows).toEqual([{ code: 'NAVS-2026' }]);
     } finally {
       await db.close();
     }

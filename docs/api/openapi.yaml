@@ -95,9 +95,9 @@ paths:
         habilitado aceita cadastro — `NAVS-2026` (Navigators). Os demais
         (`DEVILS-2026`, `BLDS-2026`, `RNGD-2026`, `WARS-2026`, `MUTTS-2026`,
         `CRSD-2026`) existem no banco e respondem `409` (indisponível); um
-        código desconhecido responde `400` (inválido). O fluxo de time único é
-        preservado: o código de e-mail é sempre emitido contra o time
-        habilitado.
+        código desconhecido ou legado (ex. o antigo `NAVIGATORS`) responde
+        `400` (inválido). O fluxo de time único é preservado: o código de
+        e-mail é sempre emitido contra o time habilitado.
       operationId: verifyEmailCode
       requestBody:
         required: true

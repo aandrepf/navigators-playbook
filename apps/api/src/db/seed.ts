@@ -1,13 +1,16 @@
 import type { Config } from '../config.js';
 import type { Database } from './types.js';
-import { TEAM_CATALOG } from '../team.js';
+import { getActiveTeamCode, TEAM_CATALOG } from '../team.js';
 
 /**
  * Garante os times do catálogo (idempotente e não destrutivo): insere os sete
  * times que faltam e sincroniza apenas a habilitação (`enabled`) dos que já
- * existem no catálogo. Times fora do catálogo (dados legados) e nomes já
- * existentes são preservados — o seed nunca desabilita nem renomeia um time
- * que não pertence ao catálogo. Apenas o time habilitado aceita cadastro.
+ * existem no catálogo. Nomes e demais dados já existentes são preservados.
+ *
+ * Regra do produto: somente o time ativo do catálogo (NAVS-2026) pode ficar
+ * habilitado. Times fora do catálogo (dados legados, como o antigo
+ * `NAVIGATORS`) são preservados — nunca removidos nem renomeados —, mas são
+ * desabilitados para que não aceitem cadastro nem sirvam a sessão.
  */
 export async function seedTeams(db: Database): Promise<void> {
   for (const team of TEAM_CATALOG) {
@@ -18,6 +21,12 @@ export async function seedTeams(db: Database): Promise<void> {
       [team.name, team.code, team.enabled],
     );
   }
+
+  // Desabilita todo código diferente do ativo: cobre os demais do catálogo e
+  // também qualquer código legado/indisponível que já exista no banco.
+  await db.query('UPDATE team SET enabled = false WHERE code <> $1', [
+    getActiveTeamCode(),
+  ]);
 }
 
 /**
@@ -32,10 +41,15 @@ export async function seedAll(db: Database, config: Config): Promise<void> {
   await seedAdmin(db, config);
 }
 
-/** Devolve o id do único time habilitado, lançando se não houver nenhum. */
+/**
+ * Devolve o id do único time habilitado do catálogo, lançando se não houver
+ * nenhum. Resolve pelo código ativo (e não por `enabled` + `created_at`) para
+ * nunca devolver um time legado que ainda carregue `enabled` verdadeiro.
+ */
 async function getEnabledTeamId(db: Database): Promise<string> {
   const team = await db.query<{ id: string }>(
-    'SELECT id FROM team WHERE enabled = true ORDER BY created_at ASC LIMIT 1',
+    'SELECT id FROM team WHERE code = $1 AND enabled = true',
+    [getActiveTeamCode()],
   );
   const teamId = team.rows[0]?.id;
   if (!teamId) {

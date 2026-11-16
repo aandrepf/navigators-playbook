@@ -66,9 +66,11 @@ special teams coexiste com ofensiva/defesa.
 
 O seed (`src/db/seed.ts`) semeia sete times de forma idempotente e **não
 destrutiva**: insere os times que faltam e sincroniza apenas a habilitação dos
-que já existem no catálogo. Times fora do catálogo (dados legados) e nomes já
-existentes são preservados. O MVP continua atendendo **um time por vez**:
-apenas o time habilitado aceita cadastro e serve a sessão.
+que já existem no catálogo. Nomes, registros e vínculos já existentes são
+preservados — inclusive times legados fora do catálogo (como o antigo
+`NAVIGATORS`), que são mantidos no banco mas desabilitados. O MVP continua
+atendendo **um time por vez**: apenas o time habilitado aceita cadastro e serve
+a sessão.
 
 | Nome | Código | Cadastro |
 | --- | --- | --- |
@@ -80,8 +82,9 @@ apenas o time habilitado aceita cadastro e serve a sessão.
 | Mutts | `MUTTS-2026` | indisponível |
 | Crusaders | `CRSD-2026` | indisponível |
 
-No cadastro, um código desabilitado responde `409` (time indisponível) e um
-código desconhecido responde `400` (inválido). O código de e-mail é sempre
+No cadastro, um código do catálogo desabilitado responde `409` (time
+indisponível) e um código desconhecido — incluindo códigos legados como
+`NAVIGATORS` — responde `400` (inválido). O código de e-mail é sempre
 emitido contra o time habilitado, preservando o fluxo de time único.
 
 ## Testes
