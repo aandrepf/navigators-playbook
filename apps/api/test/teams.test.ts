@@ -115,7 +115,7 @@ describe('time legado (QA-03)', () => {
     expect(enabled.rows).toEqual([{ code: 'NAVS-2026' }]);
   });
 
-  it('rejeita o código legado no cadastro (400, inválido)', async () => {
+  it('responde indisponível (409) para o código legado preservado', async () => {
     const res = await ctx.app.inject({
       method: 'POST',
       url: '/auth/email/verify',
@@ -126,7 +126,7 @@ describe('time legado (QA-03)', () => {
         role: 'jogador',
       },
     });
-    expect(res.statusCode).toBe(400);
-    expect(res.json()).toEqual({ error: 'código do time inválido' });
+    expect(res.statusCode).toBe(409);
+    expect(res.json()).toEqual({ error: 'time indisponível para cadastro' });
   });
 });

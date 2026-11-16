@@ -47,12 +47,6 @@ export function getActiveTeamCode(): string {
   return enabled[0].code;
 }
 
-/** Devolve true se o código (normalizado) pertence ao catálogo oficial. */
-export function isKnownTeamCode(code: string): boolean {
-  const normalized = normalizeTeamCode(code);
-  return TEAM_CATALOG.some((team) => team.code === normalized);
-}
-
 /**
  * O MVP atende um time por vez: devolve o time habilitado do catálogo.
  * Códigos legados fora do catálogo nunca são devolvidos aqui, mesmo que ainda
