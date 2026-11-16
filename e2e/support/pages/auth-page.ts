@@ -48,7 +48,8 @@ export class AuthPage {
   }
 
   async choosePapel(papel: 'JOGADOR' | 'STAFF'): Promise<void> {
-    await this.page.getByRole('button', { name: new RegExp(`^${papel}\\b`) }).click()
+    // Caixa do rótulo não é regra de negócio ("JOGADOR" antigo, "Jogador" atual).
+    await this.page.getByRole('button', { name: new RegExp(`^${papel}\\b`, 'i') }).click()
   }
 
   /** Marca posições e envia o cadastro de jogador. */
