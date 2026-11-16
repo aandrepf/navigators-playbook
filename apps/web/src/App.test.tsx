@@ -33,6 +33,18 @@ describe('App shell', () => {
     expect(screen.queryByRole('link', { name: /elenco/i })).not.toBeInTheDocument()
   })
 
+  it('identifies the current team as Navigators in the app shell', async () => {
+    renderWithAuth(<App />, { route: '/' })
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /próximos eventos/i })).toBeInTheDocument()
+    })
+
+    const sidebar = screen.getByRole('navigation', { name: /navegação principal desktop/i })
+    expect(sidebar).toHaveTextContent(/Navigators/)
+    expect(sidebar).not.toHaveTextContent(/Navigators FA/)
+  })
+
   it('shows 6 navigation items for staff including Elenco', async () => {
     server.use(
       http.get('/auth/session', () => {
@@ -80,7 +92,7 @@ describe('Authentication flow', () => {
 
     await user.click(screen.getByRole('button', { name: /entrar com código por e-mail/i }))
 
-    await user.type(screen.getByLabelText(/código do time/i), 'NAVIGATORS-2026')
+    expect(screen.getByText(/navigators/i)).toBeInTheDocument()
     await user.type(screen.getByLabelText(/nome completo/i), 'Rafael Costa')
     await user.type(screen.getByLabelText(/e-mail/i), 'rafael@navigators.fa')
     await user.click(screen.getByRole('button', { name: /receber código de 6 dígitos/i }))
@@ -111,7 +123,7 @@ describe('Authentication flow', () => {
     renderWithAuth(<App />, { route: '/login' })
 
     await user.click(screen.getByRole('button', { name: /entrar com código por e-mail/i }))
-    await user.type(screen.getByLabelText(/código do time/i), 'NAVIGATORS-2026')
+    expect(screen.getByText(/navigators/i)).toBeInTheDocument()
     await user.type(screen.getByLabelText(/nome completo/i), 'Marcos Viana')
     await user.type(screen.getByLabelText(/e-mail/i), 'marcos@navigators.fa')
     await user.click(screen.getByRole('button', { name: /receber código de 6 dígitos/i }))

@@ -45,7 +45,7 @@ export function AppShell() {
           <div className="sidebar-team-header">
             <div className="sidebar-team-name">
               <span aria-hidden="true">⚓</span>
-              <span>Navigators FA</span>
+              <span>Navigators</span>
             </div>
             <div className="sidebar-user-meta">
               {user ? (

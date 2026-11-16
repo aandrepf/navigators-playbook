@@ -32,12 +32,21 @@ describe('AuthScreen', () => {
     })
   })
 
-  it('allows entering team code, name and email', async () => {
+  it('shows read-only team name instead of team code input', async () => {
+    renderWithRouter(<AuthScreen />)
+
+    await userEvent.click(screen.getByRole('button', { name: /entrar com código por e-mail/i }))
+
+    expect(screen.getByText(/Equipe:/i)).toBeInTheDocument()
+    expect(screen.getByText(/Navigators/i)).toBeInTheDocument()
+    expect(screen.queryByLabelText(/código do time/i)).not.toBeInTheDocument()
+  })
+
+  it('allows entering name and email', async () => {
     const user = userEvent.setup()
     renderWithRouter(<AuthScreen />)
 
     await user.click(screen.getByRole('button', { name: /entrar com código por e-mail/i }))
-    await user.type(screen.getByLabelText(/código do time/i), 'NAVIGATORS-2026')
     await user.type(screen.getByLabelText(/nome completo/i), 'Rafael Costa')
     await user.type(screen.getByLabelText(/e-mail/i), 'rafael@navigators.fa')
     await user.click(screen.getByRole('button', { name: /receber código de 6 dígitos/i }))
