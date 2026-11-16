@@ -20,7 +20,7 @@ export function LoginErrorScreen() {
 
   return (
     <div className="auth-layout">
-      <div className="auth-card">
+      <div className="auth-card" data-slot="card">
         <ErrorState message={message} onRetry={() => navigate('/login')} />
       </div>
     </div>

@@ -9,7 +9,8 @@ Pré-requisitos: Node 22, um Postgres dedicado a testes e o Chromium do Playwrig
 
 ```bash
 # 1. Postgres de testes (uma vez). O nome do banco precisa conter "e2e" ou "test".
-docker run -d --name playbook-e2e-pg -p 5432:5432 \
+# Use podman nesta máquina ou docker em outra máquina.
+podman run -d --name playbook-e2e-pg -p 5432:5432 \
   -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=playbook_e2e postgres:17
 
 # 2. Dependências e browser (uma vez)
@@ -93,10 +94,16 @@ necessário. Dados vêm da API (`docs/api`), nunca de clique para semear estado.
 
 ## Status atual
 
-32 casos ativos e 17 marcados como `fixme`, cada um executado nos dois projetos
-(64 execuções passando e 34 marcadas como *skipped*). Os `fixme` não são falhas:
-cada um aponta a dependência que falta (ver abaixo). Quando a dependência chegar,
-remova o `fixme` e preencha o corpo. Checagem de tipos: `npx tsc -p e2e/tsconfig.json`.
+32 casos ativos e 17 marcados como `fixme`, cada um executado nos dois projetos.
+O reteste final do card 01 passou duas vezes: 68 execuções verdes e nenhum
+fail, com banco zerado em cada execução. Os `fixme` não são falhas; cada um
+aponta a dependência que falta (ver abaixo). Checagem de tipos:
+`npx tsc -p e2e/tsconfig.json`.
+
+O card 01 foi aprovado sem E2E específico para manifesto PWA, service worker
+ou deploy no Railway. Esses pontos ficam como melhorias não bloqueantes e
+devem receber smoke checks próprios posteriormente, em vez de ampliar a suíte
+de fluxos de usuário.
 
 ### Bloqueados por dependência (`test.fixme`)
 
@@ -110,16 +117,17 @@ remova o `fixme` e preencha o corpo. Checagem de tipos: `npx tsc -p e2e/tsconfig
 | Jogo, marcação e game plan | Sem rotas de jogo e game plan em `docs/api`. |
 | Coordenadores por unidade | Sem aprovação de staff nem atribuição de subpapel em `docs/api`. |
 
-### Achados de produto (reproduzíveis)
+### Achados de produto
 
-1. **Cadastro duplicado de coordenador vira 500.** Com `coordenador_defensivo`
-   pendente ou ativo, um segundo `POST /auth/email/verify` com role `staff` e o
-   mesmo subpapel responde 500 (violação de `staff_role_exclusive_per_team`, sem
-   mapeamento para erro de negócio). Esperado: 4xx com mensagem.
-2. **Web sem proxy de API no dev.** `apps/web/vite.config.ts` não encaminha
-   `/auth` nem `/staff`; `npm run dev` com a API não funciona sozinho.
-3. **Retorno do Google com erro é silencioso.** Ver o `fixme` em `auth.spec.ts`.
-4. **Acúmulo de special teams descartado.** Ver o `fixme` em `cadastro.spec.ts`.
+Os três achados do card 01 foram corrigidos e retestados; consulte
+`e2e/RELATORIO-QA-01.md` para a evidência completa:
+
+1. Cadastro duplicado de coordenador retorna `409`.
+2. O web tem proxy de `/auth` e `/staff` no desenvolvimento.
+3. O retorno Google com `access_denied` exibe feedback acessível.
+
+O acúmulo de special teams continua como `fixme` de contrato/produto e pertence
+aos cards seguintes.
 
 ## Regras da suíte
 

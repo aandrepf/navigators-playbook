@@ -2,34 +2,27 @@ import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { api, ApiClientError } from '../api/client'
+import { POSITIONS_BY_UNIT } from '../domain/positions'
+import {
+  Button,
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Field,
+  FieldError,
+  FieldHint,
+  FieldLabel,
+  Input,
+} from '../components/ui'
 
 type Step =
   | 'welcome'
   | 'email'
   | 'code'
   | 'role'
-  | 'player-units'
-  | 'staff-role'
+  | 'player-positions'
   | 'pending'
-
-const POSITIONS_BY_UNIT: Record<string, string[]> = {
-  ofensiva: ['QB', 'RB', 'FB', 'WR', 'TE', 'OL'],
-  defesa: ['DL', 'LB', 'CB', 'S'],
-  special_teams: ['K', 'P', 'LS', 'KR/PR', 'Gunner'],
-}
-
-const STAFF_ROLES = [
-  {
-    value: 'coordenador_ofensivo',
-    label: 'Coordenador Ofensivo',
-    description: 'Edita jogadas da unidade ofensiva.',
-  },
-  {
-    value: 'coordenador_defensivo',
-    label: 'Coordenador Defensivo',
-    description: 'Edita jogadas da unidade defensiva.',
-  },
-] as const
 
 export function AuthScreen() {
   const { requestEmailCode, loginWithEmail } = useAuth()
@@ -41,13 +34,9 @@ export function AuthScreen() {
   const [email, setEmail] = useState('')
   const [code, setCode] = useState('')
   const [name, setName] = useState('')
+  const [phone, setPhone] = useState('')
   const [teamCode, setTeamCode] = useState('')
   const [role, setRole] = useState<'jogador' | 'staff' | null>(null)
-  const [staffRole, setStaffRole] = useState<
-    'coordenador_ofensivo' | 'coordenador_defensivo' | 'coordenador_special_teams' | ''
-  >('')
-  const [alsoSt, setAlsoSt] = useState(false)
-  const [units, setUnits] = useState<string[]>([])
   const [positions, setPositions] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -66,8 +55,8 @@ export function AuthScreen() {
     }
   }
 
-  async function handleConfirmRole() {
-    if (!role) return
+  async function handleConfirmRole(nextRole = role) {
+    if (!nextRole) return
     setLoading(true)
     setError(null)
 
@@ -76,17 +65,10 @@ export function AuthScreen() {
       code,
       teamCode,
       name,
-      role,
+      phone: phone || null,
+      role: nextRole,
     }
-
-    if (role === 'staff') {
-      const subRoles: Array<
-        'coordenador_ofensivo' | 'coordenador_defensivo' | 'coordenador_special_teams'
-      > = []
-      if (staffRole) subRoles.push(staffRole)
-      if (alsoSt) subRoles.push('coordenador_special_teams')
-      payload.staffRole = subRoles[0]
-    }
+    if (nextRole === 'jogador') payload.positions = positions
 
     try {
       const user = await loginWithEmail(payload)
@@ -99,6 +81,9 @@ export function AuthScreen() {
       if (err instanceof ApiClientError && err.status === 401) {
         setError('Código inválido ou expirado. Solicite um novo código abaixo.')
         setStep('code')
+      } else if (err instanceof ApiClientError && err.status === 400) {
+        setError(err.message)
+        setStep('email')
       } else {
         setError(err instanceof Error ? err.message : 'Erro ao verificar código.')
       }
@@ -113,27 +98,11 @@ export function AuthScreen() {
     )
   }
 
-  function handleUnitChange(unit: string) {
-    setUnits((prev) => {
-      const next = prev.includes(unit) ? prev.filter((u) => u !== unit) : [...prev, unit]
-      // Remove posições de unidades desmarcadas
-      setPositions((pos) =>
-        pos.filter((p) =>
-          next.some(
-            (u) => POSITIONS_BY_UNIT[u]?.includes(p) || POSITIONS_BY_UNIT.special_teams.includes(p),
-          ),
-        ),
-      )
-      return next
-    })
-  }
-
   async function handleGoogleLogin() {
     setLoading(true)
     setError(null)
     try {
       await api.auth.checkGoogleLogin(googleErrorFlag)
-      // Se o backend respondeu 302 manual, o fetch não segue; redirecionamos explicitamente.
       window.location.href = `/auth/google${googleErrorFlag ? `?forceError=${googleErrorFlag}` : ''}`
     } catch (err) {
       setError(
@@ -149,36 +118,34 @@ export function AuthScreen() {
   if (step === 'welcome') {
     return (
       <div className="auth-layout">
-        <div className="auth-card">
-          <div className="auth-card__header">
-            <h1 className="auth-card__title">Playbook do Time</h1>
-            <p className="auth-card__subtitle">Acesse o playbook, eventos e status do elenco do seu time.</p>
-          </div>
+        <Card className="auth-card">
+          <CardHeader className="auth-card__header">
+            <CardTitle className="auth-card__title">Playbook do Time</CardTitle>
+            <CardDescription className="auth-card__subtitle">
+              Acesse o playbook, eventos e status do elenco do seu time.
+            </CardDescription>
+          </CardHeader>
 
           {error && (
-            <div className="field-error-msg" role="alert" style={{ marginBottom: 'var(--space-3)' }}>
-              ⚠ {error}
-            </div>
+            <FieldError style={{ marginBottom: 'var(--space-3)' }}>{error}</FieldError>
           )}
 
-          <button
-            type="button"
-            className="btn btn--secondary btn--block"
+          <Button
+            variant="secondary"
+            style={{ width: '100%' }}
             onClick={handleGoogleLogin}
-            disabled={loading}
-            aria-busy={loading}
+            loading={loading}
+            loadingLabel="Conectando..."
           >
-            {loading ? 'Conectando...' : 'Continuar com Google'}
-          </button>
+            Continuar com Google
+          </Button>
 
-          <div style={{ textAlign: 'center', margin: 'var(--space-4) 0', color: 'var(--color-text-muted)' }}>
-            ou
-          </div>
+          <div className="or-divider">ou</div>
 
-          <button type="button" className="btn btn--primary btn--block" onClick={() => setStep('email')}>
+          <Button variant="default" style={{ width: '100%' }} onClick={() => setStep('email')}>
             Entrar com código por e-mail
-          </button>
-        </div>
+          </Button>
+        </Card>
       </div>
     )
   }
@@ -186,77 +153,89 @@ export function AuthScreen() {
   if (step === 'email') {
     return (
       <div className="auth-layout">
-        <form className="auth-card" onSubmit={handleRequestCode}>
-          <div className="auth-card__header">
-            <h1 className="auth-card__title">Criar conta ou entrar</h1>
-            <p className="auth-card__subtitle">Informe o código do time, seu nome e e-mail para receber um código de uso único.</p>
-          </div>
+        <Card className="auth-card">
+          <form onSubmit={handleRequestCode}>
+            <CardHeader className="auth-card__header">
+              <CardTitle className="auth-card__title">Criar conta ou entrar</CardTitle>
+              <CardDescription className="auth-card__subtitle">
+                Informe o código do time, seu nome e e-mail para receber um código de uso único.
+              </CardDescription>
+            </CardHeader>
 
-          <div className="form-group">
-            <label htmlFor="team-code" className="form-label">
-              Código do time:
-            </label>
-            <input
-              id="team-code"
-              type="text"
-              className="form-input mono"
-              value={teamCode}
-              onChange={(e) => setTeamCode(e.target.value.toUpperCase())}
-              autoCapitalize="characters"
-              spellCheck="false"
-              required
-              placeholder="NAVIGATORS-2026"
-            />
-          </div>
+            <Field>
+              <FieldLabel htmlFor="team-code">Código do time:</FieldLabel>
+              <Input
+                id="team-code"
+                type="text"
+                value={teamCode}
+                onChange={(e) => setTeamCode(e.target.value.toUpperCase())}
+                autoCapitalize="characters"
+                spellCheck="false"
+                required
+                placeholder="NAVIGATORS-2026"
+              />
+            </Field>
 
-          <div className="form-group">
-            <label htmlFor="name" className="form-label">
-              Nome completo:
-            </label>
-            <input
-              id="name"
-              type="text"
-              className="form-input"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
+            <Field>
+              <FieldLabel htmlFor="name">Nome completo:</FieldLabel>
+              <Input
+                id="name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </Field>
 
-          <div className="form-group">
-            <label htmlFor="email" className="form-label">
-              E-mail:
-            </label>
-            <input
-              id="email"
-              type="email"
-              className="form-input"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              autoComplete="email"
-            />
-          </div>
+            <Field>
+              <FieldLabel htmlFor="phone">Telefone (opcional):</FieldLabel>
+              <Input
+                id="phone"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                autoComplete="tel"
+                placeholder="+351 912 345 678"
+              />
+              <FieldHint>Usaremos este dado para futuras notificações via WhatsApp.</FieldHint>
+            </Field>
 
-          {error && (
-            <div className="field-error-msg" role="alert" style={{ marginBottom: 'var(--space-3)' }}>
-              ⚠ {error}
-            </div>
-          )}
+            <Field>
+              <FieldLabel htmlFor="email">E-mail:</FieldLabel>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+              />
+            </Field>
 
-          <button type="submit" className="btn btn--primary btn--block" disabled={loading} aria-busy={loading}>
-            {loading ? 'Enviando código...' : 'Receber código de 6 dígitos'}
-          </button>
+            {error && (
+              <FieldError style={{ marginBottom: 'var(--space-3)' }}>{error}</FieldError>
+            )}
 
-          <button
-            type="button"
-            className="btn btn--secondary btn--block"
-            style={{ marginTop: 'var(--space-3)' }}
-            onClick={() => setStep('welcome')}
-          >
-            Voltar
-          </button>
-        </form>
+            <Button
+              type="submit"
+              variant="default"
+              style={{ width: '100%' }}
+              loading={loading}
+              loadingLabel="Enviando código..."
+            >
+              Receber código de 6 dígitos
+            </Button>
+
+            <Button
+              type="button"
+              variant="secondary"
+              style={{ width: '100%', marginTop: 'var(--space-3)' }}
+              onClick={() => setStep('welcome')}
+            >
+              Voltar
+            </Button>
+          </form>
+        </Card>
       </div>
     )
   }
@@ -264,55 +243,57 @@ export function AuthScreen() {
   if (step === 'code') {
     return (
       <div className="auth-layout">
-        <form
-          className="auth-card"
-          onSubmit={(e) => {
-            e.preventDefault()
-            setStep('role')
-          }}
-        >
-          <div className="auth-card__header">
-            <h1 className="auth-card__title">Verifique seu e-mail</h1>
-            <p className="auth-card__subtitle">Digite o código de 6 dígitos enviado para {email}.</p>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="code" className="form-label">
-              Código de verificação:
-            </label>
-            <input
-              id="code"
-              type="text"
-              inputMode="numeric"
-              autoComplete="one-time-code"
-              className="form-input mono"
-              value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-              required
-              pattern="\d{6}"
-              placeholder="000000"
-              aria-invalid={Boolean(error)}
-            />
-            {error && (
-              <div className="field-error-msg" role="alert">
-                ⚠ {error}
-              </div>
-            )}
-          </div>
-
-          <button type="submit" className="btn btn--primary btn--block" disabled={loading} aria-busy={loading}>
-            Continuar
-          </button>
-
-          <button
-            type="button"
-            className="btn btn--secondary btn--block"
-            style={{ marginTop: 'var(--space-3)' }}
-            onClick={() => setStep('email')}
+        <Card className="auth-card">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              setStep('role')
+            }}
           >
-            Reenviar código
-          </button>
-        </form>
+            <CardHeader className="auth-card__header">
+              <CardTitle className="auth-card__title">Verifique seu e-mail</CardTitle>
+              <CardDescription className="auth-card__subtitle">
+                Digite o código de 6 dígitos enviado para {email}.
+              </CardDescription>
+            </CardHeader>
+
+            <Field>
+              <FieldLabel htmlFor="code">Código de verificação:</FieldLabel>
+              <Input
+                id="code"
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                required
+                pattern="\d{6}"
+                placeholder="000000"
+                error={Boolean(error)}
+              />
+              {error && <FieldError>{error}</FieldError>}
+            </Field>
+
+            <Button
+              type="submit"
+              variant="default"
+              style={{ width: '100%' }}
+              loading={loading}
+              loadingLabel="Verificando..."
+            >
+              Continuar
+            </Button>
+
+            <Button
+              type="button"
+              variant="secondary"
+              style={{ width: '100%', marginTop: 'var(--space-3)' }}
+              onClick={() => setStep('email')}
+            >
+              Reenviar código
+            </Button>
+          </form>
+        </Card>
       </div>
     )
   }
@@ -320,204 +301,143 @@ export function AuthScreen() {
   if (step === 'role') {
     return (
       <div className="auth-layout">
-        <div className="auth-card">
-          <div className="auth-card__header">
-            <h1 className="auth-card__title">Como você participa do time?</h1>
-            <p className="auth-card__subtitle">Escolha seu papel para personalizar o acesso.</p>
-          </div>
+        <Card className="auth-card">
+          <CardHeader className="auth-card__header">
+            <CardTitle className="auth-card__title">Como você participa do time?</CardTitle>
+            <CardDescription className="auth-card__subtitle">
+              Escolha seu papel para personalizar o acesso.
+            </CardDescription>
+          </CardHeader>
 
-          <button
+          <Button
             type="button"
-            className="role-option"
+            variant={role === 'jogador' ? 'default' : 'outline'}
+            style={{ width: '100%', marginBottom: 'var(--space-3)', minHeight: '72px' }}
             aria-pressed={role === 'jogador'}
             onClick={() => {
               setRole('jogador')
-              setStep('player-units')
+              setStep('player-positions')
             }}
           >
-            <span className="role-option__title">JOGADOR</span>
-            <span className="role-option__desc">Jogo em campo, consulto o playbook e respondo a eventos.</span>
-          </button>
+            <span>
+              <strong>JOGADOR</strong>
+              <br />
+              Jogo em campo, consulto o playbook e respondo a eventos.
+            </span>
+          </Button>
 
-          <button
+          <Button
             type="button"
-            className="role-option"
+            variant={role === 'staff' ? 'default' : 'outline'}
+            style={{ width: '100%', minHeight: '72px' }}
             aria-pressed={role === 'staff'}
             onClick={() => {
               setRole('staff')
-              setStep('staff-role')
+              void handleConfirmRole('staff')
             }}
           >
-            <span className="role-option__title">STAFF</span>
-            <span className="role-option__desc">Faço parte do staff técnico, edito playbook, eventos ou elenco.</span>
-          </button>
-        </div>
+            <span>
+              <strong>STAFF</strong>
+              <br />
+              Faço parte do staff técnico, edito playbook, eventos ou elenco.
+            </span>
+          </Button>
+        </Card>
       </div>
     )
   }
 
-  if (step === 'player-units') {
-    const availableUnits = ['ofensiva', 'defesa', 'special_teams']
-    const availablePositions = Array.from(
-      new Set(units.flatMap((u) => POSITIONS_BY_UNIT[u] || []).concat(POSITIONS_BY_UNIT.special_teams)),
-    )
-
+  if (step === 'player-positions') {
     return (
       <div className="auth-layout">
-        <form
-          className="auth-card"
-          onSubmit={(e) => {
-            e.preventDefault()
-            handleConfirmRole()
-          }}
-        >
-          <div className="auth-card__header">
-            <h1 className="auth-card__title">Unidades e Posições</h1>
-            <p className="auth-card__subtitle">Escolha onde joga. Special teams é incluída automaticamente.</p>
-          </div>
-
-          {error && (
-            <div className="field-error-msg" role="alert" style={{ marginBottom: 'var(--space-3)' }}>
-              ⚠ {error}
-            </div>
-          )}
-
-          <div className="form-group">
-            <span className="form-label">Unidades:</span>
-            <div className="chip-bar" role="group" aria-label="Unidades de atuação">
-              {availableUnits.map((unit) => (
-                <button
-                  key={unit}
-                  type="button"
-                  className="chip"
-                  aria-pressed={units.includes(unit)}
-                  onClick={() => handleUnitChange(unit)}
-                >
-                  {unit === 'ofensiva' && 'Ofensiva'}
-                  {unit === 'defesa' && 'Defesa'}
-                  {unit === 'special_teams' && 'Special teams'}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {availablePositions.length > 0 && (
-            <div className="form-group">
-              <span className="form-label">Posições:</span>
-              <div className="chip-bar" role="group" aria-label="Posições">
-                {availablePositions.map((position) => (
-                  <button
-                    key={position}
-                    type="button"
-                    className="chip"
-                    aria-pressed={positions.includes(position)}
-                    onClick={() => togglePosition(position)}
-                  >
-                    {position}
-                  </button>
-                ))}
-              </div>
-              {positions.length === 0 && (
-                <span className="form-hint">Selecione pelo menos uma posição.</span>
-              )}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            className="btn btn--primary btn--block"
-            disabled={positions.length === 0 || loading}
-            aria-disabled={positions.length === 0 || loading}
-            aria-busy={loading}
+        <Card className="auth-card">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              handleConfirmRole()
+            }}
           >
-            {loading ? 'Criando conta...' : 'Criar conta'}
-          </button>
-        </form>
-      </div>
-    )
-  }
+            <CardHeader className="auth-card__header">
+              <CardTitle className="auth-card__title">Suas posições</CardTitle>
+              <CardDescription className="auth-card__subtitle">
+                Escolha posições de ofensiva e/ou defesa. Elas serão validadas pelo staff.
+              </CardDescription>
+            </CardHeader>
 
-  if (step === 'staff-role') {
-    return (
-      <div className="auth-layout">
-        <form
-          className="auth-card"
-          onSubmit={(e) => {
-            e.preventDefault()
-            handleConfirmRole()
-          }}
-        >
-          <div className="auth-card__header">
-            <h1 className="auth-card__title">Subpapel do Staff</h1>
-            <p className="auth-card__subtitle">Escolha sua função no staff.</p>
-          </div>
+            {error && (
+              <FieldError style={{ marginBottom: 'var(--space-3)' }}>{error}</FieldError>
+            )}
 
-          {error && (
-            <div className="field-error-msg" role="alert" style={{ marginBottom: 'var(--space-3)' }}>
-              ⚠ {error}
-            </div>
-          )}
+            {(Object.entries(POSITIONS_BY_UNIT) as Array<[string, readonly string[]]>).map(
+              ([unit, availablePositions]) => (
+                <Field key={unit}>
+                  <FieldLabel>{unit === 'ofensiva' ? 'Ofensiva' : 'Defesa'}:</FieldLabel>
+                  <div className="btn-row" role="group" aria-label={`Posições de ${unit}`}>
+                    {availablePositions.map((position) => (
+                      <Button
+                        key={position}
+                        type="button"
+                        size="sm"
+                        variant={positions.includes(position) ? 'default' : 'outline'}
+                        aria-pressed={positions.includes(position)}
+                        onClick={() => togglePosition(position)}
+                      >
+                        {position}
+                      </Button>
+                    ))}
+                  </div>
+                </Field>
+              ),
+            )}
+            {positions.length === 0 && (
+              <FieldHint>
+                Você pode pular agora. O staff validará suas posições antes de liberar o Playbook
+                por unidade.
+              </FieldHint>
+            )}
 
-          <div className="form-group">
-            <span className="form-label">Subpapel principal:</span>
-            {STAFF_ROLES.map((option) => (
-              <label key={option.value} className="role-option" style={{ display: 'block' }}>
-                <input
-                  type="radio"
-                  name="staff-role"
-                  value={option.value}
-                  checked={staffRole === option.value}
-                  onChange={(e) => setStaffRole(e.target.value as typeof staffRole)}
-                  style={{ marginRight: 'var(--space-2)' }}
-                />
-                <span className="role-option__title">{option.label}</span>
-                <span className="role-option__desc">{option.description}</span>
-              </label>
-            ))}
-          </div>
-
-          <div className="form-group">
-            <label className="role-option" style={{ display: 'flex', alignItems: 'center' }}>
-              <input
-                type="checkbox"
-                checked={alsoSt}
-                onChange={(e) => setAlsoSt(e.target.checked)}
-                style={{ marginRight: 'var(--space-2)' }}
-              />
-              <span>
-                <span className="role-option__title">Acumulo também o subpapel de Coordenador de special teams</span>
-              </span>
-            </label>
-          </div>
-
-          <div
-            className="card card--warning"
-            style={{ marginBottom: 'var(--space-4)', fontSize: 'var(--text-sm)' }}
-          >
-            Para proteger os dados de saúde, justificativas e sigilo do playbook, cadastros de staff ficam pendentes até
-            aprovação de um Head Coach.
-          </div>
-
-          <button type="submit" className="btn btn--primary btn--block" disabled={!staffRole || loading} aria-busy={loading}>
-            {loading ? 'Criando conta...' : 'Criar conta'}
-          </button>
-        </form>
+            <Button
+              type="submit"
+              variant="default"
+              style={{ width: '100%' }}
+              disabled={loading}
+              loading={loading}
+              loadingLabel="Criando conta..."
+            >
+              Criar conta
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              style={{ width: '100%', marginTop: 'var(--space-3)' }}
+              disabled={loading}
+              onClick={() => {
+                setPositions([])
+                void handleConfirmRole('jogador')
+              }}
+            >
+              Pular posições por agora
+            </Button>
+          </form>
+        </Card>
       </div>
     )
   }
 
   return (
     <div className="auth-layout">
-      <div className="auth-card" style={{ textAlign: 'center' }}>
-        <h1 className="auth-card__title">Cadastro pendente</h1>
-        <p className="auth-card__subtitle">
-          Seu cadastro como staff está aguardando aprovação de um Head Coach. Você receberá uma notificação quando for
-          liberado.
-        </p>
-        <button type="button" className="btn btn--primary btn--block" onClick={() => navigate('/')}>
+      <Card className="auth-card" style={{ textAlign: 'center' }}>
+        <CardHeader className="auth-card__header">
+          <CardTitle className="auth-card__title">Cadastro pendente</CardTitle>
+          <CardDescription className="auth-card__subtitle">
+            Seu cadastro como staff está aguardando definição de um Admin ou Head Coach. Você
+            receberá uma notificação quando for liberado.
+          </CardDescription>
+        </CardHeader>
+        <Button variant="default" style={{ width: '100%' }} onClick={() => navigate('/')}>
           Ir para a tela inicial
-        </button>
-      </div>
+        </Button>
+      </Card>
     </div>
   )
 }

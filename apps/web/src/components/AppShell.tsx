@@ -1,19 +1,21 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { TopBar } from './TopBar'
+import { RosterStatusBadge } from './RosterStatusBadge'
+import { Badge, Avatar } from './ui'
 
 const PLAYER_NAV = [
-  { to: '/', label: 'Home', icon: '🏠' },
-  { to: '/evento', label: 'Evento', icon: '📋' },
-  { to: '/playbook', label: 'Playbook', icon: '📖' },
-  { to: '/jogo', label: 'Jogo', icon: '🏟️' },
-  { to: '/perfil', label: 'Perfil', icon: '⚙️' },
+  { to: '/', label: 'Home' },
+  { to: '/evento', label: 'Evento' },
+  { to: '/playbook', label: 'Playbook' },
+  { to: '/jogo', label: 'Jogo' },
+  { to: '/perfil', label: 'Perfil' },
 ] as const
 
 const STAFF_NAV = [
   ...PLAYER_NAV.slice(0, 4),
-  { to: '/elenco', label: 'Elenco', icon: '👥' },
-  { to: '/perfil', label: 'Perfil', icon: '⚙️' },
+  { to: '/elenco', label: 'Elenco' },
+  { to: '/perfil', label: 'Perfil' },
 ] as const
 
 function isActive(to: string, pathname: string) {
@@ -33,12 +35,12 @@ export function AppShell() {
   const navItems = isStaff ? STAFF_NAV : PLAYER_NAV
 
   return (
-    <div className="app-shell">
+    <div className="app-shell" data-slot="app-shell">
       <a href="#conteudo-principal" className="skip-link">
         Pular para o conteúdo principal
       </a>
 
-      <nav className="app-sidebar" aria-label="Navegação principal desktop">
+      <nav className="app-sidebar" data-slot="sidebar" aria-label="Navegação principal desktop">
         <div>
           <div className="sidebar-team-header">
             <div className="sidebar-team-name">
@@ -65,10 +67,7 @@ export function AppShell() {
                   className="nav-item-btn"
                   aria-current={isActive(item.to, location.pathname) ? 'page' : undefined}
                 >
-                  <span className="nav-item-btn__label">
-                    <span aria-hidden="true">{item.icon}</span>
-                    {item.label}
-                  </span>
+                  <span className="nav-item-btn__label">{item.label}</span>
                 </NavLink>
               </li>
             ))}
@@ -76,12 +75,28 @@ export function AppShell() {
         </div>
 
         {user && user.role === 'jogador' && (
-          <div className="card" style={{ padding: 'var(--space-3)', fontSize: 'var(--text-xs)' }}>
-            <div style={{ fontWeight: 700, marginBottom: 4 }}>Status do elenco</div>
-            <span className="badge badge--available">✓ Disponível</span>
-            <div style={{ color: 'var(--color-text-muted)', marginTop: 6 }}>
-              Fuso: America/Sao_Paulo
+          <div className="sidebar-roster-widget">
+            <div className="sidebar-roster-widget__label">Status do elenco</div>
+            <RosterStatusBadge status="disponivel" />
+            <div className="sidebar-roster-widget__meta">Fuso: America/Sao_Paulo</div>
+          </div>
+        )}
+
+        {user && (
+          <div className="sidebar-profile-card" data-slot="profile-card">
+            <Avatar alt={user.name ?? user.email} size="default" />
+            <div data-slot="profile-card-details">
+              <span data-slot="profile-card-name">{user.name ?? user.email}</span>
+              <span data-slot="profile-card-body">
+                {user.role === 'staff' ? 'Staff' : 'Jogador'}
+                {user.subRoles.length > 0 && ` • ${user.subRoles.join(', ')}`}
+              </span>
             </div>
+            {isPending ? (
+              <Badge variant="unavailable">Pendente</Badge>
+            ) : (
+              <Badge variant="available">Ativo</Badge>
+            )}
           </div>
         )}
       </nav>
@@ -93,7 +108,7 @@ export function AppShell() {
         </main>
       </div>
 
-      <nav className="app-bottom-nav" aria-label="Navegação principal mobile">
+      <nav className="app-bottom-nav" data-slot="bottom-nav" aria-label="Navegação principal mobile">
         {navItems.map((item) => (
           <NavLink
             key={item.to}
@@ -101,9 +116,6 @@ export function AppShell() {
             className="bottom-nav-btn"
             aria-current={isActive(item.to, location.pathname) ? 'page' : undefined}
           >
-            <span className="bottom-nav-icon" aria-hidden="true">
-              {item.icon}
-            </span>
             <span>{item.label}</span>
           </NavLink>
         ))}

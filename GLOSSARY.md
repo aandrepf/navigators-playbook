@@ -52,12 +52,18 @@ _Avoid_: roster, plantel, grupo
 Membro do elenco que consulta conteúdo e responde a eventos.
 _Avoid_: atleta, usuário
 
+**Admin**:
+Pessoa com permissão administrativa geral para operar a aplicação e
+administrar os times. Pode também possuir vínculo de staff.
+_Avoid_: superadmin, administrador do time
+
 **Staff**:
 Membro do time com acesso de edição e visão de dados restritos.
-_Avoid_: comissão técnica, admin, treinador
+_Avoid_: comissão técnica, treinador
 
 **Papel**:
-Categoria de acesso: jogador ou staff.
+Categoria esportiva de acesso: jogador ou staff. A permissão de admin é
+separada e pode coexistir com o vínculo de staff.
 _Avoid_: perfil, tipo de usuário
 
 **Subpapel**:
@@ -69,8 +75,24 @@ Subpapel aditivo que qualquer membro do staff pode acumular com o seu, e que só
 _Avoid_: ST coach
 
 **Pendente**:
-Estado de um cadastro de staff que ainda aguarda aprovação de um head coach.
+Estado de um cadastro de staff que ainda aguarda definição de um admin ou
+head coach.
 _Avoid_: em análise, não verificado
+
+**Posição pendente**:
+Posição informada ou solicitada por um jogador que ainda aguarda revisão de
+staff, head coach ou admin.
+_Avoid_: posição não verificada, posição provisória
+
+**Posição aprovada**:
+Posição validada pelo staff, head coach ou admin e usada para derivar a
+unidade visível ao jogador.
+_Avoid_: posição confirmada pelo sistema
+
+**Telefone**:
+Número opcional informado no perfil para futura comunicação por WhatsApp.
+Neste MVP não implica validação nem envio de mensagem.
+_Avoid_: celular obrigatório, contato de emergência
 
 ### Estado do jogador
 

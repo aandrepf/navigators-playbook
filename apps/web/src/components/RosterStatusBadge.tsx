@@ -1,3 +1,5 @@
+import { Badge, type BadgeProps } from './ui'
+
 export type RosterStatus =
   | 'disponivel'
   | 'indisponivel'
@@ -6,16 +8,12 @@ export type RosterStatus =
 
 const STATUS_CONFIG: Record<
   RosterStatus,
-  { label: string; className: string; icon: string }
+  { label: string; variant: BadgeProps['variant'] }
 > = {
-  disponivel: { label: 'Disponível', className: 'badge--available', icon: '✓' },
-  indisponivel: {
-    label: 'Indisponível',
-    className: 'badge--unavailable',
-    icon: '!',
-  },
-  lesionado: { label: 'Lesionado', className: 'badge--injured', icon: '+' },
-  reformado: { label: 'Reformado', className: 'badge--retired', icon: '—' },
+  disponivel: { label: 'Disponível', variant: 'available' },
+  indisponivel: { label: 'Indisponível', variant: 'unavailable' },
+  lesionado: { label: 'Lesionado', variant: 'injured' },
+  reformado: { label: 'Reformado', variant: 'retired' },
 }
 
 export function RosterStatusBadge({
@@ -27,14 +25,11 @@ export function RosterStatusBadge({
 }) {
   const config = STATUS_CONFIG[status]
   return (
-    <span className={`badge ${config.className}`}>
-      <span aria-hidden="true">{config.icon}</span>
+    <Badge variant={config.variant}>
       {config.label}
       {status === 'lesionado' && returnDate && (
-        <span className="mono" style={{ marginLeft: 'var(--space-1)' }}>
-          (retorno {returnDate})
-        </span>
+        <span style={{ marginLeft: 'var(--space-1)' }}>(retorno {returnDate})</span>
       )}
-    </span>
+    </Badge>
   )
 }

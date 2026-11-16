@@ -6,10 +6,11 @@ treino, disponibilidade para jogo e status do elenco.
 ## Estrutura
 
 ```
-apps/web   React + TypeScript + Vite (front-end e PWA)
-apps/api   Fastify + Postgres (backend; contrato em docs/api/)
-docs/adr   decisões arquiteturais
-.scratch   spec e tickets (tracker local)
+apps/web      React + TypeScript + Vite (front-end, PWA e biblioteca UI P0 em src/components/ui/)
+apps/api      Fastify + Postgres (backend; contrato em docs/api/)
+docs/design   sistema de design Vega, inventário Figma autenticado e protótipo navegável (prototype/index.html)
+docs/adr      decisões arquiteturais
+.scratch      spec e tickets (tracker local)
 ```
 
 Workspaces npm na raiz. Cada app tem o próprio `package.json`; os comandos
@@ -27,6 +28,20 @@ npm run lint       # oxlint
 npm test           # testes de todos os workspaces
 npm run test:watch # vitest em modo watch (front)
 ```
+
+### Ambiente Postgres com Podman ou Docker
+
+O ambiente containerizado é portátil entre Podman e Docker. Ele está
+documentado em [`docs/operations/CONTAINERS.md`](docs/operations/CONTAINERS.md).
+
+```bash
+podman compose up --build -d   # nesta máquina
+# ou: docker compose up --build -d
+curl http://localhost:3000/health
+```
+
+O Compose usa Postgres 17 e executa migrações/seed antes da API iniciar.
+Não use o banco de desenvolvimento para os testes E2E.
 
 ### Testes
 

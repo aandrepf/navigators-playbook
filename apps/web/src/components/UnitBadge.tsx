@@ -1,20 +1,14 @@
+import { Badge, type BadgeProps } from './ui'
+
 type Unit = 'ofensiva' | 'defesa' | 'special_teams'
 
-const UNIT_CONFIG: Record<
-  Unit,
-  { label: string; className: string; icon: string }
-> = {
-  ofensiva: { label: 'OFENSIVA', className: 'badge--offense', icon: '⚔️' },
-  defesa: { label: 'DEFESA', className: 'badge--defense', icon: '🛡️' },
-  special_teams: { label: 'SPECIAL TEAMS', className: 'badge--st', icon: '🦶' },
+const UNIT_CONFIG: Record<Unit, { label: string; variant: BadgeProps['variant'] }> = {
+  ofensiva: { label: 'OFENSIVA', variant: 'offense' },
+  defesa: { label: 'DEFESA', variant: 'defense' },
+  special_teams: { label: 'SPECIAL TEAMS', variant: 'st' },
 }
 
 export function UnitBadge({ unit }: { unit: Unit }) {
   const config = UNIT_CONFIG[unit]
-  return (
-    <span className={`badge ${config.className}`}>
-      <span aria-hidden="true">{config.icon}</span>
-      {config.label}
-    </span>
-  )
+  return <Badge variant={config.variant}>{config.label}</Badge>
 }

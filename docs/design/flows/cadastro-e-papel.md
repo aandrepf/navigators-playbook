@@ -1,83 +1,109 @@
-# Fluxo 1: Cadastro, Autenticação e Escolha de Papel (`docs/design/flows/cadastro-e-papel.md`)
+# Fluxo 1: Cadastro, Autenticação e Escolha de Papel
 
-## 1. Visão Geral
+## 1. Visão geral
 
-Permite que qualquer membro do **time** crie sua conta usando o **código do time** (sem depender de o staff criar cada usuário manualmente — ADR-0005), confirme sua identidade via **código por e-mail** ou **conta Google** (sem senha e sem Instagram), e escolha seu **papel**:
-- Se **jogador**: escolhe em quais **unidades** joga (`Ofensiva`, `Defesa` ou `Ambas`) e suas **posições** (uma ou mais), entrando direto na **Home**.
-- Se **staff**: escolhe seu **subpapel** (`Head coach`, `Coordenador ofensivo`, `Coordenador defensivo` e/ou `Coordenador de special teams`) e permanece no estado **pendente** até que um **head coach** aprove seu acesso.
+Qualquer membro do **time** pode criar uma conta usando o código do time,
+confirmar sua identidade por código de e-mail ou Google e escolher o papel
+`jogador` ou `staff`.
 
-Histórias do spec atendidas: `1`, `2`, `3`, `4`, `5`, `6`, `7`, `8`, `11`, `12`.
+- Jogador entra `ativo`, pode escolher posições ou pular essa etapa.
+- Posições informadas pelo jogador ficam pendentes de validação.
+- Staff não escolhe subpapel no cadastro e entra `pendente`.
+- Admin geral é configurado pelo ambiente/seed; não pode ser autoatribuído.
+- O onboarding de e-mail e Google é o mesmo após a identidade ser confirmada.
 
----
-
-## 2. Diagrama do Fluxo Passo a Passo
+## 2. Fluxo
 
 ```text
-[Tela de Entrada / Boas-vindas]
-   ├─ Já tem conta? ──► [Entrar com Google OAuth] OU [Digitar E-mail -> Código de 6 dígitos] ──► [Sessão Ativa (Cookie httpOnly)]
-   │
-   └─ Primeiro acesso no time:
-        │
-        ▼
-[Passo 1: Código do Time + Identidade]
-   - Campo: Código do time (ex.: NAVIGATORS-2026)
-   - Campo: Nome completo
-   - Escolha de autenticação:
-       (A) Continuar com Google (1 toque)
-       (B) Informar e-mail -> Receber código de verificação de uso único
-        │
-        ▼
-[Passo 2: Confirmação do E-mail (apenas caminho B)]
-   - Campo numérico de 6 dígitos (inputmode="numeric", autocomplete="one-time-code")
-   - Botão "Reenviar código" com cooldown de 30s
-        │
-        ▼
-[Passo 3: Escolha de Papel ("Como você participa do time?")]
-   │
-   ├──► Opção A: JOGADOR ("Jogo em campo, consulto o playbook e respondo a eventos")
-   │       │
-   │       ▼
-   │    [Passo 3A: Unidades e Posições]
-   │       - Escolha de Unidade: ( ) Ofensiva  ( ) Defesa  ( ) Ambas (Ofensiva e Defesa)
-   │         (Nota: Special teams é incluída automaticamente para todo o time)
-   │       - Escolha de Posições (múltipla escolha, min. 1):
-   │         Ex.: [✓ WR] [✓ KR]
-   │       - Nota tranquilizadora: "Você poderá corrigir suas posições depois no Perfil."
-   │       │
-   │       ▼
-   │    [Destino: HOME (Estado Ativo — acesso imediato ao Playbook da sua unidade e Eventos)]
-   │
-   └──► Opção B: STAFF ("Faço parte do staff técnico, edito playbook, eventos ou elenco")
-           │
-           ▼
-        [Passo 3B: Escolha de Subpapel]
-           - Subpapel principal:
-             ( ) Head coach
-             ( ) Coordenador ofensivo
-             ( ) Coordenador defensivo
-           - Checkbox aditivo:
-             [ ] Acumulo também o subpapel de Coordenador de special teams
-           - Aviso de segurança (ADR-0005):
-             "Para proteger os dados de saúde, justificativas e sigilo do playbook,
-              cadastros de staff ficam pendentes até aprovação de um Head coach."
-           │
-           ▼
-        [Destino: TELA DE CADASTRO PENDENTE (Aguardando aprovação do Head Coach)]
+[Boas-vindas]
+   ├─ Google ─► [Identidade confirmada]
+   └─ E-mail ─► [Código de 6 dígitos] ─► [Identidade confirmada]
+                                      │
+                                      ▼
+                         [Código do time + nome + telefone opcional]
+                                      │
+                                      ▼
+                          [Escolha: jogador ou staff]
+                              │             │
+                 ┌────────────┘             └──────────────┐
+                 ▼                                         ▼
+       [Jogador: posições]                     [Staff: sem subpapel]
+          ├─ selecionar                             │
+          └─ pular                                 ▼
+                 │                         [Estado pendente]
+                 ▼                                  │
+       [Conta ativa + posições                 [Home com aviso;
+        pendentes, se houver]                   sem módulos protegidos]
 ```
 
----
+## 3. Dados coletados
 
-## 3. Regras de Interface, Validação e Acessibilidade
+- Código do time: obrigatório.
+- Nome completo: obrigatório no cadastro manual; nome disponível do Google
+  pode preencher o campo.
+- E-mail: obrigatório e verificado.
+- Telefone: opcional, armazenado para futura integração WhatsApp.
+- Papel: `jogador` ou `staff`.
+- Posições: opcionais para jogador; proibidas para staff no payload de
+  cadastro.
 
-1. **Prevenção de erro no Código do Time**:
-   - Campo com `autocapitalize="characters"`, `spellcheck="false"` e `font-family: var(--font-mono)`.
-   - Se o código do time for inválido: estado `aria-invalid="true"`, borda `#FB7185` e mensagem `"Código do time não reconhecido. Peça o código atualizado ao staff do seu time."`
-2. **Código de Verificação por E-mail**:
-   - `inputmode="numeric"` e `autocomplete="one-time-code"` para preenchimento automático a partir do teclado do iOS/Android.
-   - Se o código estiver expirado ou incorreto: exibe `"Código inválido ou expirado. Solicite um novo código abaixo."` sem limpar o e-mail digitado.
-3. **Escolha Múltipla de Posições (Histórias 4, 5, 6)**:
-   - As posições disponíveis são filtradas ou agrupadas conforme a(s) unidade(s) marcada(s), mantendo sempre visíveis as posições de `Special teams` (`K`, `P`, `LS`, `KR/PR`, `Gunner`).
-   - Se o jogador já havia sido pré-cadastrado no elenco pelo staff (história 77), o backend vincula a conta pelo e-mail/identificador e pré-preenche as posições registradas pelo staff para simples confirmação.
-4. **Sessão Persistente e Logout (Histórias 11, 12)**:
-   - O login mantém a sessão entre visitas via cookie `httpOnly` com expiração deslizante, evitando autenticar antes de cada treino.
-   - Em aparelho compartilhado, o botão `"Sair da conta"` no **Perfil** encerra a sessão imediatamente e retorna à tela de entrada.
+## 4. Posições e unidades
+
+O jogador pode selecionar múltiplas posições:
+
+- Ofensiva: `QB`, `RB`, `FB`, `WR`, `TE`, `OL`.
+- Defesa: `DL`, `LB`, `CB`, `S`.
+
+Special teams (`K`, `P`, `LS`, `KR/PR`, `Gunner`) não é escolhida no cadastro
+inicial e pode ser atribuída posteriormente por staff ativo. Uma posição de
+special teams pode coexistir com ofensiva e defesa.
+
+As unidades são derivadas das posições aprovadas. Posições escolhidas pelo
+jogador começam `pendente`; posições aprovadas por staff, head coach ou admin
+passam a derivar unidades liberadas para conteúdo específico.
+
+O jogador pode usar **Pular por agora**. Nesse caso, a conta continua ativa,
+mas o jogador vê um aviso no Perfil e não acessa conteúdo específico de
+unidade até possuir uma posição aprovada.
+
+## 5. Staff e administração
+
+Staff não escolhe subpapel no cadastro. Entra pendente e não recebe
+permissões de edição ou leitura protegida.
+
+- Admin geral administra toda a aplicação.
+- Head coach administra posições e permissões esportivas do time.
+- Staff ativo revisa solicitações de posições.
+- Staff ativo pode atribuir posições de special teams.
+- Admin e head coach podem atribuir qualquer posição.
+- Subpapéis (`head_coach`, coordenadores e special teams) são atribuídos
+  posteriormente por admin ou head coach.
+
+## 6. Validação e acessibilidade
+
+1. Código do time:
+   - obrigatório;
+   - `autocapitalize="characters"`;
+   - `spellcheck="false"`;
+   - código inválido retorna erro específico associado ao campo.
+2. Código de e-mail:
+   - `inputmode="numeric"`;
+   - `autocomplete="one-time-code"`;
+   - código inválido ou expirado não limpa o e-mail.
+3. Posições:
+   - seleção múltipla com componentes da biblioteca UI;
+   - estado selecionado exposto com `aria-pressed`;
+   - botão de skip sempre disponível;
+   - posição pendente visível no Perfil.
+4. Estados protegidos:
+   - jogador sem posição aprovada vê Home/Perfil, mas não conteúdo específico
+     de unidade;
+   - staff pendente vê apenas sua situação.
+
+## 7. Escopo por card
+
+- **Card 02:** cadastro, persistência inicial, estado pendente de posição e
+  onboarding compartilhado.
+- **Card 03:** integração Google reutilizando este onboarding.
+- **Card 04:** Perfil, solicitação de alteração e dados pessoais.
+- **Card 06:** aprovação de staff, subpapéis, fila e governança de posições.

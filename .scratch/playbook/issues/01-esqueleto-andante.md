@@ -13,3 +13,15 @@
 - [ ] Testes nos dois seams: API via `app.inject` com Postgres efêmero e uma tela com MSW
 - [ ] Deploy no Railway com Postgres gerenciado, variáveis de ambiente documentadas
 - [ ] Datas e prazos exibidos no fuso `America/Sao_Paulo`
+
+## Decisão de QA
+
+O card pode ser concluído sem E2E específico para manifesto PWA, service worker
+ou deploy no Railway. Esses itens foram validados por build/configuração e
+ficam registrados como melhorias posteriores:
+
+- adicionar smoke check automatizado do manifesto e do service worker;
+- adicionar smoke check pós-deploy do Railway.
+
+Os fluxos críticos do card foram cobertos pela suíte Playwright; o relatório
+final está em `e2e/RELATORIO-QA-01.md`.

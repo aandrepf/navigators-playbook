@@ -107,8 +107,9 @@ export function cookieHeader(name: string, value: string): { cookie: string } {
 export interface RegisterOptions {
   email: string;
   name?: string;
+  phone?: string;
   role: 'jogador' | 'staff';
-  staffRole?: string;
+  positions?: string[];
 }
 
 /**
@@ -127,14 +128,15 @@ export async function registerViaEmail(
   const code = ctx.mailer.lastCodeFor(opts.email);
   if (!code) throw new Error(`código não emitido para ${opts.email}`);
 
-  const payload: Record<string, string> = {
+  const payload: Record<string, unknown> = {
     email: opts.email,
     code,
     teamCode: TEST_TEAM_CODE,
     role: opts.role,
   };
   if (opts.name) payload.name = opts.name;
-  if (opts.staffRole) payload.staffRole = opts.staffRole;
+  if (opts.phone) payload.phone = opts.phone;
+  if (opts.positions) payload.positions = opts.positions;
 
   return ctx.app.inject({
     method: 'POST',

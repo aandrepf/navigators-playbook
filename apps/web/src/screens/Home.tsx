@@ -1,15 +1,28 @@
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { LoadingState } from '../components/LoadingState'
 import { ErrorState } from '../components/ErrorState'
 import { UnitBadge } from '../components/UnitBadge'
 import { PwaInstallBanner } from '../components/PwaInstallBanner'
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+  SectionHeading,
+} from '../components/ui'
 import type { User } from '../api/client'
 
 export function Home() {
   const { state } = useAuth()
+  const navigate = useNavigate()
 
   if (state.status === 'loading') {
-    return <LoadingState label="Carregando painel inicial" />
+    return <LoadingState label="Carregando home" />
   }
 
   if (state.status === 'error') {
@@ -27,83 +40,82 @@ export function Home() {
       <PwaInstallBanner />
 
       {user?.subRoles.includes('head_coach') && (
-        <div className="card card--warning">
-          <div className="card__header">
+        <Card variant="warning">
+          <CardHeader>
             <div>
-              <span className="badge badge--unavailable">! APROVAÇÃO DE STAFF PENDENTE</span>
-              <h2 className="card__title" style={{ marginTop: 'var(--space-1)' }}>
+              <Badge variant="unavailable">APROVAÇÃO DE STAFF PENDENTE</Badge>
+              <CardTitle style={{ marginTop: 'var(--space-1)' }}>
                 Cadastros de staff aguardam sua aprovação
-              </h2>
+              </CardTitle>
             </div>
-            <a href="/elenco" className="btn btn--primary">
+            <Button variant="default" size="sm" onClick={() => navigate('/elenco')}>
               Revisar no Elenco →
-            </a>
-          </div>
-          <p className="card__meta" style={{ margin: 0 }}>
+            </Button>
+          </CardHeader>
+          <CardContent style={{ margin: 0 }}>
             Acesse a tela Elenco para aprovar ou recusar novos membros do staff.
-          </p>
-        </div>
+          </CardContent>
+        </Card>
       )}
 
       <div className="grid-2col">
         <div className="stack-md">
-          <div className="section-header" style={{ marginBottom: 0 }}>
-            <div>
-              <h2 id="home-title" className="section-title">
-                Próximos Eventos
-              </h2>
-              <p className="section-subtitle">Responda antes do prazo para atualizar presença e marcação</p>
-            </div>
+          <div id="home-title">
+            <SectionHeading
+              title="Próximos Eventos"
+              body="Responda antes do prazo para atualizar presença e marcação"
+            />
           </div>
 
-          <article className="card">
-            <div className="card__header">
+          <Card>
+            <CardHeader>
               <div className="badge-row">
                 <UnitBadge unit="ofensiva" />
-                <span className="badge badge--unavailable mono">⏳ Prazo: Sex 15/11 • 14:00</span>
+                <Badge variant="outline">Prazo: Sex 15/11 • 14:00</Badge>
               </div>
-              <span className="badge badge--unavailable">! Sem resposta</span>
-            </div>
-            <h3 className="card__title">Treino Tático — Instalação Red Zone</h3>
-            <p className="card__meta">Sáb, 16/11/2026 • 14:00 às 17:00 • Campo Suplementar Sul</p>
-            <div className="btn-row" style={{ marginTop: 'var(--space-3)' }}>
-              <button type="button" className="btn btn--success">
-                ✓ Vou ao treino
-              </button>
-              <button type="button" className="btn btn--danger">
-                ✕ Não vou (justificar)
-              </button>
-            </div>
-          </article>
+              <Badge variant="unavailable">Sem resposta</Badge>
+            </CardHeader>
+            <CardTitle>Treino Tático — Instalação Red Zone</CardTitle>
+            <CardDescription>
+              Sáb, 16/11/2026 • 14:00 às 17:00 • Campo Suplementar Sul
+            </CardDescription>
+            <CardFooter>
+              <Button variant="success" size="sm">
+                Vou ao treino
+              </Button>
+              <Button variant="destructive" size="sm">
+                Não vou (justificar)
+              </Button>
+            </CardFooter>
+          </Card>
         </div>
 
         <div className="stack-md">
-          <div className="section-header" style={{ marginBottom: 0 }}>
-            <div>
-              <h2 className="section-title">Novidades do Playbook</h2>
-              <p className="section-subtitle">Jogadas visíveis atualizadas desde seu último estudo</p>
-            </div>
-            <a href="/playbook" className="btn btn--secondary">
+          <SectionHeading
+            title="Novidades do Playbook"
+            body="Jogadas visíveis atualizadas desde seu último estudo"
+            justification="space-between"
+          >
+            <Button variant="outline" size="sm" onClick={() => navigate('/playbook')}>
               Abrir Playbook
-            </a>
-          </div>
+            </Button>
+          </SectionHeading>
 
-          <article className="card card--highlight">
-            <div className="card__header">
+          <Card variant="highlight">
+            <CardHeader>
               <div className="badge-row">
-                <span className="badge badge--new">★ NOVO • v3</span>
+                <Badge variant="new">NOVO • v3</Badge>
                 <UnitBadge unit="ofensiva" />
-                <span className="badge badge--position">Shotgun Trips Right</span>
+                <Badge variant="position">Shotgun Trips Right</Badge>
               </div>
-              <span className="mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)' }}>
-                3rd & 6–10
-              </span>
-            </div>
-            <h3 className="card__title">Flood Right Z-Post</h3>
-            <p className="card__meta">
-              Sua atribuição (<strong>WR-Z</strong>): Rota Post profunda (18–20 jardas) atacando o terço médio contra Cover 3.
-            </p>
-          </article>
+              <span className="situation">3rd & 6–10</span>
+            </CardHeader>
+            <CardTitle>Flood Right Z-Post</CardTitle>
+            <CardDescription>
+              Sua atribuição (<strong>WR-Z</strong>): Rota Post profunda (18–20 jardas) atacando o
+              terço médio contra Cover 3.
+            </CardDescription>
+          </Card>
         </div>
       </div>
     </section>
@@ -111,25 +123,30 @@ export function Home() {
 }
 
 function PendingStaffHome({ user }: { user: User }) {
+  const navigate = useNavigate()
+
   return (
-    <section className="card card--warning" aria-labelledby="pending-staff-heading">
-      <div className="badge-row" style={{ marginBottom: 'var(--space-3)' }}>
-        <span className="badge badge--unavailable">! Aguardando aprovação do Head Coach</span>
-      </div>
-      <h2 id="pending-staff-heading" className="section-title">
-        Seu cadastro como Staff está pendente
-      </h2>
-      <p className="section-subtitle" style={{ marginTop: 'var(--space-2)', fontSize: 'var(--text-base)' }}>
-        Você solicitou acesso no papel de <strong>Staff ({formatSubRoles(user.subRoles)})</strong>. Por segurança do playbook e
-        proteção das justificativas e status de lesão do elenco, seu acesso de edição e leitura restrita será liberado assim que um{' '}
-        <strong>Head Coach</strong> aprovar sua conta.
-      </p>
-      <div className="btn-row" style={{ marginTop: 'var(--space-4)' }}>
-        <a href="/perfil" className="btn btn--secondary">
-          Falar com o staff
-        </a>
-      </div>
-    </section>
+    <Card variant="warning" aria-labelledby="pending-staff-heading">
+      <CardContent>
+        <div className="badge-row" style={{ marginBottom: 'var(--space-3)' }}>
+          <Badge variant="unavailable">Aguardando aprovação do Head Coach</Badge>
+        </div>
+        <h2 id="pending-staff-heading" className="section-title" data-slot="section-heading-title">
+          Seu cadastro como Staff está pendente
+        </h2>
+        <p style={{ marginTop: 'var(--space-2)', fontSize: 'var(--text-base)' }}>
+          Você solicitou acesso no papel de <strong>Staff ({formatSubRoles(user.subRoles)})</strong>.
+          Por segurança do playbook e proteção das justificativas e status de lesão do elenco, seu
+          acesso de edição e leitura restrita será liberado assim que um{' '}
+          <strong>Head Coach</strong> aprovar sua conta.
+        </p>
+        <div className="btn-row" style={{ marginTop: 'var(--space-4)' }}>
+          <Button variant="secondary" onClick={() => navigate('/perfil')}>
+            Falar com o staff
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 

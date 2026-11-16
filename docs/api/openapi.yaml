@@ -77,7 +77,9 @@ paths:
       summary: Verifica o código e abre sessão (cria o usuário no primeiro acesso)
       description: |
         Se o e-mail ainda não existe no time, cria o usuário: `jogador` entra
-        `ativo`; `staff` entra `pendente` com o `staffRole` auto-declarado.
+        `ativo`, com posições opcionais pendentes de validação; `staff` entra
+        `pendente` sem subpapel. O cadastro por e-mail e o onboarding após
+        Google usam as mesmas regras de papel e posições.
         A resposta define o cookie de sessão (`httpOnly`, `secure`,
         `sameSite=lax`).
       operationId: verifyEmailCode
@@ -94,10 +96,14 @@ paths:
                 code: { type: string, pattern: '^\d{6}$' }
                 teamCode: { type: string }
                 name: { type: string }
+                phone:
+                  type: [string, 'null']
+                  description: Telefone opcional para futura integração WhatsApp.
                 role: { type: string, enum: [jogador, staff] }
-                staffRole:
-                  type: string
-                  enum: [coordenador_ofensivo, coordenador_defensivo, coordenador_special_teams]
+                positions:
+                  type: array
+                  description: Opcional para jogador; proibido para staff.
+                  items: { type: string }
       responses:
         '200':
           description: Autenticado; cookie de sessão definido
@@ -115,12 +121,7 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
-          description: Código inválido/expirado ou código do time inválido
-          content:
-            application/json:
-              schema: { $ref: '#/components/schemas/Error' }
-        '409':
-          description: Subpapel de staff exclusivo já ocupado por outro membro
+          description: Código de e-mail inválido ou expirado
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
@@ -199,7 +200,7 @@ paths:
     get:
       tags: [Staff]
       summary: Lista cadastros de staff aguardando aprovação
-      description: Restrito a `head_coach` ativo. A aprovação/recusa é o próximo item.
+      description: Restrito a admin ou `head_coach` ativo. A aprovação/recusa é o próximo item.
       operationId: listPendingStaff
       security:
         - sessionCookie: []
@@ -230,29 +231,50 @@ components:
   schemas:
     User:
       type: object
-      required: [id, email, name, role, approvalState, subRoles]
+      required: [id, email, name, phone, role, approvalState, subRoles, positions, units, isAdmin]
       properties:
         id: { type: string, format: uuid }
         email: { type: string, format: email }
         name: { type: [string, 'null'] }
+        phone: { type: [string, 'null'] }
         role: { type: string, enum: [jogador, staff] }
         approvalState: { type: string, enum: [ativo, pendente, recusado] }
+        isAdmin:
+          type: boolean
+          description: Permissão administrativa geral, independente do papel esportivo.
         subRoles:
           type: array
           items:
             type: string
             enum: [head_coach, coordenador_ofensivo, coordenador_defensivo, coordenador_special_teams]
+        positions:
+          type: array
+          items: { $ref: '#/components/schemas/PlayerPosition' }
+        units:
+          type: array
+          items:
+            type: string
+            enum: [ofensiva, defesa, special_teams]
+
+    PlayerPosition:
+      type: object
+      required: [unit, position, approvalState]
+      properties:
+        unit:
+          type: string
+          enum: [ofensiva, defesa, special_teams]
+        position: { type: string }
+        approvalState:
+          type: string
+          enum: [pendente, aprovada]
 
     PendingStaff:
       type: object
-      required: [id, email, name, requestedSubrole, createdAt]
+      required: [id, email, name, createdAt]
       properties:
         id: { type: string, format: uuid }
         email: { type: string, format: email }
         name: { type: [string, 'null'] }
-        requestedSubrole:
-          type: string
-          enum: [coordenador_ofensivo, coordenador_defensivo, coordenador_special_teams]
         createdAt: { type: string, format: date-time }
 
     Error:
@@ -260,6 +282,7 @@ components:
       required: [error]
       properties:
         error: { type: string }
+        field: { type: string }
 
   responses:
     BadRequest:

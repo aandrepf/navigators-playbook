@@ -3,6 +3,18 @@ import { useAuth } from '../hooks/useAuth'
 import { LoadingState } from '../components/LoadingState'
 import { EmptyState } from '../components/EmptyState'
 import { UnitBadge } from '../components/UnitBadge'
+import {
+  Badge,
+  Button,
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Field,
+  FieldLabel,
+  Input,
+  SectionHeading,
+} from '../components/ui'
 
 export function Playbook() {
   const { state } = useAuth()
@@ -30,103 +42,89 @@ export function Playbook() {
 
   return (
     <section aria-labelledby="playbook-title" className="stack-md">
-      <div className="section-header">
-        <div>
-          <h2 id="playbook-title" className="section-title">
-            Playbook do Time
-          </h2>
-          <p className="section-subtitle">
-            Jogadas estruturadas por unidade, formação, situação e atribuição por posição.
-          </p>
-        </div>
+      <SectionHeading
+        title="Playbook do Time"
+        body="Jogadas estruturadas por unidade, formação, situação e atribuição por posição."
+        justification="space-between"
+      >
         {state.status === 'authenticated' && state.user.role === 'staff' && (
-          <button type="button" className="btn btn--primary">
-            + Criar jogada
-          </button>
+          <Button variant="default">Criar jogada</Button>
         )}
-      </div>
+      </SectionHeading>
 
-      <div className="card">
-        <div className="form-group" style={{ marginBottom: 0 }}>
-          <label htmlFor="playbook-search" className="form-label">
-            Buscar jogada por nome:
-          </label>
-          <input
+      <Card>
+        <Field style={{ marginBottom: 0 }}>
+          <FieldLabel htmlFor="playbook-search">Buscar jogada por nome:</FieldLabel>
+          <Input
             type="search"
             id="playbook-search"
-            className="form-input"
             placeholder="Ex.: Flood Right, Inside Zone, Return..."
           />
-        </div>
-      </div>
+        </Field>
+      </Card>
 
       <div className="split-master-detail">
         <div className="stack-sm">
-          <article className="card card--highlight">
-            <div className="card__header">
+          <Card variant="highlight">
+            <CardHeader>
               <div className="badge-row">
-                <span className="badge badge--new">★ NOVO • v3</span>
+                <Badge variant="new">NOVO • v3</Badge>
                 <UnitBadge unit="ofensiva" />
               </div>
-              <span className="mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)' }}>
-                3rd & 6–10
-              </span>
-            </div>
-            <h3 className="card__title">Flood Right Z-Post</h3>
-            <p className="card__meta">Formação: <strong>Shotgun Trips Right</strong></p>
-          </article>
+              <span className="situation">3rd & 6–10</span>
+            </CardHeader>
+            <CardTitle>Flood Right Z-Post</CardTitle>
+            <CardDescription>
+              Formação: <strong>Shotgun Trips Right</strong>
+            </CardDescription>
+          </Card>
 
-          <article className="card">
-            <div className="card__header">
+          <Card>
+            <CardHeader>
               <div className="badge-row">
-                <span className="badge badge--new">★ NOVO • v2</span>
+                <Badge variant="new">NOVO • v2</Badge>
                 <UnitBadge unit="special_teams" />
               </div>
-              <span className="mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)' }}>
-                Kickoff
-              </span>
-            </div>
-            <h3 className="card__title">Return Left Wedge Wall</h3>
-            <p className="card__meta">Formação: <strong>Kickoff Return Left</strong> • Visível para todo o time</p>
-          </article>
+              <span className="situation">Kickoff</span>
+            </CardHeader>
+            <CardTitle>Return Left Wedge Wall</CardTitle>
+            <CardDescription>
+              Formação: <strong>Kickoff Return Left</strong> • Visível para todo o time
+            </CardDescription>
+          </Card>
         </div>
 
-        <div className="card">
-          <div className="card__header">
+        <Card>
+          <CardHeader>
             <div>
               <div className="badge-row" style={{ marginBottom: 'var(--space-1)' }}>
-                <span className="badge badge--new">★ NOVIDADE NÃO ESTUDADA</span>
+                <Badge variant="new">NOVIDADE NÃO ESTUDADA</Badge>
                 <UnitBadge unit="ofensiva" />
-                <span className="badge badge--position mono">Versão atual: v3</span>
+                <Badge variant="position">Versão atual: v3</Badge>
               </div>
-              <h3 className="section-title">Flood Right Z-Post</h3>
-              <p className="card__meta">
-                <strong>Formação:</strong> Shotgun Trips Right • <strong>Situação:</strong> 3rd & 6–10
-              </p>
+              <CardTitle>Flood Right Z-Post</CardTitle>
+              <CardDescription>
+                <strong>Formação:</strong> Shotgun Trips Right • <strong>Situação:</strong> 3rd &
+                6–10
+              </CardDescription>
             </div>
-            <button type="button" className="btn btn--primary">
-              ✓ Marcar que estudei esta jogada
-            </button>
-          </div>
+            <Button variant="default">Marcar que estudei</Button>
+          </CardHeader>
 
-          <h4 style={{ margin: 'var(--space-4) 0 var(--space-2) 0', fontSize: 'var(--text-base)' }}>
-            Atribuições de Todas as Posições
-          </h4>
+          <h4 className="subsection-title">Atribuições de Todas as Posições</h4>
           <div className="assignment-list">
             <div className="assignment-item assignment-item--mine">
               <div>
-                <span className="badge badge--position">WR-Z</span>
-                <div style={{ fontSize: 11, color: 'var(--color-brand-primary)', fontWeight: 700, marginTop: 2 }}>
-                  SUA POSIÇÃO
-                </div>
+                <Badge variant="position">WR-Z</Badge>
+                <div className="position-hint">SUA POSIÇÃO</div>
               </div>
               <div>
-                <strong>Rota Z-Post (18–20 jardas):</strong> Saída externa forçando o CB a abrir quadril; quebrar aos 14
-                jardas em Post atacando o terço profundo central.
+                <strong>Rota Z-Post (18–20 jardas):</strong> Saída externa forçando o CB a abrir
+                quadril; quebrar aos 14 jardas em Post atacando o terço profundo central.
               </div>
             </div>
           </div>
-        </div>
+        </Card>
       </div>
     </section>
   )

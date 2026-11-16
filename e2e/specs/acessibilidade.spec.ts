@@ -32,11 +32,11 @@ test.describe('Operação por teclado', () => {
 
     await tabUntilFocused(page, page.getByRole('button', { name: /^JOGADOR\b/ }))
     await page.keyboard.press('Enter')
-    await expect(page.getByRole('heading', { name: 'Unidades e Posições' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Suas posições' })).toBeVisible()
 
     await tabUntilFocused(page, page.getByRole('button', { name: 'Ofensiva', exact: true }))
     await page.keyboard.press('Space')
-    await tabUntilFocused(page, page.getByRole('group', { name: 'Posições' }).getByRole('button', { name: 'QB', exact: true }))
+    await tabUntilFocused(page, page.getByRole('button', { name: 'QB', exact: true }))
     await page.keyboard.press('Space')
     await tabUntilFocused(page, new AuthPage(page).createAccountButton())
     await page.keyboard.press('Enter')

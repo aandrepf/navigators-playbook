@@ -2,6 +2,16 @@ import { useAuth } from '../hooks/useAuth'
 import { LoadingState } from '../components/LoadingState'
 import { ErrorState } from '../components/ErrorState'
 import { RosterStatusBadge } from '../components/RosterStatusBadge'
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardTitle,
+  FieldLabel,
+  SectionHeading,
+} from '../components/ui'
 
 export function Perfil() {
   const { state, logout } = useAuth()
@@ -22,77 +32,73 @@ export function Perfil() {
 
   return (
     <section aria-labelledby="perfil-title" className="stack-md">
-      <h2 id="perfil-title" className="section-title">
-        Perfil
-      </h2>
+      <SectionHeading title="Perfil" />
 
       <div className="grid-2col">
         <div className="stack-md">
-          <div className="card">
-            <h3 className="card__title">Identidade e Papel</h3>
-            <div className="stack-sm" style={{ marginTop: 'var(--space-3)' }}>
+          <Card>
+            <CardTitle>Identidade e Papel</CardTitle>
+            <CardContent className="stack-sm" style={{ marginTop: 'var(--space-3)' }}>
               <div>
-                <span className="form-label">Nome:</span>{' '}
+                <FieldLabel>Nome:</FieldLabel>{' '}
                 <span>{user?.name || 'Não informado'}</span>
               </div>
               <div>
-                <span className="form-label">E-mail:</span>{' '}
+                <FieldLabel>E-mail:</FieldLabel>{' '}
                 <span>{user?.email}</span>
-                <span className="badge badge--available" style={{ marginLeft: 'var(--space-2)' }}>
-                  ✓ Confirmado
-                </span>
+                <Badge variant="available" style={{ marginLeft: 'var(--space-2)' }}>
+                  Confirmado
+                </Badge>
               </div>
               <div>
-                <span className="form-label">Papel:</span>{' '}
+                <FieldLabel>Papel:</FieldLabel>{' '}
                 <span>{user?.role === 'staff' ? 'Staff' : 'Jogador'}</span>
               </div>
               {user?.subRoles && user.subRoles.length > 0 && (
                 <div>
-                  <span className="form-label">Subpapéis:</span>{' '}
+                  <FieldLabel>Subpapéis:</FieldLabel>{' '}
                   <span>{user.subRoles.join(', ')}</span>
                 </div>
               )}
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
           {user?.role === 'jogador' && (
-            <div className="card">
-              <h3 className="card__title">Meu Status do Elenco</h3>
-              <div style={{ marginTop: 'var(--space-3)' }}>
+            <Card>
+              <CardTitle>Meu Status do Elenco</CardTitle>
+              <CardContent style={{ marginTop: 'var(--space-3)' }}>
                 <RosterStatusBadge status="disponivel" />
-              </div>
-              <p className="form-hint" style={{ marginTop: 'var(--space-2)' }}>
-                Seu status do elenco é atualizado pelo staff. Caso precise comunicar uma lesão ou mudança cadastral, fale
-                com o staff abaixo.
-              </p>
-            </div>
+                <p className="form-hint" style={{ marginTop: 'var(--space-2)' }}>
+                  Seu status do elenco é atualizado pelo staff. Caso precise comunicar uma lesão ou
+                  mudança cadastral, fale com o staff abaixo.
+                </p>
+              </CardContent>
+            </Card>
           )}
         </div>
 
         <div className="stack-md">
-          <div className="card">
-            <h3 className="card__title">Sessão e Privacidade</h3>
-            <p className="card__meta" style={{ marginTop: 'var(--space-2)' }}>
+          <Card>
+            <CardTitle>Sessão e Privacidade</CardTitle>
+            <CardDescription style={{ marginTop: 'var(--space-2)' }}>
               Você permanece conectado entre visitas neste aparelho.
-            </p>
-            <div className="btn-row" style={{ marginTop: 'var(--space-3)' }}>
-              <button type="button" className="btn btn--secondary" onClick={handleLogout}>
+            </CardDescription>
+            <CardContent style={{ marginTop: 'var(--space-3)' }}>
+              <Button variant="secondary" onClick={handleLogout}>
                 Sair da conta
-              </button>
-            </div>
-          </div>
+              </Button>
+            </CardContent>
+          </Card>
 
-          <div className="card card--danger">
-            <h3 className="card__title">Zona de Perigo</h3>
-            <p className="card__meta" style={{ marginTop: 'var(--space-2)' }}>
+          <Card variant="danger">
+            <CardTitle>Zona de Perigo</CardTitle>
+            <CardDescription style={{ marginTop: 'var(--space-2)' }}>
               A exclusão da conta é irreversível.
-            </p>
-            <div className="btn-row" style={{ marginTop: 'var(--space-3)' }}>
-              <button type="button" className="btn btn--danger">
-                Apagar minha conta
-              </button>
-            </div>
-          </div>
+            </CardDescription>
+            <CardContent style={{ marginTop: 'var(--space-3)' }}>
+              <Button variant="destructive">Apagar minha conta</Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </section>

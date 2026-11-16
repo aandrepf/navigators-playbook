@@ -41,9 +41,13 @@ describe('App shell', () => {
             id: 'usr-2',
             email: 'coach@navigators.fa',
             name: 'Carlos Eduardo',
+            phone: null,
             role: 'staff',
             approvalState: 'ativo',
+            isAdmin: false,
             subRoles: ['head_coach'],
+            positions: [],
+            units: [],
           },
         })
       }),
@@ -91,10 +95,9 @@ describe('Authentication flow', () => {
     await user.click(screen.getByRole('button', { name: /jogador/i }))
 
     await waitFor(() => {
-      expect(screen.getByText(/unidades e posições/i)).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: /suas posições/i })).toBeInTheDocument()
     })
 
-    await user.click(screen.getByRole('button', { name: /ofensiva/i }))
     await user.click(screen.getByRole('button', { name: /wr/i }))
     await user.click(screen.getByRole('button', { name: /criar conta/i }))
 
@@ -117,9 +120,6 @@ describe('Authentication flow', () => {
     await user.click(screen.getByRole('button', { name: /continuar$/i }))
 
     await user.click(screen.getByRole('button', { name: /staff/i }))
-
-    await user.click(screen.getByRole('radio', { name: /coordenador defensivo/i }))
-    await user.click(screen.getByRole('button', { name: /criar conta/i }))
 
     expect(await screen.findByText(/cadastro pendente/i)).toBeInTheDocument()
   })
@@ -183,5 +183,177 @@ describe('Google login regression', () => {
     const alert = await screen.findByRole('alert')
     expect(alert).toHaveTextContent(/você cancelou o login com google/i)
     expect(screen.getByRole('button', { name: /tentar novamente/i })).toBeInTheDocument()
+  })
+})
+
+describe('Design system data-slot', () => {
+  it('renders app shell with data-slot and responsive navigation', async () => {
+    renderWithAuth(<App />, { route: '/' })
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /próximos eventos/i })).toBeInTheDocument()
+    })
+
+    expect(document.querySelector('[data-slot="app-shell"]')).toBeInTheDocument()
+    expect(document.querySelector('[data-slot="sidebar"]')).toBeInTheDocument()
+    expect(document.querySelector('[data-slot="bottom-nav"]')).toBeInTheDocument()
+  })
+
+  it('renders cards and badges with data-slot on Home', async () => {
+    renderWithAuth(<App />, { route: '/' })
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /próximos eventos/i })).toBeInTheDocument()
+    })
+
+    expect(document.querySelectorAll('[data-slot="card"]').length).toBeGreaterThan(0)
+    expect(document.querySelectorAll('[data-slot="badge"]').length).toBeGreaterThan(0)
+    expect(document.querySelector('[data-slot="section-heading"]')).toBeInTheDocument()
+  })
+
+  it('renders UnitBadge and RosterStatusBadge with data-variant', async () => {
+    server.use(
+      http.get('/auth/session', () => {
+        return HttpResponse.json({
+          user: {
+            id: 'usr-2',
+            email: 'coach@navigators.fa',
+            name: 'Carlos Eduardo',
+            phone: null,
+            role: 'staff',
+            approvalState: 'ativo',
+            isAdmin: false,
+            subRoles: ['head_coach'],
+            positions: [],
+            units: [],
+          },
+        })
+      }),
+    )
+
+    renderWithAuth(<App />, { route: '/elenco' })
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /elenco/i })).toBeInTheDocument()
+    })
+
+    const badges = document.querySelectorAll('[data-slot="badge"]')
+    expect(badges.length).toBeGreaterThan(0)
+    expect(Array.from(badges).some((b) => b.getAttribute('data-variant') === 'position')).toBe(true)
+    expect(Array.from(badges).some((b) => b.getAttribute('data-variant') === 'available')).toBe(true)
+  })
+
+  it('requires data-slot and data-variant on every badge', async () => {
+    renderWithAuth(<App />, { route: '/' })
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /próximos eventos/i })).toBeInTheDocument()
+    })
+
+    const allBadges = document.querySelectorAll('[data-slot="badge"]')
+    expect(allBadges.length).toBeGreaterThan(0)
+    for (const badge of Array.from(allBadges)) {
+      expect(badge).toHaveAttribute('data-slot', 'badge')
+      expect(badge).toHaveAttribute('data-variant')
+    }
+  })
+
+  it('does not render icons inside badges', async () => {
+    server.use(
+      http.get('/auth/session', () => {
+        return HttpResponse.json({
+          user: {
+            id: 'usr-2',
+            email: 'coach@navigators.fa',
+            name: 'Carlos Eduardo',
+            phone: null,
+            role: 'staff',
+            approvalState: 'ativo',
+            isAdmin: false,
+            subRoles: ['head_coach'],
+            positions: [],
+            units: [],
+          },
+        })
+      }),
+    )
+
+    renderWithAuth(<App />, { route: '/elenco' })
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /elenco/i })).toBeInTheDocument()
+    })
+
+    const iconGlyphs = /[\u2713\u2715\u0021\u2605\u23F3\u{1F4F2}\u2694\u{1F6E1}\u{1F9B6}\u002B\u2014]/u
+    const allBadges = document.querySelectorAll('[data-slot="badge"]')
+    expect(allBadges.length).toBeGreaterThan(0)
+    for (const badge of Array.from(allBadges)) {
+      expect(badge.textContent).not.toMatch(iconGlyphs)
+    }
+  })
+
+  it('does not render icons inside any button', async () => {
+    server.use(
+      http.get('/auth/session', () => {
+        return HttpResponse.json({
+          user: {
+            id: 'usr-2',
+            email: 'coach@navigators.fa',
+            name: 'Carlos Eduardo',
+            phone: null,
+            role: 'staff',
+            approvalState: 'ativo',
+            isAdmin: false,
+            subRoles: ['head_coach'],
+            positions: [],
+            units: [],
+          },
+        })
+      }),
+    )
+
+    renderWithAuth(<App />, { route: '/elenco' })
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /elenco/i })).toBeInTheDocument()
+    })
+
+    const iconGlyphs = /[\u2713\u2715\u002B\u271A\u2795\u26A0\u21BB\u2191\u2193\u2190\u2192\u1F514]/u
+    const buttons = screen.getAllByRole('button')
+    expect(buttons.length).toBeGreaterThan(0)
+    for (const button of buttons) {
+      expect(button.textContent).not.toMatch(iconGlyphs)
+    }
+  })
+
+  it('renders highlighted cards with flat surfaces instead of gradients', async () => {
+    renderWithAuth(<App />, { route: '/' })
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /próximos eventos/i })).toBeInTheDocument()
+    })
+
+    const highlighted = document.querySelector('[data-variant="highlight"]')
+    expect(highlighted).toBeInTheDocument()
+    const bgImage = window.getComputedStyle(highlighted!).backgroundImage
+    expect(bgImage === 'none' || bgImage === '').toBe(true)
+  })
+
+  it('does not use mono font-family anywhere in the rendered app', async () => {
+    renderWithAuth(<App />, { route: '/' })
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /próximos eventos/i })).toBeInTheDocument()
+    })
+
+    expect(document.querySelector('.mono')).not.toBeInTheDocument()
+
+    const allElements = document.querySelectorAll('*')
+    for (const element of Array.from(allElements)) {
+      const fontFamily = window.getComputedStyle(element).fontFamily
+      expect(fontFamily).not.toMatch(
+        /JetBrains Mono|SFMono-Regular|SFMono|Menlo|Monaco|Consolas/i,
+      )
+    }
   })
 })

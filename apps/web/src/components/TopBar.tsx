@@ -1,4 +1,5 @@
 import { useAuth } from '../hooks/useAuth'
+import { Badge } from './ui'
 
 export function TopBar() {
   const { state } = useAuth()
@@ -22,12 +23,12 @@ export function TopBar() {
       </div>
       <div className="badge-row">
         {user?.role === 'jogador' && (
-          <span className="badge badge--available" title="Seu status do elenco atual">
-            ✓ Disponível
-          </span>
+          <Badge variant="available" title="Seu status do elenco atual">
+            Disponível
+          </Badge>
         )}
         {user?.approvalState === 'pendente' && (
-          <span className="badge badge--unavailable">! Cadastro Pendente</span>
+          <Badge variant="unavailable">Cadastro Pendente</Badge>
         )}
       </div>
     </header>
