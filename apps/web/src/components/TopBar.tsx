@@ -22,11 +22,6 @@ export function TopBar() {
         </div>
       </div>
       <div className="badge-row">
-        {user?.role === 'jogador' && (
-          <Badge variant="available" title="Seu status do elenco atual">
-            Disponível
-          </Badge>
-        )}
         {user?.approvalState === 'pendente' && (
           <Badge variant="unavailable">Cadastro Pendente</Badge>
         )}

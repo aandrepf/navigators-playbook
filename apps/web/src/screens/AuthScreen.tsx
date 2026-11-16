@@ -348,46 +348,48 @@ export function AuthScreen() {
             </CardDescription>
           </CardHeader>
 
-          <Button
-            type="button"
-            variant={role === 'jogador' ? 'default' : 'outline'}
-            style={{
-              width: '100%',
-              marginBottom: 'var(--space-3)',
-              minHeight: '72px',
-              justifyContent: 'flex-start',
-              textAlign: 'left',
-            }}
-            aria-pressed={role === 'jogador'}
-            disabled={loading}
-            onClick={() => {
-              setRole('jogador')
-              setStep('player-positions')
-            }}
-          >
-            <strong style={{ display: 'block' }}>Jogador</strong>
-          </Button>
+          <div role="group" aria-label="Escolha de papel">
+            <Button
+              type="button"
+              variant={role === 'jogador' ? 'default' : 'outline'}
+              style={{
+                width: '100%',
+                marginBottom: 'var(--space-3)',
+                minHeight: '72px',
+                justifyContent: 'flex-start',
+                textAlign: 'left',
+              }}
+              aria-pressed={role === 'jogador'}
+              disabled={loading}
+              onClick={() => {
+                setRole('jogador')
+                setStep('player-positions')
+              }}
+            >
+              <strong style={{ display: 'block' }}>Jogador</strong>
+            </Button>
 
-          <Button
-            type="button"
-            variant={role === 'staff' ? 'default' : 'outline'}
-            style={{
-              width: '100%',
-              minHeight: '72px',
-              justifyContent: 'flex-start',
-              textAlign: 'left',
-            }}
-            aria-pressed={role === 'staff'}
-            disabled={loading}
-            loading={loading && role === 'staff'}
-            loadingLabel="Enviando solicitação..."
-            onClick={() => {
-              setRole('staff')
-              void handleConfirmRole('staff')
-            }}
-          >
-            <strong style={{ display: 'block' }}>Staff</strong>
-          </Button>
+            <Button
+              type="button"
+              variant={role === 'staff' ? 'default' : 'outline'}
+              style={{
+                width: '100%',
+                minHeight: '72px',
+                justifyContent: 'flex-start',
+                textAlign: 'left',
+              }}
+              aria-pressed={role === 'staff'}
+              disabled={loading}
+              loading={loading && role === 'staff'}
+              loadingLabel="Enviando solicitação..."
+              onClick={() => {
+                setRole('staff')
+                void handleConfirmRole('staff')
+              }}
+            >
+              <strong style={{ display: 'block' }}>Staff</strong>
+            </Button>
+          </div>
         </Card>
       </div>
     )
@@ -426,6 +428,7 @@ export function AuthScreen() {
                         key={position}
                         type="button"
                         size="sm"
+                        className="position-toggle"
                         variant={positions.includes(position) ? 'default' : 'outline'}
                         aria-pressed={positions.includes(position)}
                         onClick={() => togglePosition(position)}
@@ -465,6 +468,15 @@ export function AuthScreen() {
               }}
             >
               Pular posições por agora
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              style={{ width: '100%', marginTop: 'var(--space-3)' }}
+              disabled={loading}
+              onClick={() => setStep('role')}
+            >
+              Voltar
             </Button>
           </form>
         </Card>

@@ -108,8 +108,6 @@ export const api = {
 
     logout: () => request<void>('POST', '/auth/logout'),
 
-    googleLogin: () => request<void>('GET', '/auth/google'),
-
     checkGoogleLogin: async (forceError?: string | null) => {
       const query = forceError ? `?forceError=${forceError}` : ''
       const response = await fetch(`${API_BASE}/auth/google${query}`, {
