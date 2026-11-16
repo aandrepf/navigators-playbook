@@ -201,4 +201,32 @@ describe('autenticação por código de e-mail', () => {
     expect(res.statusCode).toBe(400);
     expect(res.json()).toMatchObject({ error: 'código do time inválido' });
   });
+
+  it('ignora staffRole no cadastro: staff entra pendente sem subpapel', async () => {
+    const email = 'staff-role-legacy@example.com';
+    await ctx.app.inject({
+      method: 'POST',
+      url: '/auth/email/request',
+      payload: { email },
+    });
+    const code = ctx.mailer.lastCodeFor(email);
+    const res = await ctx.app.inject({
+      method: 'POST',
+      url: '/auth/email/verify',
+      payload: {
+        email,
+        code,
+        teamCode: 'NAVIGATORS',
+        role: 'staff',
+        staffRole: 'coordenador_ofensivo',
+      },
+    });
+    // o contrato não autoatribui subpapel: mesmo enviado, staffRole é ignorado
+    expect(res.statusCode).toBe(200);
+    expect(res.json().user).toMatchObject({
+      role: 'staff',
+      approvalState: 'pendente',
+      subRoles: [],
+    });
+  });
 });
