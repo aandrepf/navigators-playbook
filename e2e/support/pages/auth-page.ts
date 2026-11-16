@@ -18,8 +18,13 @@ export class AuthPage {
     await expect(this.page.getByRole('button', { name: 'Entrar com código por e-mail' })).toBeVisible()
   }
 
+  /**
+   * Botão de login Google. O nome acessível é "Entrar com Google" (aria-label);
+   * o texto visível é "com o Google" ao lado do ícone colorido. Aceitamos os dois
+   * para não depender de qual deles o accessible name expõe.
+   */
   googleButton(): Locator {
-    return this.page.getByRole('button', { name: 'Continuar com Google' })
+    return this.page.getByRole('button', { name: /entrar com google|com o google/i })
   }
 
   emailLoginButton(): Locator {

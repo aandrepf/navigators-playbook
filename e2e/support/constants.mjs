@@ -13,8 +13,9 @@ import { fileURLToPath } from 'node:url'
 export const RUN_ID =
   process.env.E2E_RUN_ID ?? (process.env.E2E_RUN_ID = Date.now().toString(36))
 
-export const WEB_PORT = 5173
-export const API_PORT = 3000
+// Portas sobrescrevíveis (E2E_WEB_PORT / E2E_API_PORT) para rodar ao lado de outros serviços locais.
+export const WEB_PORT = Number(process.env.E2E_WEB_PORT ?? 5173)
+export const API_PORT = Number(process.env.E2E_API_PORT ?? 3000)
 export const WEB_URL = `http://127.0.0.1:${WEB_PORT}`
 export const API_URL = `http://127.0.0.1:${API_PORT}`
 
