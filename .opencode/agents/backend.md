@@ -43,11 +43,13 @@ Read before coding:
 1. `AGENTS.md`
 2. `GLOSSARY.md` — the domain vocabulary is binding: jogada, unidade, marcação,
    presença, justificativa, status do elenco, game plan. Avoid the `_Avoid_` terms.
-3. `docs/adr/` — all six. In particular 0001 (own backend, not Supabase),
-   0004 (game plan references plays), 0005 (open signup, staff approval) and
-   0006 (visibility by unit).
+3. `docs/adr/` — all accepted ADRs. In particular 0001 (own backend, not
+   Supabase), 0004 (game plan references plays), 0005 (open signup, staff
+   approval), 0006 (visibility by unit) and 0007 (admin and position approval).
 4. `.scratch/playbook/spec.md` — domain rules, data model and API contracts.
 5. The ticket you are implementing.
+6. `docs/operations/CONTAINERS.md` — local Podman/Docker environment and the
+   separation between development and E2E databases.
 
 ## Stack and boundaries
 
@@ -74,6 +76,8 @@ Read before coding:
 - Tests call the API through `app.inject` against an ephemeral Postgres, and
   assert external behaviour: status codes, payload shape, authorization
   outcomes. No tests against repositories or SQL strings.
+- For local integration runs, use `podman compose` on this machine; the same
+  `Containerfile` and `compose.yaml` must remain compatible with Docker.
 - Keep `npm test`, `npm run build` and `npm run lint` green at the repository
   root before reporting.
 - Commit only your ticket's files, Conventional Commits in Portuguese.
