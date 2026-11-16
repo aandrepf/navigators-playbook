@@ -31,10 +31,6 @@ export interface Config {
     /** intervalo mínimo entre envios para o mesmo e-mail (anti-abuso). */
     resendIntervalMs: number;
   };
-  team: {
-    name: string;
-    code: string;
-  };
   seedHeadCoach: {
     email: string | null;
     name: string | null;
@@ -86,10 +82,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
       ttlMs: int(env.OTP_TTL_MINUTES, 10) * 60 * 1000,
       length: int(env.OTP_LENGTH, 6),
       resendIntervalMs: int(env.OTP_RESEND_SECONDS, 60) * 1000,
-    },
-    team: {
-      name: env.TEAM_NAME ?? 'Navigators',
-      code: (env.TEAM_CODE ?? 'NAVIGATORS').toUpperCase(),
     },
     seedHeadCoach: {
       email: env.SEED_HEAD_COACH_EMAIL ?? null,

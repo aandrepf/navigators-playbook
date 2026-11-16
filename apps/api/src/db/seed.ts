@@ -1,5 +1,41 @@
 import type { Config } from '../config.js';
 import type { Database } from './types.js';
+import { TEAM_CATALOG } from '../team.js';
+
+/**
+ * Garante os times do catálogo (idempotente): insere os sete times com os
+ * códigos e a habilitação corretos e desabilita qualquer time fora do
+ * catálogo (ex.: código legado). Apenas o time habilitado aceita cadastro.
+ */
+export async function seedTeams(db: Database): Promise<void> {
+  const codes = TEAM_CATALOG.map((team) => team.code);
+
+  await db.query(
+    'UPDATE team SET enabled = false WHERE NOT (code = ANY($1::text[]))',
+    [codes],
+  );
+
+  for (const team of TEAM_CATALOG) {
+    await db.query(
+      `INSERT INTO team (name, code, enabled) VALUES ($1, $2, $3)
+       ON CONFLICT (code) DO UPDATE
+         SET name = EXCLUDED.name, enabled = EXCLUDED.enabled`,
+      [team.name, team.code, team.enabled],
+    );
+  }
+}
+
+/** Devolve o id do único time habilitado, lançando se não houver nenhum. */
+async function getEnabledTeamId(db: Database): Promise<string> {
+  const team = await db.query<{ id: string }>(
+    'SELECT id FROM team WHERE enabled = true ORDER BY created_at ASC LIMIT 1',
+  );
+  const teamId = team.rows[0]?.id;
+  if (!teamId) {
+    throw new Error('não foi possível encontrar o time habilitado no seed');
+  }
+  return teamId;
+}
 
 /**
  * Garante que o time e o primeiro head coach existam (idempotente).
@@ -9,30 +45,8 @@ import type { Database } from './types.js';
  * head coach inicial.
  */
 export async function seedHeadCoach(db: Database, config: Config): Promise<void> {
-  const team = await db.query<{ id: string }>(
-    'SELECT id FROM team ORDER BY created_at ASC LIMIT 1',
-  );
-  let teamId = team.rows[0]?.id;
-
-  if (!teamId) {
-    const inserted = await db.query<{ id: string }>(
-      `INSERT INTO team (name, code) VALUES ($1, $2)
-       ON CONFLICT (code) DO NOTHING
-       RETURNING id`,
-      [config.team.name, config.team.code],
-    );
-    teamId =
-      inserted.rows[0]?.id ??
-      (
-        await db.query<{ id: string }>('SELECT id FROM team WHERE code = $1', [
-          config.team.code,
-        ])
-      ).rows[0]?.id;
-  }
-
-  if (!teamId) {
-    throw new Error('não foi possível criar o time no seed');
-  }
+  await seedTeams(db);
+  const teamId = await getEnabledTeamId(db);
 
   if (!config.seedHeadCoach.email) {
     console.warn(
@@ -69,11 +83,8 @@ export async function seedAdmin(db: Database, config: Config): Promise<void> {
     return;
   }
 
-  const team = await db.query<{ id: string }>(
-    'SELECT id FROM team ORDER BY created_at ASC LIMIT 1',
-  );
-  const teamId = team.rows[0]?.id;
-  if (!teamId) throw new Error('não foi possível encontrar o time no seed do admin');
+  await seedTeams(db);
+  const teamId = await getEnabledTeamId(db);
 
   const email = config.seedAdmin.email.toLowerCase();
   const existing = await db.query<{ id: string }>(

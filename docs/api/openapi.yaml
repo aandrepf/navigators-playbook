@@ -90,6 +90,14 @@ paths:
         próxima fatia.
         A resposta define o cookie de sessão (`httpOnly`, `secure`,
         `sameSite=lax`).
+
+        **Times (SnapIn)**: o catálogo semea sete times, mas apenas o
+        habilitado aceita cadastro — `NAVS-2026` (Navigators). Os demais
+        (`DEVILS-2026`, `BLDS-2026`, `RNGD-2026`, `WARS-2026`, `MUTTS-2026`,
+        `CRSD-2026`) existem no banco e respondem `409` (indisponível); um
+        código desconhecido responde `400` (inválido). O fluxo de time único é
+        preservado: o código de e-mail é sempre emitido contra o time
+        habilitado.
       operationId: verifyEmailCode
       requestBody:
         required: true
@@ -132,6 +140,11 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           description: Código de e-mail inválido ou expirado
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '409':
+          description: Time desabilitado para cadastro (código conhecido, mas indisponível)
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }

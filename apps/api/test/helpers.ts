@@ -56,13 +56,11 @@ export class RecordingMailer implements Mailer {
   }
 }
 
-export const TEST_TEAM_CODE = 'NAVIGATORS';
+export const TEST_TEAM_CODE = 'NAVS-2026';
 
 export function makeTestConfig(overrides: NodeJS.ProcessEnv = {}): Config {
   return loadConfig({
     NODE_ENV: 'test',
-    TEAM_NAME: 'Navigators',
-    TEAM_CODE: TEST_TEAM_CODE,
     SEED_HEAD_COACH_EMAIL: 'head@example.com',
     SEED_HEAD_COACH_NAME: 'Head Coach',
     SEED_ADMIN_EMAIL: 'admin@example.com',
