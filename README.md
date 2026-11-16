@@ -20,7 +20,7 @@ abaixo rodam na raiz e delegam para os workspaces.
 
 ```bash
 npm install
-npm run dev        # front em http://localhost:5173
+npm run dev -w @playbook/web -- --host 0.0.0.0   # front em http://localhost:5173
 npm run dev:api    # backend (quando apps/api existir)
 npm run build      # build de todos os workspaces
 npm run preview    # serve o build do front
@@ -35,6 +35,7 @@ O ambiente containerizado é portátil entre Podman e Docker. Ele está
 documentado em [`docs/operations/CONTAINERS.md`](docs/operations/CONTAINERS.md).
 
 ```bash
+podman machine start
 podman compose up --build -d   # nesta máquina
 # ou: docker compose up --build -d
 curl http://localhost:3000/health

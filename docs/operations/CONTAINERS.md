@@ -16,7 +16,7 @@ O ambiente possui dois serviços:
 O frontend continua podendo rodar no host com Vite:
 
 ```bash
-npm run dev
+npm run dev -w @playbook/web -- --host 0.0.0.0
 ```
 
 ## Podman
