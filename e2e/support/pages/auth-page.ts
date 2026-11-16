@@ -1,5 +1,4 @@
 import { expect, type Locator, type Page } from '@playwright/test'
-import { TEAM_CODE } from '../constants.mjs'
 
 /**
  * Tela de entrada e cadastro (`/login`). Seleciona por papel e rótulo, como o
@@ -36,9 +35,11 @@ export class AuthPage {
     await expect(this.page.getByRole('heading', { name: 'Criar conta ou entrar' })).toBeVisible()
   }
 
-  /** Preenche código do time, nome e e-mail e pede o código. */
-  async requestCode(input: { email: string; name?: string; teamCode?: string }): Promise<void> {
-    await this.page.getByLabel(/código do time/i).fill(input.teamCode ?? TEAM_CODE)
+  /**
+   * Preenche nome e e-mail e pede o código. O time não é digitado: a tela
+   * mostra a equipe atual (Navigators) e o cadastro usa o time habilitado.
+   */
+  async requestCode(input: { email: string; name?: string }): Promise<void> {
     await this.page.getByLabel(/nome completo/i).fill(input.name ?? 'Conta E2E')
     await this.page.getByLabel(/^e-mail/i).fill(input.email)
     await this.page.getByRole('button', { name: 'Receber código de 6 dígitos' }).click()

@@ -16,7 +16,7 @@ import {
   Input,
 } from '../components/ui'
 
-const TEAM_CODE = 'NAVIGATORS-2026'
+const TEAM_CODE = 'NAVS-2026'
 
 function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
   return (

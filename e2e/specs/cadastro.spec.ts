@@ -17,20 +17,14 @@ async function sessionUser(page: import('@playwright/test').Page): Promise<Sessi
   return ((await response.json()) as { user: SessionUser }).user
 }
 
-test.describe('Cadastro: código do time', () => {
-  test('código de time inválido é recusado com mensagem acessível', async ({ page }) => {
-    const email = uniqueEmail('cadastro.time.errado')
+test.describe('Cadastro: equipe atual', () => {
+  test('a tela mostra o Navigators como equipe atual, sem campo de código', async ({ page }) => {
     const auth = new AuthPage(page)
     await auth.goto()
     await auth.startEmailLogin()
-    await auth.requestCode({ email, teamCode: 'CODIGO-ERRADO' })
-    await auth.enterCode(await waitForLoginCode(email))
-    await auth.choosePapel('JOGADOR')
-    await auth.submitPlayer({ positions: ['QB'] })
 
-    await expect(auth.alert()).toContainText(/código do time inválido/i)
-    await expect(page.getByRole('heading', { name: 'Criar conta ou entrar' })).toBeVisible()
-    expect((await page.request.get('/auth/session')).status()).toBe(401)
+    await expect(page.getByLabel('Equipe atual: Navigators')).toBeVisible()
+    await expect(page.getByLabel(/código do time/i)).toHaveCount(0)
   })
 })
 
