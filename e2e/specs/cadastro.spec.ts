@@ -2,11 +2,15 @@ import { expect, test } from '../support/fixtures'
 import { uniqueEmail } from '../support/accounts'
 import { waitForLoginCode } from '../support/mail'
 import { AuthPage } from '../support/pages/auth-page'
-import { WEB_URL } from '../support/constants.mjs'
 
-type SessionUser = { role: string; approvalState: string; subRoles: string[] }
+type SessionUser = {
+  role: string
+  approvalState: string
+  subRoles: string[]
+  positions: Array<{ unit: string; position: string; approvalState: string }>
+  units: string[]
+}
 
-/** GET /auth/session pelo mesmo cookie do browser (contrato em docs/api). */
 async function sessionUser(page: import('@playwright/test').Page): Promise<SessionUser> {
   const response = await page.request.get('/auth/session')
   expect(response.status()).toBe(200)
@@ -14,7 +18,7 @@ async function sessionUser(page: import('@playwright/test').Page): Promise<Sessi
 }
 
 test.describe('Cadastro de jogador', () => {
-  test('exige ao menos uma posição antes de criar a conta', async ({ page }) => {
+  test('permite criar sem posição ou escolher uma posição', async ({ page }) => {
     const auth = new AuthPage(page)
     await auth.goto()
     await auth.startEmailLogin()
@@ -22,16 +26,15 @@ test.describe('Cadastro de jogador', () => {
     await auth.enterCode('123456')
     await auth.choosePapel('JOGADOR')
 
-    await expect(page.getByRole('heading', { name: 'Unidades e Posições' })).toBeVisible()
-    await page.getByRole('button', { name: 'Ofensiva', exact: true }).click()
-    await expect(auth.createAccountButton()).toBeDisabled()
-    await expect(page.getByText('Selecione pelo menos uma posição.')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Suas posições' })).toBeVisible()
+    await expect(auth.createAccountButton()).toBeEnabled()
+    await expect(page.getByRole('button', { name: 'Pular posições por agora' })).toBeVisible()
 
-    await page.getByRole('group', { name: 'Posições' }).getByRole('button', { name: 'QB', exact: true }).click()
+    await page.getByRole('button', { name: 'QB', exact: true }).click()
     await expect(auth.createAccountButton()).toBeEnabled()
   })
 
-  test('cria conta de jogador ativo com papel jogador', async ({ page }) => {
+  test('cria conta de jogador ativo com posições pendentes', async ({ page }) => {
     const email = uniqueEmail('cadastro.jogador')
     const auth = new AuthPage(page)
     await auth.goto()
@@ -39,40 +42,24 @@ test.describe('Cadastro de jogador', () => {
     await auth.requestCode({ email, name: 'Rafael Costa' })
     await auth.enterCode(await waitForLoginCode(email))
     await auth.choosePapel('JOGADOR')
-    await auth.submitPlayer({ units: ['Ofensiva', 'Defesa'], positions: ['QB', 'LB'] })
+    await auth.submitPlayer({ positions: ['QB', 'LB'] })
 
     await expect(page).toHaveURL('/')
     expect(await sessionUser(page)).toMatchObject({
       role: 'jogador',
       approvalState: 'ativo',
       subRoles: [],
+      positions: [
+        { unit: 'ofensiva', position: 'QB', approvalState: 'pendente' },
+        { unit: 'defesa', position: 'LB', approvalState: 'pendente' },
+      ],
+      units: [],
     })
   })
-
-  test.fixme(
-    'posições escolhidas no cadastro são gravadas no perfil',
-    async () => {
-      // BLOQUEADO (contrato): POST /auth/email/verify em docs/api não recebe
-      // unidades nem posições. A AuthScreen coleta, mas não envia nem persiste.
-      // Desbloquear quando o contrato de cadastro ganhar `positions`/`units` e
-      // GET /auth/session ou o perfil devolver essas posições.
-    },
-  )
 })
 
 test.describe('Cadastro de staff', () => {
-  // O cadastro ocupa uma vaga exclusiva (ofensivo ou defensivo) do banco da
-  // execução. Uma nova tentativa encontraria a vaga tomada, então não é
-  // repetível: sem retry. A CI já roda cada teste uma vez, com banco zerado.
-  test.describe.configure({ retries: 0 })
-
-  test('cadastro de staff exige subpapel, fica pendente e a vaga exclusiva conflita', async ({ page, browser }, testInfo) => {
-    // Ofensivo e defensivo são exclusivos por time. Cada projeto usa a sua vaga
-    // porque o banco é compartilhado pela execução inteira.
-    const subRole = testInfo.project.name.startsWith('mobile')
-      ? { label: 'Coordenador Ofensivo' as const, value: 'coordenador_ofensivo' }
-      : { label: 'Coordenador Defensivo' as const, value: 'coordenador_defensivo' }
-
+  test('cadastro de staff fica pendente sem subpapel', async ({ page }) => {
     const email = uniqueEmail('cadastro.staff')
     const auth = new AuthPage(page)
     await auth.goto()
@@ -80,54 +67,16 @@ test.describe('Cadastro de staff', () => {
     await auth.requestCode({ email, name: 'Marcos Viana' })
     await auth.enterCode(await waitForLoginCode(email))
     await auth.choosePapel('STAFF')
-
-    await expect(page.getByRole('heading', { name: 'Subpapel do Staff' })).toBeVisible()
-    await expect(auth.createAccountButton()).toBeDisabled()
-
-    await auth.submitStaff(subRole.label)
-    await expect(auth.pendingHeading()).toBeVisible()
+    await auth.submitStaff()
 
     expect(await sessionUser(page)).toMatchObject({
       role: 'staff',
       approvalState: 'pendente',
-      subRoles: [subRole.value],
+      subRoles: [],
     })
     expect((await page.request.get('/staff/pending')).status()).toBe(403)
 
     await page.goto('/playbook')
     await expect(page.getByRole('heading', { name: 'Acesso bloqueado' })).toBeVisible()
-
-    // Segundo candidato à mesma vaga, em outro browser: conflito de domínio
-    // (409 com mensagem), nunca erro interno.
-    const candidatoEmail = uniqueEmail('cadastro.staff.candidato')
-    const context = await browser.newContext({ baseURL: WEB_URL, locale: 'pt-BR' })
-    try {
-      const candidato = await context.newPage()
-      const second = new AuthPage(candidato)
-      await second.goto()
-      await second.startEmailLogin()
-      await second.requestCode({ email: candidatoEmail })
-      await second.enterCode(await waitForLoginCode(candidatoEmail))
-      await second.choosePapel('STAFF')
-      await second.submitStaff(subRole.label)
-
-      await expect(second.alert()).toContainText(/já está ocupado/i)
-      await expect(second.pendingHeading()).toHaveCount(0)
-      expect((await candidato.request.get('/auth/session')).status()).toBe(401)
-    } finally {
-      await context.close()
-    }
   })
-
-  test.fixme(
-    'staff acumula o subpapel de coordenador de special teams no cadastro',
-    async () => {
-      // BUG (produto) + BLOQUEADO (contrato): a AuthScreen coleta o checkbox
-      // "Acumulo também o subpapel de Coordenador de special teams", mas envia só
-      // `subRoles[0]` como `staffRole`, então o acúmulo é descartado. O contrato
-      // (`staffRole`, um único enum) também não expressa acúmulo. Reprodução:
-      // cadastrar staff com ofensivo + checkbox ST; GET /auth/session devolve só
-      // ['coordenador_ofensivo'].
-    },
-  )
 })
