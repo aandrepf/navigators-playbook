@@ -4,7 +4,7 @@ import { buildApp } from '../src/app.js';
 import type { Config } from '../src/config.js';
 import { loadConfig } from '../src/config.js';
 import { runMigrations } from '../src/db/migrate.js';
-import { seedHeadCoach } from '../src/db/seed.js';
+import { seedAdmin, seedHeadCoach } from '../src/db/seed.js';
 import type { Database, Queryable } from '../src/db/types.js';
 import type { Mailer } from '../src/mail/mailer.js';
 
@@ -65,6 +65,8 @@ export function makeTestConfig(overrides: NodeJS.ProcessEnv = {}): Config {
     TEAM_CODE: TEST_TEAM_CODE,
     SEED_HEAD_COACH_EMAIL: 'head@example.com',
     SEED_HEAD_COACH_NAME: 'Head Coach',
+    SEED_ADMIN_EMAIL: 'admin@example.com',
+    SEED_ADMIN_NAME: 'Admin Geral',
     LOG_LEVEL: 'silent',
     ...overrides,
   });
@@ -77,6 +79,7 @@ export async function createTestContext(): Promise<TestContext> {
 
   const config = makeTestConfig();
   await seedHeadCoach(db, config);
+  await seedAdmin(db, config);
 
   const mailer = new RecordingMailer();
   const app = await buildApp({ db, config, mailer, google: null, logger: false });

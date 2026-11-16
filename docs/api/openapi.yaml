@@ -4,14 +4,20 @@ info:
   version: 0.1.0
   description: |
     Contrato da fundação do backend do Playbook do Time (Fastify + Postgres).
-    Cobre autenticação por código de e-mail e por Google, sessão por cookie e a
-    leitura da fila de cadastros de staff pendentes.
+    Cobre autenticação por código de e-mail e por Google, sessão por cookie,
+    cadastro com papel e posições e a leitura da fila de cadastros de staff
+    pendentes.
 
     **Regras de autorização** (decididas no servidor, nunca confiadas do cliente):
-    - `jogador` entra com estado `ativo` após confirmar o e-mail.
-    - `staff` entra `pendente` até um `head_coach` aprovar; enquanto pendente lê
-      apenas o próprio estado (`GET /auth/session`) e nada mais.
-    - `GET /staff/pending` exige `head_coach` ativo.
+    - `jogador` entra com estado `ativo` após confirmar o e-mail, mesmo sem
+      posição aprovada; suas posições nascem `pendente` e só posições
+      `aprovada` derivam unidades liberadas para conteúdo.
+    - `staff` entra `pendente` sem subpapel até um admin ou `head_coach`
+      aprovar; enquanto pendente lê apenas o próprio estado
+      (`GET /auth/session`) e nada mais.
+    - `admin` é uma permissão geral (nunca auto-cadastrada) que pode coexistir
+      com o vínculo de staff e administra a fila de pendentes.
+    - `GET /staff/pending` exige admin ou `head_coach` ativo.
 
     Valores de enum são snake_case; as *chaves* do JSON são camelCase.
 servers:
@@ -77,9 +83,11 @@ paths:
       summary: Verifica o código e abre sessão (cria o usuário no primeiro acesso)
       description: |
         Se o e-mail ainda não existe no time, cria o usuário: `jogador` entra
-        `ativo`, com posições opcionais pendentes de validação; `staff` entra
-        `pendente` sem subpapel. O cadastro por e-mail e o onboarding após
-        Google usam as mesmas regras de papel e posições.
+        `ativo`, com posições opcionais (apenas de ofensiva/defesa) que nascem
+        `pendente`; `staff` entra `pendente` sem subpapel e não pode enviar
+        posições. Nesta fatia o callback Google ainda cria apenas um `jogador`
+        `ativo` sem posições; o onboarding de posições no Google chega na
+        próxima fatia.
         A resposta define o cookie de sessão (`httpOnly`, `secure`,
         `sameSite=lax`).
       operationId: verifyEmailCode
@@ -102,8 +110,10 @@ paths:
                 role: { type: string, enum: [jogador, staff] }
                 positions:
                   type: array
-                  description: Opcional para jogador; proibido para staff.
-                  items: { type: string }
+                  description: Opcional para jogador; proibido para staff. Aceita apenas posições de ofensiva e defesa (special teams é atribuída depois por staff).
+                  items:
+                    type: string
+                    enum: [QB, RB, FB, WR, TE, OL, DL, LB, CB, S]
       responses:
         '200':
           description: Autenticado; cookie de sessão definido

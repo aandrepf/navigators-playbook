@@ -77,6 +77,7 @@ describe('autorização por papel', () => {
       role: 'staff',
       approvalState: 'ativo',
       subRoles: ['head_coach'],
+      isAdmin: false,
     });
 
     const res = await injectWithSession(ctx, head, {
@@ -93,5 +94,89 @@ describe('autorização por papel', () => {
       email: 'coord2@example.com',
       name: 'Coordenador Dois',
     });
+  });
+
+  it('admin geral (semeado) administra a fila de staff pendentes', async () => {
+    await registerViaEmail(ctx, {
+      email: 'staff-admin@example.com',
+      name: 'Staff Para Admin',
+      role: 'staff',
+    });
+
+    const admin = await registerViaEmail(ctx, {
+      email: 'admin@example.com',
+      role: 'staff',
+    });
+    expect(admin.statusCode).toBe(200);
+    expect(admin.json().user).toMatchObject({
+      role: 'staff',
+      approvalState: 'ativo',
+      isAdmin: true,
+    });
+
+    const res = await injectWithSession(ctx, admin, {
+      method: 'GET',
+      url: '/staff/pending',
+    });
+    expect(res.statusCode).toBe(200);
+
+    const { staff } = res.json();
+    expect(staff.map((s: { email: string }) => s.email)).toContain(
+      'staff-admin@example.com',
+    );
+  });
+
+  it('staff ativo sem subpapel não administra a fila de pendentes', async () => {
+    const staff = await registerViaEmail(ctx, {
+      email: 'staff-ativo@example.com',
+      name: 'Staff Ativo',
+      role: 'staff',
+    });
+    expect(staff.statusCode).toBe(200);
+
+    // promove manualmente a staff ativo (a aprovação formal é a próxima fatia)
+    await ctx.db.query(`UPDATE "user" SET approval_state = 'ativo' WHERE id = $1`, [
+      staff.json().user.id,
+    ]);
+
+    const res = await injectWithSession(ctx, staff, {
+      method: 'GET',
+      url: '/staff/pending',
+    });
+    expect(res.statusCode).toBe(403);
+  });
+
+  it('deriva unidades apenas de posições aprovadas na sessão', async () => {
+    const res = await registerViaEmail(ctx, {
+      email: 'jogador-unidades@example.com',
+      role: 'jogador',
+      positions: ['QB', 'LB'],
+    });
+    expect(res.statusCode).toBe(200);
+    const { user } = res.json();
+    expect(user.units).toEqual([]);
+
+    // aprova a posição de ofensiva (fixture direta no banco; a revisão de
+    // posições pelo staff é a próxima fatia)
+    const player = await ctx.db.query<{ id: string }>(
+      'SELECT id FROM player WHERE user_id = $1',
+      [user.id],
+    );
+    await ctx.db.query(
+      `UPDATE player_position SET approval_state = 'aprovada'
+       WHERE player_id = $1 AND position = 'QB'`,
+      [player.rows[0].id],
+    );
+
+    const session = await injectWithSession(ctx, res, {
+      method: 'GET',
+      url: '/auth/session',
+    });
+    expect(session.statusCode).toBe(200);
+    expect(session.json().user.units).toEqual(['ofensiva']);
+    expect(session.json().user.positions).toEqual([
+      { unit: 'ofensiva', position: 'QB', approvalState: 'aprovada' },
+      { unit: 'defesa', position: 'LB', approvalState: 'pendente' },
+    ]);
   });
 });

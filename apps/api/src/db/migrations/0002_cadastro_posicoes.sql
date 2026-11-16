@@ -1,6 +1,9 @@
--- O schema inicial já contém as colunas desta fatia em instalações novas.
--- Esta migração torna a evolução explícita para bancos criados pela versão
--- anterior, sem perder usuários ou posições existentes.
+-- Evolução do schema para o cadastro com papel e posições (card 02).
+-- O schema base (0001) não conhecia telefone, permissão de admin nem estado de
+-- validação de posição; esta migração os adiciona de forma idempotente, sem
+-- perder usuários ou posições já existentes.
+-- Posições criadas antes desta migração não tinham noção de pendência e são
+-- tratadas como `aprovada` por padrão.
 ALTER TABLE "user"
   ADD COLUMN IF NOT EXISTS phone text;
 

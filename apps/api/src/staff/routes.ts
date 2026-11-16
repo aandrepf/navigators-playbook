@@ -18,8 +18,8 @@ interface PendingStaffRow {
 }
 
 /**
- * Cadastros de staff aguardando aprovação. Restrito ao head coach; a aprovação
- * e a recusa em si são o próximo item (administração de staff).
+ * Cadastros de staff aguardando aprovação. Restrito a admin ou head coach ativo;
+ * a aprovação e a recusa em si são o próximo item (administração de staff).
  */
 export async function staffRoutes(
   app: FastifyInstance,
@@ -34,7 +34,7 @@ export async function staffRoutes(
     const result = await db.query<PendingStaffRow>(
       `SELECT u.id, u.email, u.name, u.created_at
        FROM "user" u
-       WHERE u.team_id = $1 AND u.approval_state = 'pendente'
+       WHERE u.team_id = $1 AND u.role = 'staff' AND u.approval_state = 'pendente'
        ORDER BY u.created_at ASC`,
       [team.id],
     );

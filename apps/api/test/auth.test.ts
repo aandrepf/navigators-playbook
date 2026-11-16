@@ -124,6 +124,23 @@ describe('autenticação por código de e-mail', () => {
     expect(res.statusCode).toBe(202);
   });
 
+  it('cria jogador sem posições (skip) e devolve posições e unidades vazias', async () => {
+    const res = await registerViaEmail(ctx, {
+      email: 'jogador-skip@example.com',
+      name: 'Jogador Skip',
+      role: 'jogador',
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.json().user).toMatchObject({
+      role: 'jogador',
+      approvalState: 'ativo',
+      positions: [],
+      units: [],
+      isAdmin: false,
+    });
+  });
+
   it('recusa posição inválida e subpapel no cadastro de staff', async () => {
     const invalidPosition = await registerViaEmail(ctx, {
       email: 'invalid-position@example.com',
@@ -135,12 +152,23 @@ describe('autenticação por código de e-mail', () => {
       error: 'posição inválida para cadastro: K',
     });
 
+    const duplicate = await registerViaEmail(ctx, {
+      email: 'dup-position@example.com',
+      role: 'jogador',
+      positions: ['QB', 'QB'],
+    });
+    expect(duplicate.statusCode).toBe(400);
+    expect(duplicate.json()).toMatchObject({ error: 'posição duplicada: QB' });
+
     const staff = await registerViaEmail(ctx, {
       email: 'staff-with-position@example.com',
       role: 'staff',
       positions: ['QB'],
     });
     expect(staff.statusCode).toBe(400);
+    expect(staff.json()).toMatchObject({
+      error: 'staff não pode enviar posições no cadastro',
+    });
 
     const unknown = await registerViaEmail(ctx, {
       email: 'unknown-position@example.com',
@@ -148,6 +176,9 @@ describe('autenticação por código de e-mail', () => {
       positions: ['WR-X'],
     });
     expect(unknown.statusCode).toBe(400);
+    expect(unknown.json()).toMatchObject({
+      error: 'posição inválida para cadastro: WR-X',
+    });
   });
 
   it('recusa código de time inválido com erro específico', async () => {
@@ -169,5 +200,33 @@ describe('autenticação por código de e-mail', () => {
     });
     expect(res.statusCode).toBe(400);
     expect(res.json()).toMatchObject({ error: 'código do time inválido' });
+  });
+
+  it('ignora staffRole no cadastro: staff entra pendente sem subpapel', async () => {
+    const email = 'staff-role-legacy@example.com';
+    await ctx.app.inject({
+      method: 'POST',
+      url: '/auth/email/request',
+      payload: { email },
+    });
+    const code = ctx.mailer.lastCodeFor(email);
+    const res = await ctx.app.inject({
+      method: 'POST',
+      url: '/auth/email/verify',
+      payload: {
+        email,
+        code,
+        teamCode: 'NAVIGATORS',
+        role: 'staff',
+        staffRole: 'coordenador_ofensivo',
+      },
+    });
+    // o contrato não autoatribui subpapel: mesmo enviado, staffRole é ignorado
+    expect(res.statusCode).toBe(200);
+    expect(res.json().user).toMatchObject({
+      role: 'staff',
+      approvalState: 'pendente',
+      subRoles: [],
+    });
   });
 });
