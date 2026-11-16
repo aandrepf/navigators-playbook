@@ -79,17 +79,18 @@ test.describe('Times do SnapIn: cadastro', () => {
     })
   }
 
-  test('registro do time legado NAVIGATORS é preservado e indisponível (não aceita cadastro)', async () => {
+  test('registro do time legado NAVIGATORS é preservado e indisponível: cadastro responde 409', async () => {
     await ensureLegacyTeamPreservedAndDisabled()
 
     const { status, body } = await verifyRaw(uniqueEmail('times.legado'), {
       role: 'jogador',
       teamCode: LEGACY_TEAM_CODE,
     })
-    // Contrato (docs/api/README.md e openapi): código fora do catálogo é inválido (400),
-    // nunca aceito. Ver nota de divergência no RELATORIO-QA-04.md.
-    expect(status).toBe(400)
-    expect(JSON.stringify(body)).toMatch(/código do time inválido/)
+    // Regra pedida para a correção QA-03/QA-04: o legado existe no banco mas
+    // está indisponível, então responde 409 como os demais times desabilitados.
+    // NOTA: docs/api (openapi e README) hoje dizem 400 para legado; ver RELATORIO-QA-04.md.
+    expect(status).toBe(409)
+    expect(body).toEqual({ error: 'time indisponível para cadastro' })
 
     // O registro continua no banco, com o nome original e desabilitado.
     expect(await readTeamRow(LEGACY_TEAM_CODE)).toEqual({
