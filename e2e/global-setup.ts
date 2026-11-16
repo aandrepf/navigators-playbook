@@ -8,10 +8,8 @@ import { HEAD_COACH_EMAIL, RUN_ID, SHARED_ACCOUNTS_PATH } from './support/consta
  * `scripts/start-api.mjs`, então o seed do head coach é novo a cada execução.
  *
  * - Head coach: autenticado uma vez (o reenvio tem limite de um por minuto).
- * - Staff pendente: cadastrado uma vez, com `coordenador_special_teams`, que é
- *   aditivo e não ocupa vaga exclusiva por unidade (ver a migração 0001). Os
- *   testes apenas leem essa conta. Os cadastros de staff feitos pela UI usam
- *   ofensivo ou defensivo, que são exclusivos: cada projeto tem a sua vaga.
+ * - Staff pendente: cadastrado uma vez, como o contrato manda: sem subpapel e
+ *   sem posições. Os testes apenas leem essa conta.
  */
 export default async function globalSetup(): Promise<void> {
   const headCoach = await signIn({
@@ -30,10 +28,15 @@ export default async function globalSetup(): Promise<void> {
     email: `staff.pendente.${RUN_ID}@e2e.playbook.test`,
     role: 'staff',
     name: 'Marcos Viana',
-    staffRole: 'coordenador_special_teams',
   })
-  if (staffPendente.user.approvalState !== 'pendente') {
-    throw new Error(`O staff compartilhado deveria estar pendente: ${JSON.stringify(staffPendente.user)}`)
+  if (
+    staffPendente.user.approvalState !== 'pendente' ||
+    staffPendente.user.subRoles.length !== 0 ||
+    staffPendente.user.positions.length !== 0
+  ) {
+    throw new Error(
+      `O staff compartilhado deveria estar pendente, sem subpapel e sem posições: ${JSON.stringify(staffPendente.user)}`,
+    )
   }
 
   const shared: SharedAccounts = { headCoach, staffPendente }

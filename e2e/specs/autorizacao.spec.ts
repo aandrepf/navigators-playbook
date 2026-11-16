@@ -75,6 +75,10 @@ test.describe('Staff pendente', () => {
       expect(((await session.json()) as { user: unknown }).user).toMatchObject({
         role: 'staff',
         approvalState: 'pendente',
+        subRoles: [],
+        positions: [],
+        units: [],
+        isAdmin: false,
       })
       expect((await api.get('/staff/pending')).status()).toBe(403)
     } finally {
@@ -84,20 +88,20 @@ test.describe('Staff pendente', () => {
 })
 
 test.describe('Head coach', () => {
-  test('lê a fila de cadastros pendentes', async ({ headCoach, staffPendente }) => {
+  test('lê a fila de cadastros pendentes, sem subpapel solicitado', async ({ headCoach, staffPendente }) => {
     const api = await apiAs(headCoach)
     try {
       const response = await api.get('/staff/pending')
       expect(response.status()).toBe(200)
       const { staff } = (await response.json()) as {
-        staff: Array<{ email: string; requestedSubrole: string }>
+        staff: Array<{ id: string; email: string; name: string | null; createdAt: string }>
       }
-      expect(staff).toContainEqual(
-        expect.objectContaining({
-          email: staffPendente.email,
-          requestedSubrole: 'coordenador_special_teams',
-        }),
-      )
+      const entry = staff.find((item) => item.email === staffPendente.email)
+      expect(entry, 'staff pendente aparece na fila').toBeDefined()
+      expect(entry).toMatchObject({ id: staffPendente.user.id, name: 'Marcos Viana' })
+      // O contrato PendingStaff não traz subpapel: staff escolhe subpapel só
+      // depois, por admin ou head coach (story 13 e card 06).
+      expect(entry).not.toHaveProperty('requestedSubrole')
     } finally {
       await api.dispose()
     }

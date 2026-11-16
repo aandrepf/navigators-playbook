@@ -74,14 +74,14 @@ e2e/
   scripts/start-api.mjs       API de testes (zera o banco, grava o log)
   specs/
     auth.spec.ts              login por e-mail, Google, sessão e logout
-    cadastro.spec.ts          cadastro de jogador e de staff pendente
+    cadastro.spec.ts          código do time, jogador com/sem posições, staff sem subpapel, contrato
     autorizacao.spec.ts       jogador, staff pendente, head coach
     acessibilidade.spec.ts    teclado, skip link, landmarks, títulos
     playbook.spec.ts          consulta de jogada (smoke + bloqueados)
     presenca-e-jogo.spec.ts   evento, presença, jogo, game plan (bloqueados)
   support/
     constants.mjs             URLs, portas, e-mails, caminhos
-    accounts.ts               contas via API (signIn, createAccount, apiAs)
+    accounts.ts               contas via API (signIn, createAccount, verifyRaw, apiAs)
     mail.ts                   lê o código de acesso do log da API
     fixtures.ts               fixtures jogador, staffPendente, headCoach
     keyboard.ts               tabUntilFocused (foco só por Tab)
@@ -94,11 +94,14 @@ necessário. Dados vêm da API (`docs/api`), nunca de clique para semear estado.
 
 ## Status atual
 
-32 casos ativos e 17 marcados como `fixme`, cada um executado nos dois projetos.
-O reteste final do card 01 passou duas vezes: 68 execuções verdes e nenhum
-fail, com banco zerado em cada execução. Os `fixme` não são falhas; cada um
-aponta a dependência que falta (ver abaixo). Checagem de tipos:
-`npx tsc -p e2e/tsconfig.json`.
+45 casos ativos e 15 marcados como `fixme`, cada um executado nos dois projetos.
+Na QA-02 (cadastro com papel e posições), duas execuções seguidas com banco
+zerado deram o mesmo resultado: **88 verdes e 2 vermelhos**. Os 2 vermelhos são
+um bug de produto (título `h1` ausente na tela de entrada, ver abaixo), não
+instabilidade de teste. Os `fixme` não são falhas; cada um aponta a dependência
+que falta. Checagem de tipos: `npx tsc -p e2e/tsconfig.json`.
+
+Relatórios: `e2e/RELATORIO-QA-01.md` e `e2e/RELATORIO-QA-02.md`.
 
 O card 01 foi aprovado sem E2E específico para manifesto PWA, service worker
 ou deploy no Railway. Esses pontos ficam como melhorias não bloqueantes e
@@ -109,13 +112,16 @@ de fluxos de usuário.
 
 | Área | Motivo |
 | --- | --- |
-| Posições e unidades no cadastro | `POST /auth/email/verify` não recebe nem persiste posições (contrato). |
-| Acúmulo de special teams no cadastro | Contrato aceita um `staffRole`; a tela descarta o checkbox. |
-| Erro do retorno do Google | A tela de entrada não lê `login=erro&motivo=`. |
+| Perfil com posições pendentes e solicitação de alteração | Perfil é o card 04 (stories 10–11). |
+| Não vê justificativa de outro jogador | Eventos e justificativas ainda não estão em `docs/api`. |
 | Consulta de jogada e visibilidade | Sem listagem/detalhe de jogadas em `docs/api`. |
 | Evento, presença e justificativa | Sem rotas de evento e resposta em `docs/api`. |
 | Jogo, marcação e game plan | Sem rotas de jogo e game plan em `docs/api`. |
-| Coordenadores por unidade | Sem aprovação de staff nem atribuição de subpapel em `docs/api`. |
+| Coordenadores por unidade | Sem aprovação de staff nem atribuição de subpapel em `docs/api` (card 06). |
+
+Cadastro com Google (caminho 2 da matriz de cadastro) não tem cena própria:
+o callback exige credenciais externas. A suíte cobre o botão, o 503 e o erro
+de retorno; o onboarding Google é do card 03.
 
 ### Achados de produto
 
@@ -128,6 +134,12 @@ Os três achados do card 01 foram corrigidos e retestados; consulte
 
 O acúmulo de special teams continua como `fixme` de contrato/produto e pertence
 aos cards seguintes.
+
+Na QA-02, um bug de produto segue **vermelho** de propósito (não é `fixme`):
+
+4. A tela de entrada (`/login`) renderiza "Playbook do Time" como `h3`, não `h1`.
+   Teste: `acessibilidade.spec.ts` › "tela de entrada tem título h1 e campos com rótulo".
+   Causa: `CardTitle` usa `h3` no welcome. A tela logada tem `h1` e passa.
 
 ## Regras da suíte
 

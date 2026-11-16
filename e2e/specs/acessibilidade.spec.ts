@@ -18,9 +18,10 @@ test.describe('Operação por teclado', () => {
     const teamCode = page.getByLabel(/código do time/i)
     await tabUntilFocused(page, teamCode)
     await page.keyboard.type(TEAM_CODE)
-    await page.keyboard.press('Tab')
+    await tabUntilFocused(page, page.getByLabel(/nome completo/i))
     await page.keyboard.type('Rafael Costa')
-    await page.keyboard.press('Tab')
+    // Telefone (opcional) fica entre nome e e-mail: o foco vai até o e-mail pela ordem natural.
+    await tabUntilFocused(page, page.getByLabel(/^e-mail/i))
     await page.keyboard.type(email)
     await page.keyboard.press('Enter')
     await expect(page.getByRole('heading', { name: 'Verifique seu e-mail' })).toBeVisible()
@@ -34,10 +35,10 @@ test.describe('Operação por teclado', () => {
     await page.keyboard.press('Enter')
     await expect(page.getByRole('heading', { name: 'Suas posições' })).toBeVisible()
 
-    await tabUntilFocused(page, page.getByRole('button', { name: 'Ofensiva', exact: true }))
-    await page.keyboard.press('Space')
+    // Unidade não é escolhida: ela é derivada das posições. Basta marcar uma posição.
     await tabUntilFocused(page, page.getByRole('button', { name: 'QB', exact: true }))
     await page.keyboard.press('Space')
+    await expect(page.getByRole('button', { name: 'QB', exact: true })).toHaveAttribute('aria-pressed', 'true')
     await tabUntilFocused(page, new AuthPage(page).createAccountButton())
     await page.keyboard.press('Enter')
 
@@ -93,6 +94,40 @@ test.describe('Landmarks e títulos', () => {
     })
   }
 
+  test('grupos de posição são rotulados e expõem o estado marcado', async ({ page }) => {
+    const auth = new AuthPage(page)
+    await auth.goto()
+    await auth.startEmailLogin()
+    await auth.requestCode({ email: uniqueEmail('a11y.posicoes') })
+    await auth.enterCode('123456')
+    await auth.choosePapel('JOGADOR')
+
+    const ofensiva = page.getByRole('group', { name: 'Posições de ofensiva' })
+    await expect(ofensiva).toBeVisible()
+    const qb = ofensiva.getByRole('button', { name: 'QB', exact: true })
+    await expect(qb).toHaveAttribute('aria-pressed', 'false')
+    await qb.click()
+    await expect(qb).toHaveAttribute('aria-pressed', 'true')
+    await expect(page.getByRole('group', { name: 'Posições de defesa' })).toBeVisible()
+  })
+
+  test('erro de código do time é anunciado como alerta', async ({ page }) => {
+    const auth = new AuthPage(page)
+    await auth.goto()
+    await auth.startEmailLogin()
+    const email = uniqueEmail('a11y.erro')
+    await auth.requestCode({ email, teamCode: 'NAO-EXISTE' })
+    await auth.enterCode(await waitForLoginCode(email))
+    await auth.choosePapel('JOGADOR')
+    await auth.submitPlayer({ positions: ['QB'] })
+
+    await expect(auth.alert()).toContainText(/código do time inválido/i)
+  })
+
+  // BUG (card 02, regressão de UI): a tela de entrada renderiza o título
+  // "Playbook do Time" como h3 (CardTitle), não como h1. A tela logada tem
+  // h1 (teste acima). Corrigir no componente da tela de entrada; este teste
+  // deve passar sem mudança de expectativa.
   test('tela de entrada tem título h1 e campos com rótulo', async ({ page }) => {
     const auth = new AuthPage(page)
     await auth.goto()

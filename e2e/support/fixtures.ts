@@ -6,7 +6,7 @@ type Fixtures = {
   jogador: Account
   /**
    * Staff pendente compartilhado pela execução. Somente leitura: o cadastro
-   * pendente não tem aprovação ainda, e o subpapel é único por time.
+   * pendente não tem aprovação ainda, e não tem subpapel.
    */
   staffPendente: Account
   /** Head coach ativo semeado pela API, autenticado no global setup. */

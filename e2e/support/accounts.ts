@@ -15,12 +15,10 @@ export type PublicUser = {
   role: 'jogador' | 'staff'
   approvalState: 'ativo' | 'pendente' | 'recusado'
   subRoles: string[]
+  positions: Array<{ unit: string; position: string; approvalState: 'pendente' | 'aprovada' }>
+  units: string[]
+  isAdmin: boolean
 }
-
-export type StaffRole =
-  | 'coordenador_ofensivo'
-  | 'coordenador_defensivo'
-  | 'coordenador_special_teams'
 
 export type Account = {
   email: string
@@ -42,13 +40,15 @@ export function uniqueEmail(prefix: string): string {
  * Autentica por código de e-mail direto na API (sem UI). Usado para semear
  * estado: é mais rápido e determinístico do que preencher o cadastro na tela.
  *
- * Para um e-mail já existente a API devolve o usuário atual e ignora `role`.
+ * Cadastro novo: `role` define o papel. Staff nasce `pendente` e sem subpapel:
+ * o contrato não aceita subpapel no cadastro. Para um e-mail já existente a API
+ * devolve o usuário atual e ignora `role`.
  */
 export async function signIn(input: {
   email: string
   role: 'jogador' | 'staff'
   name?: string
-  staffRole?: StaffRole
+  positions?: string[]
 }): Promise<Account> {
   const api = await newApiContext([])
   try {
@@ -65,7 +65,7 @@ export async function signIn(input: {
         teamCode: TEAM_CODE,
         name: input.name ?? 'Conta E2E',
         role: input.role,
-        ...(input.staffRole ? { staffRole: input.staffRole } : {}),
+        ...(input.positions ? { positions: input.positions } : {}),
       },
     })
     if (!verified.ok()) {
@@ -83,10 +83,44 @@ export async function signIn(input: {
 export function createAccount(input: {
   role: 'jogador' | 'staff'
   name?: string
-  staffRole?: StaffRole
+  positions?: string[]
 }): Promise<Account> {
   const prefix = input.role === 'staff' ? 'staff' : 'jogador'
   return signIn({ ...input, email: uniqueEmail(prefix) })
+}
+
+/**
+ * Pede um código e tenta o cadastro pela API com um corpo arbitrário. Para
+ * testar as fronteiras do contrato (campos proibidos, posições inválidas,
+ * código de time errado) sem depender da tela. Não abre sessão no contexto do
+ * chamador: a resposta traz só o status e o corpo.
+ */
+export async function verifyRaw(
+  email: string,
+  overrides: Record<string, unknown>,
+): Promise<{ status: number; body: unknown }> {
+  const api = await newApiContext([])
+  try {
+    const requested = await api.post('/auth/email/request', { data: { email } })
+    if (requested.status() !== 202) {
+      throw new Error(`POST /auth/email/request respondeu ${requested.status()} para ${email}`)
+    }
+    const code = await waitForLoginCode(email)
+    const response = await api.post('/auth/email/verify', {
+      data: {
+        email,
+        code,
+        teamCode: TEAM_CODE,
+        name: 'Conta E2E',
+        role: 'jogador',
+        ...overrides,
+      },
+    })
+    const text = await response.text()
+    return { status: response.status(), body: text ? JSON.parse(text) : null }
+  } finally {
+    await api.dispose()
+  }
 }
 
 /** Contas compartilhadas geradas no global setup (somente leitura nos testes). */
