@@ -1,4 +1,4 @@
-# Biblioteca de Componentes UI — Playbook do Time
+# Biblioteca de Componentes UI — SnapIn
 
 Biblioteca interna reutilizável em `apps/web/src/components/ui/`. Sem dependências externas obrigatórias; usa apenas React, tokens do design system e marcações `data-slot`/`data-variant`.
 

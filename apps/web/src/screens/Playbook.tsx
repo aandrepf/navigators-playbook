@@ -43,7 +43,7 @@ export function Playbook() {
   return (
     <section aria-labelledby="playbook-title" className="stack-md">
       <SectionHeading
-        title="Playbook do Time"
+        title="Playbook"
         body="Jogadas estruturadas por unidade, formação, situação e atribuição por posição."
         justification="space-between"
       >

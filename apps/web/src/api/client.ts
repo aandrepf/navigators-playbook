@@ -1,5 +1,5 @@
 /**
- * Cliente HTTP único do Playbook do Time.
+ * Cliente HTTP único do SnapIn.
  *
  * Único lugar do frontend que conhece URLs, métodos e formato de erro da API.
  * Todas as chamadas são relative ao mesmo origin pois o backend serve o

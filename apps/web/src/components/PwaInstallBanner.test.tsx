@@ -27,7 +27,7 @@ describe('PwaInstallBanner', () => {
     render(<PwaInstallBanner />)
 
     expect(document.querySelector('[data-slot="banner"]')).toBeInTheDocument()
-    expect(screen.getByText(/instale o playbook/i)).toBeInTheDocument()
+    expect(screen.getByText(/instale o snapin/i)).toBeInTheDocument()
   })
 
   it('dismisses banner when dismiss button is clicked', async () => {
