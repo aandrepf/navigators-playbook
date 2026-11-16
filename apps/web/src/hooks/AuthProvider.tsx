@@ -21,11 +21,9 @@ export type AuthContextValue = {
     code: string
     teamCode: string
     name?: string
+    phone?: string | null
     role: 'jogador' | 'staff'
-    staffRole?:
-      | 'coordenador_ofensivo'
-      | 'coordenador_defensivo'
-      | 'coordenador_special_teams'
+    positions?: string[]
   }) => Promise<User>
   requestEmailCode: (email: string) => Promise<void>
   logout: () => Promise<void>

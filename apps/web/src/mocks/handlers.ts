@@ -5,27 +5,39 @@ export const mockUser: User = {
   id: 'usr-1',
   email: 'jogador@navigators.fa',
   name: 'Rafael Costa',
+  phone: null,
   role: 'jogador',
   approvalState: 'ativo',
+  isAdmin: false,
   subRoles: [],
+  positions: [{ unit: 'ofensiva', position: 'WR', approvalState: 'aprovada' }],
+  units: ['ofensiva'],
 }
 
 export const mockStaff: User = {
   id: 'usr-2',
   email: 'coach@navigators.fa',
   name: 'Carlos Eduardo',
+  phone: null,
   role: 'staff',
   approvalState: 'ativo',
+  isAdmin: false,
   subRoles: ['head_coach'],
+  positions: [],
+  units: [],
 }
 
 export const mockPendingStaff: User = {
   id: 'usr-3',
   email: 'pendente@navigators.fa',
   name: 'Marcos Viana',
+  phone: null,
   role: 'staff',
   approvalState: 'pendente',
-  subRoles: ['coordenador_defensivo'],
+  isAdmin: false,
+  subRoles: [],
+  positions: [],
+  units: [],
 }
 
 export const handlers = [
@@ -40,7 +52,7 @@ export const handlers = [
   http.post('/auth/email/verify', async ({ request }) => {
     const body = (await request.json()) as {
       role: 'jogador' | 'staff'
-      staffRole?: string
+      positions?: string[]
     }
 
     const user: User =
@@ -49,9 +61,13 @@ export const handlers = [
             id: 'usr-new',
             email: 'novo@navigators.fa',
             name: 'Novo Usuário',
+            phone: null,
             role: 'staff',
             approvalState: 'pendente',
-            subRoles: body.staffRole ? [body.staffRole as User['subRoles'][number]] : [],
+            isAdmin: false,
+            subRoles: [],
+            positions: [],
+            units: [],
           }
         : mockUser
 
@@ -77,7 +93,6 @@ export const handlers = [
           id: 'pend-1',
           email: 'pendente@navigators.fa',
           name: 'Marcos Viana',
-          requestedSubrole: 'coordenador_defensivo',
           createdAt: new Date().toISOString(),
         },
       ],
