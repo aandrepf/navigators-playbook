@@ -66,11 +66,12 @@ plan (outros cards); coordenadores por unidade (card 06).
 - **Correção sugerida (frontend):** título da página de entrada como `h1` (por exemplo, `as="h1"` ou elemento próprio). Não mudar a expectativa do teste.
 - **Por que é bloqueio:** é a regra de título de tela e landmarks do card 01 (e do critério de acessibilidade), regredida pela migração para a biblioteca UI.
 
-### 2. Divergência de spec entre `qa` e `feat/02`
+### 2. Checklist do card desalinhado (decisão vigente: staff não escolhe subpapel)
 
-O checklist da cópia em `qa` ainda diz "Staff escolhe subpapel (head coach, coordenador ofensivo, defensivo ou de special teams)".
-O spec completo em `feat/02` diz o contrário: staff **não** escolhe subpapel no cadastro e nasce pendente. A suíte segue o spec completo,
-que é o atualizado (`a651b1f`). **Ação para o coordenador:** alinhar o checklist do card antes de fechar.
+Decisão vigente: **staff não escolhe subpapel no cadastro** e nasce `pendente` sem subpapel nem posições
+(spec completo em `feat/02`, `a651b1f`; contrato `PendingStaff` sem subpapel). A suíte e o contrato já seguem essa decisão.
+O checklist em `.scratch/playbook/issues/02-cadastro-papel-posicoes.md` da `qa` ainda diz "Staff escolhe subpapel (head coach, coordenador ofensivo, defensivo ou de special teams)".
+Esse arquivo está em `.scratch/**`, que o worker QA não edita. **Ação para o coordenador:** trocar o item por "Staff nasce pendente, sem subpapel; subpapel é atribuído depois por admin ou head coach (card 06)".
 
 ### 3. Lacunas do card (não bloqueiam a suíte, registradas)
 
