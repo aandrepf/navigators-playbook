@@ -1537,6 +1537,12 @@ dialog[data-slot='image-zoom-dialog'][open] {
   font-size: var(--text-sm);
 }
 
+/* Position toggles keep sm font/padding but meet 44px touch target */
+.position-toggle {
+  min-height: var(--touch-min);
+  min-width: var(--touch-min);
+}
+
 .ui-btn[data-size='lg'] {
   padding: var(--space-3) var(--space-6);
 }
