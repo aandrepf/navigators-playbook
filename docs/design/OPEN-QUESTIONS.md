@@ -76,3 +76,11 @@ Registro das decisões de produto e de interface em que o spec (`.scratch/playbo
   - A implementação do backend no commit `6457129` espera apenas `positions?: string[]` no verify, deriva a unidade a partir da posição e rejeita posições de `special_teams` no cadastro.
 - **Questão**: A interface deve continuar exibindo o seletor de unidades (Ofensiva/Defesa/Ambas) como no protótipo, filtrando as posições, ou pode ir direto para a escolha de posições agrupadas por unidade?
 - **Adotado no frontend (branch web)**: A tela de posições lista diretamente as posições de ofensiva e defesa, agrupadas por unidade, sem seletor de unidades. O jogador pode selecionar zero ou mais posições (incluindo de ambas as unidades) e também pular a etapa.
+
+---
+
+## OQ-09 — Identidade visual do novo nome "SnapIn"
+
+- **Contexto**: a atualização de branding (novembro/2026) definiu o nome visível do produto como **SnapIn** e o título do navegador como **"SnapIn: Gestão de Futebol Americano"**.
+- **Questão**: não há definição de logo, ícone, cor da marca, ilustração de entrada ou diretriz tipográfica para o nome "SnapIn". O manifesto PWA continua apontando para `/icon.svg`, a tela de entrada não possui logotipo e a barra lateral mantém o emoji ⚓ com o nome do time ("Navigators FA").
+- **Adotado**: foram atualizados apenas os textos visíveis do produto. Nenhum elemento gráfico foi criado ou alterado, para não inventar design fora do escopo da decisão de branding.

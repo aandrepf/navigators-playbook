@@ -9,7 +9,7 @@ export function TopBar() {
   return (
     <header className="mobile-topbar">
       <div>
-        <h1 className="mobile-topbar__title">Playbook do Time</h1>
+        <h1 className="mobile-topbar__title">SnapIn</h1>
         <div className="mobile-topbar__subtitle">
           {user ? (
             <>

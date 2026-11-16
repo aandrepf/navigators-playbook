@@ -16,7 +16,7 @@ describe('App shell', () => {
 
     renderWithAuth(<App />, { route: '/' })
 
-    expect(await screen.findByRole('heading', { name: /playbook do time/i })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /snapin/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /entrar com código por e-mail/i })).toBeInTheDocument()
   })
 

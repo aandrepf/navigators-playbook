@@ -23,7 +23,7 @@ describe('AuthScreen', () => {
     const user = userEvent.setup()
     renderWithRouter(<AuthScreen />)
 
-    expect(screen.getByRole('heading', { name: /playbook do time/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /snapin/i })).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: /entrar com código por e-mail/i }))
 

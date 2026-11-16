@@ -157,10 +157,10 @@ export function AuthScreen() {
         <Card className="auth-card">
           <CardHeader className="auth-card__header">
             <h1 data-slot="card-title" className="auth-card__title ui-card__title">
-              Playbook do Time
+              SnapIn
             </h1>
             <CardDescription className="auth-card__subtitle">
-              Acesse o playbook, eventos e status do elenco do seu time.
+              Gestão de Futebol Americano.
             </CardDescription>
           </CardHeader>
 
