@@ -29,6 +29,20 @@ npm test           # testes de todos os workspaces
 npm run test:watch # vitest em modo watch (front)
 ```
 
+### Ambiente Postgres com Podman ou Docker
+
+O ambiente containerizado é portátil entre Podman e Docker. Ele está
+documentado em [`docs/operations/CONTAINERS.md`](docs/operations/CONTAINERS.md).
+
+```bash
+podman compose up --build -d   # nesta máquina
+# ou: docker compose up --build -d
+curl http://localhost:3000/health
+```
+
+O Compose usa Postgres 17 e executa migrações/seed antes da API iniciar.
+Não use o banco de desenvolvimento para os testes E2E.
+
 ### Testes
 
 Vitest + jsdom + React Testing Library em `apps/web`, configurados em

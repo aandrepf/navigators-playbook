@@ -9,7 +9,8 @@ Pré-requisitos: Node 22, um Postgres dedicado a testes e o Chromium do Playwrig
 
 ```bash
 # 1. Postgres de testes (uma vez). O nome do banco precisa conter "e2e" ou "test".
-docker run -d --name playbook-e2e-pg -p 5432:5432 \
+# Use podman nesta máquina ou docker em outra máquina.
+podman run -d --name playbook-e2e-pg -p 5432:5432 \
   -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=playbook_e2e postgres:17
 
 # 2. Dependências e browser (uma vez)

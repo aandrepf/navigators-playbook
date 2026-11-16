@@ -65,6 +65,10 @@ serviço. O `apps/api/railway.json` assume o **root directory do serviço =
 `apps/api`** (build `npm run build`, start `npm run start`, healthcheck
 `/health`).
 
+Para desenvolvimento local, o Postgres pode ser executado com Podman ou Docker
+usando [`docs/operations/CONTAINERS.md`](../operations/CONTAINERS.md). A
+configuração é compatível com `podman compose` e `docker compose`.
+
 ## Comandos
 
 ```bash
