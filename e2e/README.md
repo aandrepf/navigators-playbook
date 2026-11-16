@@ -95,11 +95,10 @@ necessário. Dados vêm da API (`docs/api`), nunca de clique para semear estado.
 ## Status atual
 
 45 casos ativos e 15 marcados como `fixme`, cada um executado nos dois projetos.
-Na QA-02 (cadastro com papel e posições), duas execuções seguidas com banco
-zerado deram o mesmo resultado: **88 verdes e 2 vermelhos**. Os 2 vermelhos são
-um bug de produto (título `h1` ausente na tela de entrada, ver abaixo), não
-instabilidade de teste. Os `fixme` não são falhas; cada um aponta a dependência
-que falta. Checagem de tipos: `npx tsc -p e2e/tsconfig.json`.
+Na QA-02 (cadastro com papel e posições), três execuções com banco zerado deram o
+mesmo resultado: **90 verdes, 0 vermelhos e 30 `fixme`** (15 casos × 2 projetos).
+Os `fixme` não são falhas; cada um aponta a dependência que falta. Checagem de
+tipos: `npx tsc -p e2e/tsconfig.json`.
 
 Relatórios: `e2e/RELATORIO-QA-01.md` e `e2e/RELATORIO-QA-02.md`.
 
@@ -135,11 +134,11 @@ Os três achados do card 01 foram corrigidos e retestados; consulte
 O acúmulo de special teams continua como `fixme` de contrato/produto e pertence
 aos cards seguintes.
 
-Na QA-02, um bug de produto segue **vermelho** de propósito (não é `fixme`):
+Na QA-02, o achado de produto abaixo foi corrigido pelo web (commit `96c85ec`,
+integrado na `qa`) e retestado:
 
-4. A tela de entrada (`/login`) renderiza "Playbook do Time" como `h3`, não `h1`.
+4. A tela de entrada (`/login`) tem `h1` como título da página (antes era `h3`).
    Teste: `acessibilidade.spec.ts` › "tela de entrada tem título h1 e campos com rótulo".
-   Causa: `CardTitle` usa `h3` no welcome. A tela logada tem `h1` e passa.
 
 ## Regras da suíte
 

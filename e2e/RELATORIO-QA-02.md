@@ -1,39 +1,47 @@
 # Relatório QA — Card 02 "Cadastro com papel, subpapel e posições"
 
 Data: 2026-11-16 · Branch testada: `qa`
-Commits: integração `7ac03e4` (merge de `feat/02-cadastro-papel-posicoes` em `qa`,
-com `6457129` feat e `86cf1d8` test do card), suíte QA `e265d19`.
-Spec de referência: `.scratch/playbook/issues/02-cadastro-papel-posicoes.md` **da
-branch `feat/02`** (spec completo, commit `a651b1f`). A cópia da `qa` é um resumo antigo e
-diverge (ver "Divergências").
-Responsável: worker QA (`task_a99754ae525f`)
+Commits: integração `7ac03e4` (feat/02 em `qa`, com `6457129` feat e `86cf1d8` test),
+suíte QA `e265d19`, relatório `b119617`, **integração do web `c5323e5`** (merge de
+`96c85ec`, correção do h1 e feedback de loading, base `eb5165a`), e ajuste de seletor
+de papel nesta rodada (commit desta rodada, somente `e2e/`).
+Spec de referência: `.scratch/playbook/issues/02-cadastro-papel-posicoes.md`
+(checklist já alinhado à decisão "staff não escolhe subpapel").
+Responsável: worker QA (`task_4892a1214648`)
 
 ## Veredito
 
-**Não concluir.** A suíte está verde nos fluxos do card, exceto **um bug de produto**:
-a tela de entrada não tem `h1`. Pela mesma regra do card 01, um achado de produto aberto
-bloqueia a conclusão. Card 02 sobe para revisão quando o h1 for corrigido e o reteste passar.
+**Card 02 sobe para revisão.** O bug de produto da rodada anterior (h1 ausente na
+tela de entrada) foi corrigido pelo web e o reteste passa. A suíte roda verde nos
+dois projetos (`mobile-chromium` e `desktop-chromium`), com 0 vermelhos. Os 30
+`fixme` são dependências de outros cards, não falhas.
 
 ## Ambiente
 
-- Podman 6.0.2, máquina `podman-machine-default` (applehv, arm64), iniciada nesta sessão.
-- Postgres 17 em container `playbook-e2e-pg` (porta 5433, banco `playbook_e2e`), zerado a cada execução pela suíte.
-- Node 22.23.1, Playwright 1.65.1, Chromium do Playwright. API e web sobem pelo `playwright.config.ts`.
+- Podman 5.8.5, máquina `podman-machine-default` (applehv, arm64), iniciada nesta rodada.
+- Postgres 17.12 em container `playbook-e2e-pg` (porta 5433, banco `playbook_e2e`), zerado a cada execução pela suíte.
+- Node 22, Playwright 1.65.1, Chromium do Playwright. API e web sobem pelo `playwright.config.ts`.
 - Comando: `E2E_DATABASE_URL=postgres://postgres:postgres@127.0.0.1:5433/playbook_e2e npm run test:e2e`.
 
 ## Resultado
 
-Duas execuções seguidas, banco zerado em cada uma, mesmo resultado:
+| Execução | Verdes | Vermelhos | Skipped (`fixme`) | Tempo |
+| --- | --- | --- | --- | --- |
+| 1 (antes do ajuste de seletor) | 66 | 24 | 30 | 2.9 min |
+| 2 (após o ajuste) | 90 | 0 | 30 | 31 s |
+| 3 (repetição, banco zerado) | 90 | 0 | 30 | 31 s |
 
-| Execução | Verdes | Vermelhos | Skipped (`fixme`) |
-| --- | --- | --- | --- |
-| 1 | 88 | 2 | 30 |
-| 2 | 88 | 2 | 30 |
+Execução 1: 24 vermelhos por um único motivo, o seletor de papel. O web passou a
+renderizar "Jogador" e "Staff" (title case), e a suíte buscava "JOGADOR"/"STAFF".
+Corrigido em `e2e/support/pages/auth-page.ts` e `e2e/specs/acessibilidade.spec.ts`
+com busca case-insensitive. Não foi mudança de expectativa de produto: o rótulo
+não é regra de negócio.
 
-Os 2 vermelhos são o mesmo caso nos dois projetos (`mobile-chromium` e `desktop-chromium`).
-Lint sem erros (1 aviso preexistente em `AuthProvider.tsx`, fora do escopo). Tipos da
-suíte (`tsc -p e2e/tsconfig.json`) limpos. Unitários: web 108 testes, api 10 testes, verdes.
-Build verde.
+Demais checagens na integração `c5323e5`, após o ajuste:
+- Lint (`npm run lint`): sem erros. 1 aviso preexistente em `AuthProvider.tsx`, fora do escopo.
+- Tipos da suíte (`npx tsc -p e2e/tsconfig.json`): limpos.
+- Unitários: web 108 testes, api 10 testes, verdes.
+- Build: verde.
 
 ### Casos verdes (novos ou ajustados no card 02)
 
@@ -45,57 +53,35 @@ Build verde.
 - **Staff:** tela de pendência mostra o estado; não há escolha de subpapel na tela.
 - **Contrato (API direta):** staff com `positions` → 400; special teams (`K`) no jogador → 400; posição desconhecida → 400; posição repetida → 400; `staffRole` não concede subpapel.
 - **Autorização:** head coach lê a fila; staff pendente aparece sem `requestedSubrole` (contrato `PendingStaff`); staff pendente com sessão vazia de subpapel, posição e unidade; jogador sem Elenco; `/staff/pending` 401 sem sessão e 403 para jogador.
-- **Acessibilidade:** teclado até o e-mail (telefone entre nome e e-mail); login e cadastro de jogador só com teclado; grupos de posição rotulados (`Posições de ofensiva`/`defesa`) com `aria-pressed` alternando; erro de código do time como `role="alert"`.
+- **Acessibilidade:** teclado até o e-mail (telefone entre nome e e-mail); login e cadastro de jogador só com teclado; grupos de posição rotulados (`Posições de ofensiva`/`defesa`) com `aria-pressed` alternando; erro de código do time como `role="alert"`; **tela de entrada com `h1` "Playbook do Time" e campos rotulados (corrigido)**.
 - **Regressão do card 01:** login por e-mail, código errado, Google indisponível (503), erro do Google, sessão, logout, skip link, navegação por teclado, landmarks da tela logada.
 
 ### Fixme mantidos (com motivo)
 
-15 casos: Perfil com posições pendentes e solicitação de alteração (card 04); justificativa
+15 casos (×2 projetos): Perfil com posições pendentes e solicitação de alteração (card 04); justificativa
 de outro jogador (eventos ainda fora do contrato); playbook por unidade, presença, jogo e game
 plan (outros cards); coordenadores por unidade (card 06).
 
-## Bloqueios
+## Checagens do spec (decisão vigente: staff não escolhe subpapel)
 
-### 1. Bug de produto: tela de entrada sem `h1` (vermelho, 2 casos)
+- Checklist `.scratch/playbook/issues/02-cadastro-papel-posicoes.md` (na `qa`): já diz "staff não escolhe subpapel no cadastro e nasce `pendente`" (linhas 22 e 59). O texto antigo "Staff escolhe subpapel" não existe mais. Divergência anterior resolvida.
+- Suíte e contrato `PendingStaff` seguem a decisão. Nenhum teste espera subpapel de staff.
+- **Resquício fora do escopo QA:** `docs/design/prototype/index.html:2012` ainda tem a opção "Staff (escolhe subpapel e fica Pendente até Head Coach aprovar)", que contradiz o texto da linha 2033 do mesmo protótipo ("O cadastro não escolhe subpapel"). Ação para UX/coordenador: alinhar a opção do select.
 
-- **Teste:** `acessibilidade.spec.ts` › "tela de entrada tem título h1 e campos com rótulo".
-- **Reprodução:** abrir `/login`. A árvore de acessibilidade mostra `heading "Playbook do Time" [level=3]`.
-  Não existe `h1` na tela de entrada.
-- **Causa:** `CardTitle` renderiza `h3`, e a tela de entrada (`AuthScreen.tsx`, passo `welcome`) usa `CardTitle` como título da página.
-  A tela logada tem `h1` e passa.
-- **Correção sugerida (frontend):** título da página de entrada como `h1` (por exemplo, `as="h1"` ou elemento próprio). Não mudar a expectativa do teste.
-- **Por que é bloqueio:** é a regra de título de tela e landmarks do card 01 (e do critério de acessibilidade), regredida pela migração para a biblioteca UI.
-
-### 2. Checklist do card desalinhado (decisão vigente: staff não escolhe subpapel)
-
-Decisão vigente: **staff não escolhe subpapel no cadastro** e nasce `pendente` sem subpapel nem posições
-(spec completo em `feat/02`, `a651b1f`; contrato `PendingStaff` sem subpapel). A suíte e o contrato já seguem essa decisão.
-O checklist em `.scratch/playbook/issues/02-cadastro-papel-posicoes.md` da `qa` ainda diz "Staff escolhe subpapel (head coach, coordenador ofensivo, defensivo ou de special teams)".
-Esse arquivo está em `.scratch/**`, que o worker QA não edita. **Ação para o coordenador:** trocar o item por "Staff nasce pendente, sem subpapel; subpapel é atribuído depois por admin ou head coach (card 06)".
-
-### 3. Lacunas do card (não bloqueiam a suíte, registradas)
+## Lacunas do card (não bloqueiam a suíte, registradas)
 
 - **Aviso de posição pendente após o cadastro** (story 10): a Home e o Perfil não mostram o estado das posições. O spec empurra isso para o card 04; o teste está em `fixme`.
 - **Playbook sem gate por posição aprovada:** a tela `/playbook` mostra conteúdo estático para o jogador, mesmo sem posição aprovada. O spec diz que jogador sem posição aprovada não vê conteúdo específico. Conteúdo por unidade é fora de escopo do card 02, então é observação.
 - **Cadastro com Google** (caminho 2 da matriz): sem credenciais externas o callback não roda. Cobertura fica no card 03. A suíte cobre o botão, o 503 e o erro de retorno.
 
-### 4. Observações não bloqueantes
+## Observações não bloqueantes
 
 - `staffRole` é removido em silêncio pelo ajv do Fastify (`removeAdditional`), e o cadastro responde 200 sem subpapel. Atende ao contrato ("não aceita"), mas o contrato não diz se deve ser 400. Vale decidir.
 - `AuthScreen` ainda lê o parâmetro `forceError` em produção (já apontado no QA-01).
-
-## Mudanças nesta rodada (somente `e2e/`)
-
-- `support/accounts.ts`: removido `staffRole`; `signIn` aceita `positions`; novo helper `verifyRaw` para os casos de contrato; tipo `PublicUser` com `positions`, `units`, `isAdmin`.
-- `global-setup.ts`: staff pendente sem `staffRole`; asserção de sem subpapel e sem posição.
-- `specs/cadastro.spec.ts`: reescrito para o card 02 (ver casos verdes).
-- `specs/autorizacao.spec.ts`: fila sem `requestedSubrole`; sessão do staff pendente com `subRoles`, `positions`, `units`, `isAdmin`.
-- `specs/acessibilidade.spec.ts`: teclado ajustado ao campo de telefone e sem botão de unidade; novos casos de grupo de posição e erro do time; caso do h1 mantido com a expectativa correta e comentário de bug.
-- `support/fixtures.ts`: comentário atualizado.
-- `README.md`: contagens, tabela de bloqueados e bug de produto.
+- Caixa dos rótulos de papel mudou de "JOGADOR"/"STAFF" para "Jogador"/"Staff". A suíte agora ignora caixa. Vale confirmar que a grafia nova é a do protótipo.
 
 ## Próximo passo
 
-1. Web: título `h1` na tela de entrada (bloqueio 1).
-2. Coordenador: alinhar checklist do card 02 com o spec de `feat/02` (divergência 2).
-3. QA: reteste com `npm run test:e2e`. Se o caso do h1 passar e o restante continuar verde, o card 02 pode ser concluído.
+1. Coordenador: revisar o card 02 (veredito: sobe para revisão).
+2. UX/coordenador: alinhar a opção "Staff (escolhe subpapel…)" em `docs/design/prototype/index.html:2012`.
+3. Card 04: aviso de posição pendente e perfil (os `fixme` correspondentes).

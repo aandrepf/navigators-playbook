@@ -31,7 +31,7 @@ test.describe('Operação por teclado', () => {
     await page.keyboard.press('Enter')
     await expect(page.getByRole('heading', { name: 'Como você participa do time?' })).toBeVisible()
 
-    await tabUntilFocused(page, page.getByRole('button', { name: /^JOGADOR\b/ }))
+    await tabUntilFocused(page, page.getByRole('button', { name: /^JOGADOR\b/i }))
     await page.keyboard.press('Enter')
     await expect(page.getByRole('heading', { name: 'Suas posições' })).toBeVisible()
 
@@ -124,10 +124,8 @@ test.describe('Landmarks e títulos', () => {
     await expect(auth.alert()).toContainText(/código do time inválido/i)
   })
 
-  // BUG (card 02, regressão de UI): a tela de entrada renderiza o título
-  // "Playbook do Time" como h3 (CardTitle), não como h1. A tela logada tem
-  // h1 (teste acima). Corrigir no componente da tela de entrada; este teste
-  // deve passar sem mudança de expectativa.
+  // Regressão do card 02 (corrigida no web, commit 96c85ec): a tela de entrada
+  // precisa de um h1 como título da página, não de um h3 (CardTitle).
   test('tela de entrada tem título h1 e campos com rótulo', async ({ page }) => {
     const auth = new AuthPage(page)
     await auth.goto()
