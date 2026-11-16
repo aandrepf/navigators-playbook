@@ -27,18 +27,26 @@ Atualizações e prazos chegam por Web Push, com e-mail como rede de segurança.
 
 ### Cadastro e acesso
 
-1. Como jogador, quero me cadastrar com o código do time, para entrar sem depender de o staff criar minha conta.
-2. Como jogador, quero confirmar meu e-mail com um código, para provar que a conta é minha.
-3. Como jogador, quero entrar com minha conta Google, para não depender de código por e-mail a cada acesso.
-4. Como jogador, quero escolher se jogo na ofensiva, na defesa ou em ambas, para ver o playbook certo.
-5. Como jogador, quero escolher mais de uma posição, para refletir que jogo em mais de um lugar.
-6. Como jogador, quero ver e corrigir minhas posições depois, para consertar um cadastro errado.
-7. Como membro do staff, quero me cadastrar escolhendo meu subpapel, para ter acesso de edição.
-8. Como membro do staff, quero ficar pendente até um head coach aprovar, para que ninguém ganhe acesso de edição apenas se declarando staff.
-9. Como head coach, quero aprovar ou recusar cadastros de staff, para controlar quem edita o quê.
-10. Como head coach, quero conceder o subpapel de coordenador de special teams a qualquer membro do staff, para que ele acumule essa função com a sua.
-11. Como usuário, quero sair da minha conta, para usar o app em um aparelho compartilhado.
-12. Como usuário, quero continuar logado entre visitas, para não autenticar a cada treino.
+1. Como membro do time, quero me cadastrar com o código do time, para entrar sem depender de o staff criar minha conta.
+2. Como membro do time, quero confirmar meu e-mail com um código ou entrar com Google, para provar minha identidade.
+3. Como membro do time, quero informar nome e telefone opcional, para manter meu perfil pronto para futuras notificações.
+4. Como membro do time, quero escolher jogador ou staff, para iniciar com o papel correto.
+5. Como jogador, quero escolher mais de uma posição de ofensiva e/ou defesa, para refletir onde atuo.
+6. Como jogador, quero poder pular a escolha inicial de posições, para concluir meu cadastro e completar o perfil depois.
+7. Como jogador, quero ver minhas posições e o estado de validação, para saber o que foi aprovado.
+8. Como jogador, quero solicitar correção de posição, para consertar um cadastro errado.
+9. Como membro do staff, quero me cadastrar sem escolher subpapel, para não receber permissão de edição automaticamente.
+10. Como membro do staff, quero ficar pendente até um administrador ou head coach definir meu acesso, para que ninguém ganhe edição apenas se declarando staff.
+11. Como admin geral, quero administrar a aplicação inteira, para operar todos os times.
+12. Como head coach, quero administrar posições e permissões esportivas do meu time, para manter o elenco correto.
+13. Como staff ativo, quero revisar solicitações de posição, para validar o cadastro dos jogadores.
+14. Como staff ativo, quero atribuir posições de special teams, para registrar jogadores que também atuam nessa unidade.
+15. Como admin ou head coach, quero atribuir qualquer posição, para corrigir o cadastro do elenco.
+16. Como jogador, quero ser avisado quando uma posição for alterada por staff, para manter meu perfil atualizado.
+17. Como head coach, quero aprovar ou recusar cadastros de staff, para controlar quem edita o quê.
+18. Como head coach, quero conceder o subpapel de coordenador de special teams a qualquer membro do staff, para que ele acumule essa função com a sua.
+19. Como usuário, quero sair da minha conta, para usar o app em um aparelho compartilhado.
+20. Como usuário, quero continuar logado entre visitas, para não autenticar a cada treino.
 
 ### Elenco e status
 
@@ -138,9 +146,9 @@ Atualizações e prazos chegam por Web Push, com e-mail como rede de segurança.
 ### Modelo de dados
 
 - `team`: um único time no MVP, com identificador presente em todas as entidades para permitir multi-time depois.
-- `user`: identidade, e-mail verificado, papel (`jogador` | `staff`), estado de aprovação (`ativo` | `pendente` | `recusado`), preferências de notificação.
+- `user`: identidade, e-mail verificado, telefone opcional, papel (`jogador` | `staff`), permissão administrativa opcional, estado de aprovação (`ativo` | `pendente` | `recusado`), preferências de notificação.
 - `player`: vínculo do usuário jogador com o elenco, status do elenco e observação; data prevista de retorno quando lesionado.
-- `player_position`: posições do jogador (mais de uma), cada uma mapeada a uma unidade.
+- `player_position`: posições do jogador (mais de uma), cada uma mapeada a uma unidade e a um estado de validação (`pendente` | `aprovada`).
 - `staff_role`: subpapéis do staff. Head coach, coordenador ofensivo e coordenador defensivo são exclusivos por unidade; coordenador de special teams é aditivo e acumulável por qualquer staff.
 - `play`: jogada com nome, unidade dona, formação, situação, status (`ativa` | `arquivada`), versão atual e imagem opcional.
 - `play_assignment`: atribuição por posição dentro da jogada.
@@ -156,7 +164,7 @@ Atualizações e prazos chegam por Web Push, com e-mail como rede de segurança.
 ### Contratos de API (REST, JSON)
 
 - Autenticação: iniciar e verificar código de e-mail, callback do Google, sessão atual, logout.
-- Jogadores: listar, ler, atualizar posições e unidades; staff atualiza status, observação e retorno previsto.
+- Jogadores: listar, ler, solicitar e revisar posições e unidades; staff atualiza status, observação e retorno previsto.
 - Staff: listar pendentes, aprovar, recusar, atribuir e remover subpapéis.
 - Jogadas: listar conforme visibilidade do solicitante, ler, criar, editar, arquivar, definir visibilidade, anexar imagem, marcar como estudada.
 - Eventos: listar, criar, editar, cancelar, responder, listar respostas consolidadas (staff), registrar presença real (staff).
@@ -169,7 +177,8 @@ Toda autorização é decidida no servidor, por papel, subpapel e vínculo do us
 
 - **Visibilidade de jogada**: dona + unidades liberadas; special teams sempre aberta a todo o time (ADR-0006). `play_read` do solicitante define o que é "novo".
 - **Novidade**: a jogada é nova para o jogador quando a versão atual é posterior ao seu último `play_read` e a jogada está na visibilidade dele. Não há marcação item a item obrigatória.
-- **Edição por subpapel**: head coach edita qualquer unidade; coordenador edita a sua; ninguém edita unidade alheia, ainda que a veja. Staff sem subpapel de unidade só lê o playbook.
+- **Edição por subpapel**: head coach e admin editam qualquer unidade; coordenador edita a sua; ninguém edita unidade alheia, ainda que a veja. Staff sem subpapel de unidade só lê o playbook.
+- **Cadastro e posições**: jogador entra ativo mesmo sem posição aprovada. Unidades são derivadas das posições aprovadas. Staff ativo pode revisar solicitações; staff pode atribuir special teams; admin e head coach podem atribuir qualquer posição. Alterações administrativas notificam o jogador.
 - **Presença**: resposta permitida até o prazo; depois disso só o staff altera. Presença real é registro separado, feito pelo staff após o treino.
 - **Disponibilidade de jogo**: mesma mecânica de resposta, com prazo próprio; não altera o status do elenco.
 - **Status do elenco**: `disponivel`, `indisponivel`, `lesionado`, `reformado`. Suspensão é `indisponivel` com observação. Só staff edita.
