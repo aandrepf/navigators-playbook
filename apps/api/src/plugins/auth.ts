@@ -77,7 +77,10 @@ export function setupAuth(app: FastifyInstance, opts: AuthOptions): void {
       if (reply.sent) return done();
       const user = req.sessionUser;
       if (!user) return unauthorized(reply);
-      if (user.role !== 'staff' || user.approvalState !== 'ativo') {
+      if (
+        (!user.isAdmin && user.role !== 'staff') ||
+        (!user.isAdmin && user.approvalState !== 'ativo')
+      ) {
         return forbidden(reply, 'exige staff ativo');
       }
       done();
@@ -91,9 +94,10 @@ export function setupAuth(app: FastifyInstance, opts: AuthOptions): void {
       const user = req.sessionUser;
       if (!user) return unauthorized(reply);
       if (
-        user.role !== 'staff' ||
-        user.approvalState !== 'ativo' ||
-        !user.subRoles.includes('head_coach')
+        !user.isAdmin &&
+        (user.role !== 'staff' ||
+          user.approvalState !== 'ativo' ||
+          !user.subRoles.includes('head_coach'))
       ) {
         return forbidden(reply, 'exige head coach');
       }

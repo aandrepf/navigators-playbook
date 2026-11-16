@@ -61,3 +61,40 @@ export async function seedHeadCoach(db: Database, config: Config): Promise<void>
     );
   });
 }
+
+/** Garante um admin geral configurado pelo ambiente para operação e testes. */
+export async function seedAdmin(db: Database, config: Config): Promise<void> {
+  if (!config.seedAdmin.email) {
+    console.warn('[seed] SEED_ADMIN_EMAIL não definido; admin não será semeado.');
+    return;
+  }
+
+  const team = await db.query<{ id: string }>(
+    'SELECT id FROM team ORDER BY created_at ASC LIMIT 1',
+  );
+  const teamId = team.rows[0]?.id;
+  if (!teamId) throw new Error('não foi possível encontrar o time no seed do admin');
+
+  const email = config.seedAdmin.email.toLowerCase();
+  const existing = await db.query<{ id: string }>(
+    'SELECT id FROM "user" WHERE team_id = $1 AND email = $2',
+    [teamId, email],
+  );
+
+  if (existing.rows[0]) {
+    await db.query(
+      `UPDATE "user"
+       SET is_admin = true, approval_state = 'ativo', email_verified_at = COALESCE(email_verified_at, now())
+       WHERE id = $1`,
+      [existing.rows[0].id],
+    );
+    return;
+  }
+
+  await db.query(
+    `INSERT INTO "user"
+      (team_id, email, name, role, approval_state, is_admin, email_verified_at)
+     VALUES ($1, $2, $3, 'staff', 'ativo', true, now())`,
+    [teamId, email, config.seedAdmin.name ?? 'Admin'],
+  );
+}

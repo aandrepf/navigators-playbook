@@ -1,7 +1,7 @@
 import pg from 'pg';
 import { loadConfig } from '../config.js';
 import { createPgDatabase } from './pg.js';
-import { seedHeadCoach } from './seed.js';
+import { seedAdmin, seedHeadCoach } from './seed.js';
 
 async function main(): Promise<void> {
   const config = loadConfig();
@@ -13,6 +13,7 @@ async function main(): Promise<void> {
   const db = createPgDatabase(pool);
   try {
     await seedHeadCoach(db, config);
+    await seedAdmin(db, config);
     console.log('seed concluído (idempotente).');
   } finally {
     await db.close();

@@ -41,9 +41,13 @@ describe('App shell', () => {
             id: 'usr-2',
             email: 'coach@navigators.fa',
             name: 'Carlos Eduardo',
+            phone: null,
             role: 'staff',
             approvalState: 'ativo',
+            isAdmin: false,
             subRoles: ['head_coach'],
+            positions: [],
+            units: [],
           },
         })
       }),
@@ -91,10 +95,9 @@ describe('Authentication flow', () => {
     await user.click(screen.getByRole('button', { name: /jogador/i }))
 
     await waitFor(() => {
-      expect(screen.getByText(/unidades e posições/i)).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: /suas posições/i })).toBeInTheDocument()
     })
 
-    await user.click(screen.getByRole('button', { name: /ofensiva/i }))
     await user.click(screen.getByRole('button', { name: /wr/i }))
     await user.click(screen.getByRole('button', { name: /criar conta/i }))
 
@@ -117,9 +120,6 @@ describe('Authentication flow', () => {
     await user.click(screen.getByRole('button', { name: /continuar$/i }))
 
     await user.click(screen.getByRole('button', { name: /staff/i }))
-
-    await user.click(screen.getByRole('radio', { name: /coordenador defensivo/i }))
-    await user.click(screen.getByRole('button', { name: /criar conta/i }))
 
     expect(await screen.findByText(/cadastro pendente/i)).toBeInTheDocument()
   })
@@ -219,9 +219,13 @@ describe('Design system data-slot', () => {
             id: 'usr-2',
             email: 'coach@navigators.fa',
             name: 'Carlos Eduardo',
+            phone: null,
             role: 'staff',
             approvalState: 'ativo',
+            isAdmin: false,
             subRoles: ['head_coach'],
+            positions: [],
+            units: [],
           },
         })
       }),
@@ -262,9 +266,13 @@ describe('Design system data-slot', () => {
             id: 'usr-2',
             email: 'coach@navigators.fa',
             name: 'Carlos Eduardo',
+            phone: null,
             role: 'staff',
             approvalState: 'ativo',
+            isAdmin: false,
             subRoles: ['head_coach'],
+            positions: [],
+            units: [],
           },
         })
       }),
@@ -292,9 +300,13 @@ describe('Design system data-slot', () => {
             id: 'usr-2',
             email: 'coach@navigators.fa',
             name: 'Carlos Eduardo',
+            phone: null,
             role: 'staff',
             approvalState: 'ativo',
+            isAdmin: false,
             subRoles: ['head_coach'],
+            positions: [],
+            units: [],
           },
         })
       }),

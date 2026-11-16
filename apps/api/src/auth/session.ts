@@ -1,5 +1,5 @@
 import type { Database } from '../db/types.js';
-import type { PublicUser, StaffSubrole } from '../domain.js';
+import type { PlayerPosition, PublicUser, StaffSubrole, Unit } from '../domain.js';
 import { randomToken, sha256 } from './crypto.js';
 
 export interface ResolvedSession {
@@ -15,8 +15,10 @@ interface SessionRow {
   id: string;
   email: string;
   name: string | null;
+  phone: string | null;
   role: PublicUser['role'];
   approval_state: PublicUser['approvalState'];
+  is_admin: boolean;
 }
 
 /** Cria uma sessão e devolve o token opaco a colocar no cookie. */
@@ -45,7 +47,7 @@ export async function resolveSession(
   const tokenHash = sha256(token);
   const result = await db.query<SessionRow>(
     `SELECT s.id AS session_id, s.expires_at, s.last_seen_at,
-            u.id, u.email, u.name, u.role, u.approval_state
+            u.id, u.email, u.name, u.phone, u.role, u.approval_state, u.is_admin
      FROM session s
      JOIN "user" u ON u.id = s.user_id
      WHERE s.token_hash = $1`,
@@ -60,6 +62,25 @@ export async function resolveSession(
     'SELECT role FROM staff_role WHERE user_id = $1',
     [row.id],
   );
+  const positions = await db.query<{
+    unit: Unit;
+    position: string;
+    approval_state: PlayerPosition['approvalState'];
+  }>(
+    `SELECT pp.unit, pp.position, pp.approval_state
+     FROM player_position pp
+     JOIN player p ON p.id = pp.player_id
+     WHERE p.user_id = $1
+     ORDER BY pp.created_at,
+       CASE pp.unit WHEN 'ofensiva' THEN 1 WHEN 'defesa' THEN 2 ELSE 3 END,
+       pp.position`,
+    [row.id],
+  );
+  const publicPositions = positions.rows.map((position) => ({
+    unit: position.unit,
+    position: position.position,
+    approvalState: position.approval_state,
+  }));
 
   return {
     sessionId: row.session_id,
@@ -68,9 +89,17 @@ export async function resolveSession(
       id: row.id,
       email: row.email,
       name: row.name,
+      phone: row.phone,
       role: row.role,
       approvalState: row.approval_state,
+      isAdmin: row.is_admin,
       subRoles: subRoles.rows.map((r) => r.role),
+      positions: publicPositions,
+      units: [...new Set(
+        publicPositions
+          .filter((position) => position.approvalState === 'aprovada')
+          .map((position) => position.unit),
+      )],
     },
   };
 }

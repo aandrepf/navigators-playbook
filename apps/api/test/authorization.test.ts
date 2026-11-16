@@ -22,13 +22,12 @@ describe('autorização por papel', () => {
       email: 'coord@example.com',
       name: 'Coordenador',
       role: 'staff',
-      staffRole: 'coordenador_ofensivo',
     });
     expect(pending.statusCode).toBe(200);
     expect(pending.json().user).toMatchObject({
       role: 'staff',
       approvalState: 'pendente',
-      subRoles: ['coordenador_ofensivo'],
+      subRoles: [],
     });
 
     // lê o próprio estado
@@ -66,7 +65,6 @@ describe('autorização por papel', () => {
       email: 'coord2@example.com',
       name: 'Coordenador Dois',
       role: 'staff',
-      staffRole: 'coordenador_defensivo',
     });
 
     // o head coach semeado entra pelo mesmo fluxo de código
@@ -91,9 +89,9 @@ describe('autorização por papel', () => {
     expect(staff.map((s: { email: string }) => s.email)).toContain(
       'coord2@example.com',
     );
-    expect(
-      staff.find((s: { email: string }) => s.email === 'coord2@example.com')
-        .requestedSubrole,
-    ).toBe('coordenador_defensivo');
+    expect(staff.find((s: { email: string }) => s.email === 'coord2@example.com')).toMatchObject({
+      email: 'coord2@example.com',
+      name: 'Coordenador Dois',
+    });
   });
 });
