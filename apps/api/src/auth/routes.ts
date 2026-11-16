@@ -120,6 +120,7 @@ export async function authRoutes(
 
       const team = await getTeamByCode(db, body.teamCode);
       if (!team) throw new HttpError(400, 'código do time inválido');
+      if (!team.enabled) throw new HttpError(409, 'time indisponível para cadastro');
 
       const consumed = await consumeLoginCode(db, team.id, body.email, body.code);
       if (!consumed) throw new HttpError(401, 'código inválido ou expirado');

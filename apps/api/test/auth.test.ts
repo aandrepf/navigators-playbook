@@ -43,7 +43,7 @@ describe('autenticação por código de e-mail', () => {
       payload: {
         email: 'errado@example.com',
         code: '000000',
-        teamCode: 'NAVIGATORS',
+        teamCode: 'NAVS-2026',
         role: 'jogador',
       },
     });
@@ -216,7 +216,7 @@ describe('autenticação por código de e-mail', () => {
       payload: {
         email,
         code,
-        teamCode: 'NAVIGATORS',
+        teamCode: 'NAVS-2026',
         role: 'staff',
         staffRole: 'coordenador_ofensivo',
       },

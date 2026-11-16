@@ -49,7 +49,7 @@ multi-time no futuro (fase 3).
 
 | Tabela | Papel |
 | --- | --- |
-| `team` | O time (um no MVP), com o `code` usado no cadastro. |
+| `team` | O time, com o `code` usado no cadastro e a coluna `enabled` (apenas o habilitado aceita cadastro). |
 | `user` | Identidade, e-mail verificado, telefone opcional, papel (`jogador`/`staff`), permissão `is_admin` e estado de aprovação. |
 | `player` | Vínculo do jogador com o elenco (status do elenco, observação, retorno). |
 | `player_position` | Posições do jogador (mais de uma), cada uma ligada a uma unidade e a um estado de validação (`pendente`/`aprovada`). |
@@ -61,6 +61,26 @@ O catálogo autoritativo de posições vive no backend (`src/domain.ts`) e é
 espelhado pelo frontend: ofensiva `QB RB FB WR TE OL`, defesa `DL LB CB S` e
 special teams `K P LS KR/PR Gunner`. Unidades derivam das posições `aprovada`;
 special teams coexiste com ofensiva/defesa.
+
+### Times do SnapIn (seed)
+
+O seed (`src/db/seed.ts`) semeia sete times de forma idempotente, mas o MVP
+continua atendendo **um time por vez**: apenas o time habilitado aceita
+cadastro e serve a sessão.
+
+| Nome | Código | Cadastro |
+| --- | --- | --- |
+| Navigators | `NAVS-2026` | habilitado |
+| Devils | `DEVILS-2026` | indisponível |
+| Bulldogs | `BLDS-2026` | indisponível |
+| Renegades | `RNGD-2026` | indisponível |
+| Warriors | `WARS-2026` | indisponível |
+| Mutts | `MUTTS-2026` | indisponível |
+| Crusaders | `CRSD-2026` | indisponível |
+
+No cadastro, um código desabilitado responde `409` (time indisponível) e um
+código desconhecido responde `400` (inválido). O código de e-mail é sempre
+emitido contra o time habilitado, preservando o fluxo de time único.
 
 ## Testes
 
@@ -94,6 +114,6 @@ configuração é compatível com `podman compose` e `docker compose`.
 ```bash
 npm run dev:api          # servidor com recarga (tsx watch)
 npm run db:migrate       # aplica migrações (via DATABASE_URL)
-npm run db:seed          # semeia time + primeiro head coach + admin geral
+npm run db:seed          # semeia os sete times + primeiro head coach + admin geral
 npm test                 # testes de todos os workspaces (raiz)
 ```
