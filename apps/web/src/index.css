@@ -17,6 +17,7 @@
   --popover: #ffffff;
   --popover-foreground: #0a0a0a;
   --primary: #171717;
+  --primary-hover: #262626;
   --primary-foreground: #fafafa;
   --secondary: #f5f5f5;
   --secondary-foreground: #171717;
@@ -33,6 +34,7 @@
   --input: #d4d4d4;
   --bg-input-30: #ffffff;
   --ring: #171717;
+  --ring-focus: rgba(23, 23, 23, 0.16);
   --radius: 0.625rem;
   --sidebar: #fafafa;
   --sidebar-foreground: #0a0a0a;
@@ -56,6 +58,7 @@
   --popover: #171717;
   --popover-foreground: #fafafa;
   --primary: #e5e5e5;
+  --primary-hover: #ffffff;
   --primary-foreground: #171717;
   --secondary: #262626;
   --secondary-foreground: #fafafa;
@@ -72,6 +75,7 @@
   --input: #404040;
   --bg-input-30: #1d1d1d;
   --ring: #d4d4d4;
+  --ring-focus: rgba(212, 212, 212, 0.24);
   --radius: 0.625rem;
   --sidebar: #111111;
   --sidebar-foreground: #fafafa;
@@ -129,6 +133,8 @@
   --font-sans:
     'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
     Ubuntu, sans-serif;
+  --font-mono:
+    'Geist Mono', 'JetBrains Mono', 'SFMono-Regular', Menlo, Consolas, monospace;
 
   --text-xs: 0.75rem; /* 12px */
   --text-sm: 0.875rem; /* 14px */
@@ -308,7 +314,7 @@ button {
 .nav-item-btn[aria-current='page'] {
   background: var(--color-brand-primary-subtle);
   color: var(--color-brand-primary);
-  border-color: rgba(56, 189, 248, 0.4);
+  border-color: var(--color-brand-primary);
 }
 
 .nav-item-btn__label {
@@ -710,6 +716,12 @@ button {
   text-align: center;
 }
 
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.12em;
+}
+
 .or-divider {
   text-align: center;
   margin: var(--space-4) 0;
@@ -742,9 +754,9 @@ button {
   gap: var(--space-2);
   text-decoration: none;
   transition:
-    transform var(--duration-fast) var(--ease-standard),
     background-color var(--duration-fast) var(--ease-standard),
-    border-color var(--duration-fast) var(--ease-standard);
+    border-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard);
 }
 
 .btn--primary {
@@ -753,7 +765,7 @@ button {
 }
 
 .btn--primary:hover:not(:disabled) {
-  background: #0369a1;
+  background: var(--primary-hover);
 }
 
 .btn--secondary {
@@ -926,7 +938,7 @@ button {
 
 .assignment-item--mine {
   border-color: var(--color-brand-primary);
-  background: rgba(56, 189, 248, 0.09);
+  background: var(--color-brand-primary-subtle);
 }
 
 /* ==========================================================================
@@ -1093,12 +1105,14 @@ button {
   font-size: var(--text-xl);
   font-weight: 700;
   margin: 0 0 var(--space-2) 0;
+  text-wrap: balance;
 }
 
 .auth-card__subtitle {
   font-size: var(--text-sm);
   color: var(--color-text-secondary);
   margin: 0;
+  text-wrap: pretty;
 }
 
 .auth-readonly-value {
@@ -1447,10 +1461,10 @@ dialog[data-slot='image-zoom-dialog'][open] {
   gap: var(--space-2);
   text-decoration: none;
   transition:
-    transform var(--duration-fast) var(--ease-standard),
     background-color var(--duration-fast) var(--ease-standard),
     border-color var(--duration-fast) var(--ease-standard),
-    color var(--duration-fast) var(--ease-standard);
+    color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard);
 }
 
 .ui-btn__spinner {
@@ -1469,7 +1483,13 @@ dialog[data-slot='image-zoom-dialog'][open] {
 
 .ui-btn[data-variant='default']:hover:not(:disabled),
 .ui-btn[data-variant='primary']:hover:not(:disabled) {
-  background: #0369a1;
+  background: var(--primary-hover);
+}
+
+.ui-btn:focus-visible {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px var(--ring-focus);
 }
 
 .ui-btn[data-variant='secondary'] {
@@ -1532,15 +1552,24 @@ dialog[data-slot='image-zoom-dialog'][open] {
 }
 
 .ui-btn[data-size='sm'] {
-  min-height: 36px;
+  min-height: var(--touch-min);
   padding: var(--space-1) var(--space-3);
   font-size: var(--text-sm);
 }
 
-/* Position toggles keep sm font/padding but meet 44px touch target */
+/* Position toggles enforce 44px touch target and selected state beyond color */
+.ui-btn.position-toggle,
 .position-toggle {
   min-height: var(--touch-min);
   min-width: var(--touch-min);
+}
+
+.ui-btn.position-toggle[aria-pressed='true'] {
+  background: var(--color-brand-primary-strong);
+  color: var(--primary-foreground);
+  border-color: var(--color-brand-primary-strong);
+  font-weight: 700;
+  box-shadow: inset 0 0 0 2px var(--primary-foreground);
 }
 
 .ui-btn[data-size='lg'] {
@@ -1721,8 +1750,8 @@ dialog[data-slot='image-zoom-dialog'][open] {
 
 .ui-input:focus,
 .ui-select:focus {
-  border-color: var(--color-brand-primary);
-  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.28);
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px var(--ring-focus);
 }
 
 .ui-input:disabled,

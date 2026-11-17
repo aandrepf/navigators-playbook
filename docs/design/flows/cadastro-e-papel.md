@@ -2,103 +2,185 @@
 
 ## 1. Visão geral
 
-Qualquer membro do **time** pode criar uma conta usando o código do time,
-confirmar sua identidade por código de e-mail ou Google e escolher o papel
-`jogador` ou `staff`.
+Qualquer membro do **time** pode criar uma conta ou entrar usando o código do
+time, confirmar sua identidade por código de e-mail ou Google e escolher o
+papel `jogador` ou `staff`.
 
-- Jogador entra `ativo`, pode escolher posições ou pular essa etapa.
-- Posições informadas pelo jogador ficam pendentes de validação.
-- Staff não escolhe subpapel no cadastro e entra `pendente`.
+- O cadastro manual exibe **`Time: Navigators`** como informação somente leitura
+  e apresenta o campo editável **`Código do time`** (com `NAVS-2026` como
+  valor/exemplo).
+- Jogador entra `ativo`, podendo escolher posições de ofensiva e/ou defesa ou
+  pular essa etapa (**Pular posições por agora**).
+- Posições informadas pelo jogador ficam com estado `pendente` de validação.
+- Staff não escolhe subpapel no cadastro e entra `pendente`, aguardando
+  definição de um Admin ou Head Coach.
 - Admin geral é configurado pelo ambiente/seed; não pode ser autoatribuído.
-- O onboarding de e-mail e Google é o mesmo após a identidade ser confirmada.
+- O onboarding de escolha de papel e posições é compartilhado entre e-mail e
+  Google após a confirmação de identidade.
 
-## 2. Fluxo
+## 2. Fluxo e etapas (`AuthScreen`)
 
 ```text
-[Boas-vindas]
-   ├─ Google ─► [Identidade confirmada]
-   └─ E-mail ─► [Código de 6 dígitos] ─► [Identidade confirmada]
-                                      │
-                                      ▼
-                         [Código do time + nome + telefone opcional]
-                                      │
-                                      ▼
-                          [Escolha: jogador ou staff]
-                              │             │
-                 ┌────────────┘             └──────────────┐
-                 ▼                                         ▼
-       [Jogador: posições]                     [Staff: sem subpapel]
-          ├─ selecionar                             │
-          └─ pular                                 ▼
-                 │                         [Estado pendente]
-                 ▼                                  │
-       [Conta ativa + posições                 [Home com aviso;
-        pendentes, se houver]                   sem módulos protegidos]
+[1. Boas-vindas (SnapIn)]
+   ├─ Entrar com o Google ──────────────────────────┐
+   │    (erro OAuth exibido na própria etapa)       │
+   │                                                ▼
+   └─ Entrar com código por e-mail          [Identidade Google]
+        │                                           │
+        ▼                                           │
+[2. Dados & Time (cadastro manual)]                 │
+   • Time: Navigators (somente leitura)             │
+   • Código do time: [NAVS-2026] (editável)         │
+   • Nome completo + Telefone (opcional) + E-mail   │
+   • Ações: [Receber código de 6 dígitos] / [Voltar]│
+        │                                           │
+        ▼                                           │
+[3. Verifique seu e-mail (código 6 dígitos)]        │
+   • Código numérico (tabular-nums, --font-mono)    │
+   • Ações: [Continuar] / [Reenviar código / Voltar]│
+        │                                           │
+        └───────────────────┬───────────────────────┘
+                            ▼
+            [4. Como você participa do time? (Papel)]
+               • Escolha: [Jogador] ou [Staff]
+               • Erro de submissão visível na própria etapa
+               • Ação reversa: [Voltar] (retorna à etapa 3)
+                   │                          │
+      ┌────────────┘                          └──────────────┐
+      ▼                                                      ▼
+[5. Suas posições (Jogador)]                   [Staff: sem subpapel]
+   • Ofensiva (QB, RB, FB, WR, TE, OL)                       │
+   • Defesa (DL, LB, CB, S)                                  ▼
+   • Ações:                                    [6. Cadastro pendente]
+     - [Criar conta]                              • Aguarda Admin ou Head Coach
+     - [Pular posições por agora]                 • Ação: [Ir para a tela inicial]
+     - [Voltar] (retorna à etapa 4)                          │
+      │                                                      ▼
+      ▼                                        [Home de Staff Pendente]
+[Conta ativa + posições                           • Exibe papel "Staff" (sem "()")
+ pendentes, se houver]                            • Ações: [Falar com o staff]
+                                                           e [Sair da conta]
 ```
+
+### Retornos de erro na verificação final (`POST /auth/email/verify`)
+
+- **`401` (código de 6 dígitos inválido ou expirado)**: retorna para a etapa
+  **3 (`code`)** com mensagem de erro associada ao campo de código, preservando
+  o e-mail, o código do time, o nome e o telefone já preenchidos.
+- **`400` (código do time inválido) ou `409` (time desativado/indisponível)**:
+  retorna para a etapa **2 (`email`)** com mensagem de erro associada ao campo
+  editável **Código do time**, permitindo corrigir o código sem redigitar os
+  demais campos.
+- **Falha de rede ou erro `5xx` ao confirmar papel `Staff` ou `Jogador`**:
+  mantém o usuário na etapa atual (**4 (`role`)** ou **5 (`player-positions`)**)
+  e exibe `<FieldError role="alert">` visível no card, sem engolir o erro.
 
 ## 3. Dados coletados
 
-- Código do time: obrigatório.
-- Nome completo: obrigatório no cadastro manual; nome disponível do Google
+- **Time (somente leitura)**: exibe `Time: Navigators`. Em conformidade estrita
+  com o `GLOSSARY.md`, nunca utiliza o termo proibido *"Equipe"*.
+- **Código do time (editável)**: obrigatório no cadastro manual, com
+  `NAVS-2026` como valor/exemplo padrão. Validado no servidor contra times
+  inexistentes (`400`) ou desativados (`409`).
+- **Nome completo**: obrigatório no cadastro manual; nome disponível do Google
   pode preencher o campo.
-- E-mail: obrigatório e verificado.
-- Telefone: opcional, armazenado para futura integração WhatsApp.
-- Papel: `jogador` ou `staff`.
-- Posições: opcionais para jogador; proibidas para staff no payload de
+- **Telefone (opcional)**: informado em formato livre (`(11) 91234-5678`) para
+  futura comunicação por WhatsApp, sem validação nem envio de mensagem no MVP.
+- **E-mail**: obrigatório e verificado.
+- **Papel**: `jogador` ou `staff`.
+- **Posições**: opcionais para `jogador`; proibidas para `staff` no payload de
   cadastro.
 
 ## 4. Posições e unidades
 
-O jogador pode selecionar múltiplas posições:
+Na etapa **5 (`player-positions`)**, o jogador pode selecionar zero, uma ou
+múltiplas posições agrupadas por unidade:
 
-- Ofensiva: `QB`, `RB`, `FB`, `WR`, `TE`, `OL`.
-- Defesa: `DL`, `LB`, `CB`, `S`.
+- **Ofensiva**: `QB`, `RB`, `FB`, `WR`, `TE`, `OL`.
+- **Defesa**: `DL`, `LB`, `CB`, `S`.
 
 Special teams (`K`, `P`, `LS`, `KR/PR`, `Gunner`) não é escolhida no cadastro
 inicial e pode ser atribuída posteriormente por staff ativo. Uma posição de
 special teams pode coexistir com ofensiva e defesa.
 
 As unidades são derivadas das posições aprovadas. Posições escolhidas pelo
-jogador começam `pendente`; posições aprovadas por staff, head coach ou admin
-passam a derivar unidades liberadas para conteúdo específico.
+jogador começam com estado `pendente`; posições aprovadas por staff, head coach
+ou admin passam a derivar unidades liberadas para conteúdo específico.
 
-O jogador pode usar **Pular por agora**. Nesse caso, a conta continua ativa,
-mas o jogador vê um aviso no Perfil e não acessa conteúdo específico de
-unidade até possuir uma posição aprovada.
+O jogador pode acionar **Pular posições por agora**. Nesse caso, a conta entra
+`ativa` sem posições cadastradas; o jogador vê um aviso no Perfil e acessa
+apenas jogadas de special teams até possuir uma posição aprovada. Da etapa de
+posições, o jogador também pode acionar **Voltar** para retornar à escolha de
+papel.
 
 ## 5. Staff e administração
 
-Staff não escolhe subpapel no cadastro. Entra pendente e não recebe
+Staff não escolhe subpapel no cadastro. Ao selecionar **Staff** na etapa de
+papel, o cadastro é submetido sem `staffRole` e entra no estado `pendente` sem
 permissões de edição ou leitura protegida.
 
-- Admin geral administra toda a aplicação.
-- Head coach administra posições e permissões esportivas do time.
-- Staff ativo revisa solicitações de posições.
-- Staff ativo pode atribuir posições de special teams.
-- Admin e head coach podem atribuir qualquer posição.
-- Subpapéis (`head_coach`, coordenadores e special teams) são atribuídos
-  posteriormente por admin ou head coach.
+- **Tela pós-cadastro (`pending`)**: informa que o cadastro como staff aguarda
+  definição de um **Admin ou Head Coach** e oferece o botão **Ir para a tela
+  inicial**.
+- **Home de staff pendente (`PendingStaffHome`)**: exibe que o usuário solicitou
+  acesso no papel de **Staff** (sem parênteses vazios `Staff ()` quando não há
+  subpapel atribuído; se houver subpapel atribuído, exibe `Staff (Subpapel)`),
+  explica que a aprovação cabe a um **Admin ou Head Coach** e disponibiliza as
+  ações **Falar com o staff** e **Sair da conta**.
+- **Governança**:
+  - Admin geral administra toda a aplicação.
+  - Head coach administra posições e permissões esportivas do time.
+  - Staff ativo revisa solicitações de posições e pode atribuir posições de
+    special teams.
+  - Admin e head coach podem atribuir qualquer posição e definir os subpapéis
+    (`head_coach`, coordenadores de unidade e coordenador de special teams).
 
-## 6. Validação e acessibilidade
+## 6. Validação, estados e acessibilidade
 
-1. Código do time:
-   - obrigatório;
-   - `autocapitalize="characters"`;
-   - `spellcheck="false"`;
-   - código inválido retorna erro específico associado ao campo.
-2. Código de e-mail:
-   - `inputmode="numeric"`;
-   - `autocomplete="one-time-code"`;
-   - código inválido ou expirado não limpa o e-mail.
-3. Posições:
-   - seleção múltipla com componentes da biblioteca UI;
-   - estado selecionado exposto com `aria-pressed`;
-   - botão de skip sempre disponível;
-   - posição pendente visível no Perfil.
-4. Estados protegidos:
-   - jogador sem posição aprovada vê Home/Perfil, mas não conteúdo específico
-     de unidade;
-   - staff pendente vê apenas sua situação.
+1. **Contexto do time e Código do time (etapa `email`)**:
+   - **Time somente leitura**: rótulo `Time:` associado semanticamente ao valor
+     `Navigators` (`<input readOnly value="Navigators">` ou grupo rotulado com
+     `aria-labelledby`), sem usar `<Field disabled>` (evitando opacidade
+     reduzida de controle inativo) e sem usar a palavra proibida *"Equipe"*;
+   - **Código do time editável**: obrigatório, valor/exemplo `NAVS-2026`,
+     `autocapitalize="characters"`, `spellcheck="false"`, fonte `--font-mono`;
+   - código inválido (`400`) ou time indisponível (`409`) retorna à etapa
+     `email` e exibe erro específico associado ao campo via `aria-invalid="true"`
+     e `aria-describedby`.
+2. **Código de verificação de e-mail (etapa `code`)**:
+   - `inputmode="numeric"`, `autocomplete="one-time-code"`, `pattern="\d{6}"`;
+   - tipografia `--font-mono` com `font-variant-numeric: tabular-nums` para
+     evitar oscilação horizontal durante a digitação;
+   - código inválido ou expirado (`401`) associa o `<FieldError>` ao input via
+     `aria-describedby` e não limpa o e-mail nem os dados preenchidos;
+   - botão secundário permite voltar à etapa `email` ou reenviar o código.
+3. **Escolha de papel (etapa `role`)**:
+   - grupo com `role="group"` e `aria-label="Escolha de papel"`;
+   - botões **Jogador** e **Staff** com `min-height: 72px`, `aria-pressed` e
+     descrição curta da consequência de cada escolha (entrada ativa com
+     posições vs. aprovação pendente por Admin ou Head Coach);
+   - renderiza `<FieldError role="alert">` no topo do card caso a requisição de
+     confirmação falhe;
+   - inclui obrigatoriamente botão **Voltar** para retornar à etapa `code`.
+4. **Posições do jogador (etapa `player-positions`)**:
+   - seleção múltipla com botões `.position-toggle` agrupados em `Ofensiva` e
+     `Defesa` (`role="group"`);
+   - alvo de toque mínimo obrigatório de **`44×44px`** (`min-height: 44px`,
+     `min-width: 44px`);
+   - estado selecionado exposto com `aria-pressed="true"` e diferenciado por
+     contraste (`background: var(--primary)`, `color: var(--primary-foreground)`)
+     **e** indicador visual não-cromático (prefixo/ícone `✓ ` antes da sigla,
+     ex.: `✓ WR`);
+   - botões **Criar conta**, **Pular posições por agora** e **Voltar** sempre
+     acessíveis com altura mínima de `44px`.
+5. **Botão Google e estado de carregamento (`loading`)**:
+   - rótulo visível completo **Entrar com o Google** (alinhado ao nome
+     acessível, sem truncar para *"com o Google"*);
+   - ícone SVG do Google puramente decorativo (`aria-hidden="true"`, sem
+     `role="img"` conflitante);
+   - durante `loading={true}`, o rótulo textual oculto do botão recebe
+     `aria-hidden="true"` para que leitores de tela anunciem apenas o
+     `loadingLabel` do `Spinner`.
 
 ## 7. Escopo por card
 
