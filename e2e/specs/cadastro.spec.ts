@@ -17,14 +17,14 @@ async function sessionUser(page: import('@playwright/test').Page): Promise<Sessi
   return ((await response.json()) as { user: SessionUser }).user
 }
 
-test.describe('Cadastro: equipe atual', () => {
-  test('a tela mostra o Navigators como equipe atual, sem campo de código', async ({ page }) => {
+test.describe('Cadastro: time atual', () => {
+  test('a tela mostra o Navigators como time atual e o código do time editável', async ({ page }) => {
     const auth = new AuthPage(page)
     await auth.goto()
     await auth.startEmailLogin()
 
-    await expect(page.getByLabel('Equipe atual: Navigators')).toBeVisible()
-    await expect(page.getByLabel(/código do time/i)).toHaveCount(0)
+    await expect(page.getByLabel(/time atual: navigators/i)).toBeVisible()
+    await expect(page.getByLabel(/código do time/i)).toHaveValue('NAVS-2026')
   })
 })
 

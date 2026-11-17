@@ -13,8 +13,9 @@ test.describe('Operação por teclado', () => {
     await tabUntilFocused(page, page.getByRole('button', { name: 'Entrar com código por e-mail' }))
     await page.keyboard.press('Enter')
 
-    // Após abrir o formulário, o foco parte do topo: Tab até o primeiro campo
-    // (o time é fixo, não há campo de código do time).
+    // Após abrir o formulário, o foco parte do topo: Tab até o código do time
+    // (já preenchido com NAVS-2026) e depois até o nome.
+    await tabUntilFocused(page, page.getByLabel(/código do time/i))
     await tabUntilFocused(page, page.getByLabel(/nome completo/i))
     await page.keyboard.type('Rafael Costa')
     // Telefone (opcional) fica entre nome e e-mail: o foco vai até o e-mail pela ordem natural.
@@ -35,7 +36,8 @@ test.describe('Operação por teclado', () => {
     // Unidade não é escolhida: ela é derivada das posições. Basta marcar uma posição.
     await tabUntilFocused(page, page.getByRole('button', { name: 'QB', exact: true }))
     await page.keyboard.press('Space')
-    await expect(page.getByRole('button', { name: 'QB', exact: true })).toHaveAttribute('aria-pressed', 'true')
+    // Posição marcada ganha prefixo "✓ " (indicador não-cromático): o nome muda.
+    await expect(page.getByRole('button', { name: /^(✓ )?QB$/ })).toHaveAttribute('aria-pressed', 'true')
     await tabUntilFocused(page, new AuthPage(page).createAccountButton())
     await page.keyboard.press('Enter')
 
@@ -79,6 +81,13 @@ test.describe('Landmarks e títulos', () => {
     await expect(page.getByRole('heading', { level: 2, name: 'Playbook' })).toBeVisible()
   })
 
+  test('tela de entrada expõe main, skip link e título h1', async ({ page }) => {
+    await page.goto('/login')
+    await expect(page.getByRole('main')).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Pular para o conteúdo principal' })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: 'SnapIn' })).toBeVisible()
+  })
+
   test('item ativo da navegação expõe aria-current', async ({ page, jogador }) => {
     await openAs(page, jogador)
     await expect(navLink(page, 'Home')).toHaveAttribute('aria-current', 'page')
@@ -105,7 +114,7 @@ test.describe('Landmarks e títulos', () => {
     const qb = ofensiva.getByRole('button', { name: 'QB', exact: true })
     await expect(qb).toHaveAttribute('aria-pressed', 'false')
     await qb.click()
-    await expect(qb).toHaveAttribute('aria-pressed', 'true')
+    await expect(ofensiva.getByRole('button', { name: /^(✓ )?QB$/ })).toHaveAttribute('aria-pressed', 'true')
     await expect(page.getByRole('group', { name: 'Posições de defesa' })).toBeVisible()
   })
 

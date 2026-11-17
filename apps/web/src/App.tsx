@@ -13,6 +13,7 @@ import { Elenco } from './screens/Elenco'
 import { Perfil } from './screens/Perfil'
 import { LoadingState } from './components/LoadingState'
 import { ErrorState } from './components/ErrorState'
+import { AuthMain } from './components/AuthMain'
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { state } = useAuth()
@@ -20,17 +21,17 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 
   if (state.status === 'loading') {
     return (
-      <div className="auth-layout">
+      <AuthMain>
         <LoadingState label="Verificando sessão" />
-      </div>
+      </AuthMain>
     )
   }
 
   if (state.status === 'error') {
     return (
-      <div className="auth-layout">
+      <AuthMain>
         <ErrorState message={state.error} onRetry={() => window.location.reload()} />
-      </div>
+      </AuthMain>
     )
   }
 

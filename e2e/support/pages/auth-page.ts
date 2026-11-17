@@ -18,12 +18,11 @@ export class AuthPage {
   }
 
   /**
-   * Botão de login Google. O nome acessível é "Entrar com Google" (aria-label);
-   * o texto visível é "com o Google" ao lado do ícone colorido. Aceitamos os dois
-   * para não depender de qual deles o accessible name expõe.
+   * Botão de login Google. O nome acessível e o texto visível coincidem em
+   * "Entrar com o Google".
    */
   googleButton(): Locator {
-    return this.page.getByRole('button', { name: /entrar com google|com o google/i })
+    return this.page.getByRole('button', { name: 'Entrar com o Google', exact: true })
   }
 
   emailLoginButton(): Locator {
@@ -37,7 +36,8 @@ export class AuthPage {
 
   /**
    * Preenche nome e e-mail e pede o código. O time não é digitado: a tela
-   * mostra a equipe atual (Navigators) e o cadastro usa o time habilitado.
+   * mostra o Time (Navigators, somente leitura) e o Código do time já preenchido com
+   * NAVS-2026, que pode ser editado.
    */
   async requestCode(input: { email: string; name?: string }): Promise<void> {
     await this.page.getByLabel(/nome completo/i).fill(input.name ?? 'Conta E2E')
@@ -69,6 +69,14 @@ export class AuthPage {
 
   createAccountButton(): Locator {
     return this.page.getByRole('button', { name: /^Criar conta$/ })
+  }
+
+  resendCodeButton(): Locator {
+    return this.page.getByRole('button', { name: 'Reenviar código' })
+  }
+
+  backButton(): Locator {
+    return this.page.getByRole('button', { name: 'Voltar', exact: true })
   }
 
   /** Staff é criado diretamente como pendente após escolher o papel. */

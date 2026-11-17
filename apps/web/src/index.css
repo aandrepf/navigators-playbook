@@ -100,6 +100,8 @@
   --color-text-primary: var(--foreground);
   --color-text-secondary: var(--secondary-foreground);
   --color-text-muted: var(--muted-foreground);
+  --color-text-success: var(--success);
+  --color-text-error: var(--destructive);
 
   --color-brand-primary: var(--primary);
   --color-brand-primary-strong: var(--primary);
@@ -1083,7 +1085,10 @@ button {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--space-4);
+  padding-top: max(var(--space-4), env(safe-area-inset-top));
+  padding-bottom: max(var(--space-4), env(safe-area-inset-bottom));
+  padding-left: max(var(--space-4), env(safe-area-inset-left));
+  padding-right: max(var(--space-4), env(safe-area-inset-right));
 }
 
 .auth-card {
@@ -1124,6 +1129,20 @@ button {
   color: var(--color-text-primary);
   background: var(--color-bg-input);
   border-radius: var(--radius-md);
+}
+
+.auth-resend-status {
+  margin: var(--space-2) 0 0 0;
+  font-size: var(--text-sm);
+  line-height: 1.4;
+}
+
+.auth-resend-status--success {
+  color: var(--color-text-success);
+}
+
+.auth-resend-status--error {
+  color: var(--color-text-error);
 }
 
 /* Role selection */
