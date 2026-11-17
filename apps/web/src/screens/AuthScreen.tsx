@@ -15,7 +15,7 @@ import {
   Input,
 } from '../components/ui'
 
-const TEAM_CODE = 'NAVS-2026'
+const DEFAULT_TEAM_CODE = 'NAVS-2026'
 
 function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -25,8 +25,6 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      role="img"
-      aria-label="Google"
       {...props}
     >
       <path
@@ -68,6 +66,7 @@ export function AuthScreen() {
   const [code, setCode] = useState('')
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
+  const [teamCode, setTeamCode] = useState(DEFAULT_TEAM_CODE)
   const [role, setRole] = useState<'jogador' | 'staff' | null>(null)
   const [positions, setPositions] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
@@ -98,7 +97,7 @@ export function AuthScreen() {
     const payload: Parameters<typeof loginWithEmail>[0] = {
       email,
       code,
-      teamCode: TEAM_CODE,
+      teamCode: teamCode,
       name,
       phone: phone || null,
       role: nextRole,
@@ -175,10 +174,9 @@ export function AuthScreen() {
             onClick={handleGoogleLogin}
             loading={loading}
             loadingLabel="Conectando..."
-            aria-label="Entrar com Google"
           >
             <GoogleIcon aria-hidden="true" style={{ marginRight: 'var(--space-2)' }} />
-            com o Google
+            Entrar com o Google
           </Button>
 
           <div className="or-divider">ou</div>
@@ -205,11 +203,28 @@ export function AuthScreen() {
               </CardDescription>
             </CardHeader>
 
-            <Field disabled>
-              <FieldLabel>Equipe:</FieldLabel>
-              <span className="auth-readonly-value" aria-label="Equipe atual: Navigators">
+            <Field>
+              <FieldLabel htmlFor="team-code">Código do time:</FieldLabel>
+              <Input
+                id="team-code"
+                type="text"
+                value={teamCode}
+                onChange={(e) => setTeamCode(e.target.value.toUpperCase())}
+                autoComplete="off"
+                placeholder="NAVS-2026"
+                maxLength={16}
+              />
+            </Field>
+
+            <Field>
+              <FieldLabel htmlFor="team-name">Time:</FieldLabel>
+              <output
+                id="team-name"
+                className="auth-readonly-value"
+                aria-label="Time atual: Navigators"
+              >
                 Navigators
-              </span>
+              </output>
             </Field>
 
             <Field>
@@ -307,8 +322,10 @@ export function AuthScreen() {
                 pattern="\d{6}"
                 placeholder="000000"
                 error={Boolean(error)}
+                aria-describedby={error ? 'code-error' : undefined}
+                className="mono"
               />
-              {error && <FieldError>{error}</FieldError>}
+              {error && <FieldError id="code-error">{error}</FieldError>}
             </Field>
 
             <Button
@@ -348,6 +365,10 @@ export function AuthScreen() {
             </CardDescription>
           </CardHeader>
 
+          {error && (
+            <FieldError style={{ marginBottom: 'var(--space-3)' }}>{error}</FieldError>
+          )}
+
           <div role="group" aria-label="Escolha de papel">
             <Button
               type="button"
@@ -367,6 +388,9 @@ export function AuthScreen() {
               }}
             >
               <strong style={{ display: 'block' }}>Jogador</strong>
+              <span style={{ fontSize: 'var(--text-sm)', fontWeight: 400, display: 'block' }}>
+                Consulto o playbook e respondo a treinos e jogos
+              </span>
             </Button>
 
             <Button
@@ -388,8 +412,21 @@ export function AuthScreen() {
               }}
             >
               <strong style={{ display: 'block' }}>Staff</strong>
+              <span style={{ fontSize: 'var(--text-sm)', fontWeight: 400, display: 'block' }}>
+                Acesso sujeito à aprovação de um Admin ou Head Coach
+              </span>
             </Button>
           </div>
+
+          <Button
+            type="button"
+            variant="ghost"
+            style={{ width: '100%', marginTop: 'var(--space-3)' }}
+            disabled={loading}
+            onClick={() => setStep('code')}
+          >
+            Voltar
+          </Button>
         </Card>
       </div>
     )
@@ -433,7 +470,7 @@ export function AuthScreen() {
                         aria-pressed={positions.includes(position)}
                         onClick={() => togglePosition(position)}
                       >
-                        {position}
+                        {positions.includes(position) ? `✓ ${position}` : position}
                       </Button>
                     ))}
                   </div>
