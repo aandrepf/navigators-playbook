@@ -81,19 +81,25 @@ Extraídos diretamente das 3 coleções de variáveis da sessão autenticada do 
 
 ### 2.4. Raio de Borda, Sombra e Movimento
 
-- **Raio de borda**:
-  - `--radius-sm`: `6px` (emblemas de posição e situação)
-  - `--radius-md`: `10px` (botões, inputs, selects)
-  - `--radius-lg`: `14px` (cartões de jogada, evento e jogador)
-  - `--radius-full`: `9999px` (chips de filtro e pílulas de status do elenco)
-- **Sombras**:
-  - `--shadow-sm`: `0 1px 3px rgba(0, 0, 0, 0.35)`
-  - `--shadow-md`: `0 6px 16px rgba(0, 0, 0, 0.45)`
-  - `--shadow-lg`: `0 16px 36px rgba(0, 0, 0, 0.65)` (modais e gavetas)
-- **Movimento**:
+- **Raio de borda e Raios Concêntricos (`R_externo = R_interno + padding`)**:
+  - `--radius-sm`: `6px` (emblemas de unidade, posição e botões internos de seletor segmentado)
+  - `--radius-md` / `--component-button-radius` / `--component-input-radius`: `8px` (botões, inputs, selects e gatilhos de aba `[data-slot="tabs-trigger"]`)
+  - `--radius-lg`: `10px` (cartões compactos, linhas de atribuição e prancheta do diagrama)
+  - `--radius-xl` / `--component-card-radius`: `14px` (cartões de jogada, evento, jogador e modais)
+  - `--radius-4xl` / `--component-badge-radius`: `26px` (emblemas base e status do elenco)
+  - `--radius-full`: `9999px` (avatares e indicadores circulares)
+  - *Regra de raios concêntricos*: containers com padding curto (`<= 12px`) usam `R_externo = R_interno + padding` (ex.: `[data-slot="tabs-list"]` com `padding: 4px` e `border-radius: 12px` envolvendo `[data-slot="tabs-trigger"]` com `border-radius: 8px`).
+- **Sombras (Effect Styles do Figma Vega)**:
+  - `--shadow-surface` (`--shadow-sm`): `0 1px 2px 0 rgba(0, 0, 0, 0.05)` (Light) / `0 1px 3px 0 rgba(0, 0, 0, 0.4)` (Dark)
+  - `--shadow-control`: `0 1px 2px 0 rgba(0, 0, 0, 0.04)` (Light) / `0 1px 2px 0 rgba(0, 0, 0, 0.35)` (Dark)
+  - `--shadow-tabs-active`: `0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)`
+  - `--shadow-popover` (`--shadow-md`): `0 4px 12px -2px rgba(0, 0, 0, 0.08)` (Light) / `0 8px 20px -4px rgba(0, 0, 0, 0.55)` (Dark)
+  - `--shadow-dialog` (`--shadow-lg`): `0 20px 25px -5px rgba(0, 0, 0, 0.12)` (Light) / `0 24px 48px -12px rgba(0, 0, 0, 0.75)` (Dark)
+- **Movimento e Transições Específicas**:
   - `--ease-standard`: `cubic-bezier(0.2, 0, 0, 1)`
-  - `--duration-fast`: `150ms` (foco, hover, troca de chip)
-  - `--duration-normal`: `240ms` (abertura de gaveta/modal, transição de aba)
+  - `--duration-fast`: `150ms` (foco, hover, troca de aba/chip)
+  - `--duration-normal`: `220ms` (abertura de modal/painel)
+  - Proibição de `transition: all`: transições declaram apenas propriedades explícitas (`background-color`, `border-color`, `color`, `box-shadow`).
   - Respeito obrigatório a `@media (prefers-reduced-motion: reduce)` zerando animações e transições para `0.01ms`.
 
 ---
@@ -137,15 +143,16 @@ No modo instalado na tela inicial (`display: standalone`), o layout aplica:
 ## 4. Alvos de Toque, Contraste e Acessibilidade
 
 1. **Alvo de toque mínimo (`44×44px`)**:
-   - Todo botão, aba de navegação, chip de filtro, seletor de "Vou / Não vou", botão de ordenação do game plan (`↑` / `↓`) e item acionável possui `min-height: 44px` e `min-width: 44px`.
+   - Todo botão (`[data-slot="button"]`, inclusive `sm` e `icon`), aba (`[data-slot="tabs-trigger"]`), item de navegação, chip de filtro, seletor de "Vou / Não vou", botão de ordenação do game plan (`↑` / `↓`) e item acionável possui `min-height: 44px` e `min-width: 44px` (`--touch-min: 44px`).
 2. **Anel de foco visível (`:focus-visible`)**:
-   - `outline: 2px solid var(--color-focus-ring); outline-offset: 2px;` em todos os elementos interativos. Nunca usar `outline: none` sem substituto de alto contraste.
+   - `outline: none; border-color: var(--ring); box-shadow: 0 0 0 3px var(--ring-focus);` em todos os elementos interativos (Figma Effect `focus/button` e `focus/input`). Nunca usar `outline: none` sem anel de foco de alto contraste.
 3. **Estados obrigatórios em todos os componentes interativos**:
    - **Padrão (`default`)**: pronto para interação.
-   - **Foco (`:focus-visible`)**: anel amarelo `#FACC15` de `2px` com offset de `2px`.
-   - **Desabilitado (`disabled` / `aria-disabled="true"`)**: opacidade `0.55`, cursor `not-allowed`, rótulo explicativo do motivo (ex.: "Prazo encerrado — somente o staff pode alterar" ou "Somente leitura para seu subpapel").
-   - **Carregando (`aria-busy="true"`)**: indicador visual animado + texto acessível (`"Salvando resposta..."`) e bloqueio contra duplo envio.
-   - **Erro (`aria-invalid="true"`)**: borda `--color-status-injured` (`#FB7185`), ícone de alerta `⚠` e mensagem vinculada por `aria-describedby` em `role="alert"`.
+   - **Hover (`:hover:not(:disabled)`)** e **Ativo/Selecionado (`[aria-pressed="true"]` / `[aria-selected="true"]` / `[aria-current="page"]`)**: feedback visual inequívoco sem deslocar o layout.
+   - **Foco (`:focus-visible`)**: borda `--ring` (`#171717` Light / `#D4D4D4` Dark) + halo de `3px` `--ring-focus`.
+   - **Desabilitado (`disabled` / `aria-disabled="true"`)**: opacidade `0.48–0.5`, cursor `not-allowed`, rótulo explicativo do motivo (ex.: "Prazo encerrado — somente o staff pode alterar" ou "Somente leitura para seu subpapel").
+   - **Carregando (`aria-busy="true"`)**: `<Spinner data-slot="spinner">` inline + texto acessível (`"Salvando resposta..."`), preservando as dimensões do botão e bloqueando duplo envio.
+   - **Erro (`aria-invalid="true"`)**: borda `--destructive` (`#DC2626` Light / `#FF6467` Dark) + halo `3px var(--destructive-focus)`, ícone de alerta e mensagem vinculada por `aria-describedby` em `role="alert"`.
 4. **Leitores de tela (VoiceOver iOS / TalkBack Android / NVDA)**:
    - Landmarks semânticos: `<header>`, `<nav aria-label="Navegação principal">`, `<main id="conteudo-principal">`, `<section aria-labelledby="...">`.
    - Link `"Pular para o conteúdo principal"` visível no primeiro `Tab`.
@@ -171,7 +178,8 @@ No modo instalado na tela inicial (`display: standalone`), o layout aplica:
 - [`flows/aprovacao-staff.md`](./flows/aprovacao-staff.md) — Estado pendente do recém-cadastrado como staff, notificação ao head coach, aprovação/recusa, concessão cumulativa de coordenador de special teams e remoção do papel de staff.
 - [`flows/instalacao-pwa.md`](./flows/instalacao-pwa.md) — Convite não intrusivo (exibido uma única vez na Home) para adicionar à tela inicial no iOS/Android, ativação de Web Push por gesto do usuário e fallback automático por e-mail.
 
-### Referência Figma, Inventário Completo, Plano da Biblioteca de Componentes & Questões em Aberto (`docs/design/`)
+### Gate de Qualidade, Referência Figma, Inventário, Biblioteca de Componentes & Questões em Aberto (`docs/design/`)
+- [`DESIGN-POLISH-GATE.md`](./DESIGN-POLISH-GATE.md) — **Design Polish Gate** estruturado em duas partes desacopladas: **(Parte A) Gate Genérico de Acabamento**, reutilizável em projetos com qualquer template Figma (tipografia, `tabular-nums`/`text-wrap`, superfícies e raios concêntricos, alinhamento óptico, ícones `currentColor`/peso, hit areas `44×44px`, estados de interação, motion restraint/`prefers-reduced-motion`, transições específicas sem `transition: all`, imagens, evidências mínimas, severidade `S0`/`S1`/`S2` e veredito `Approve`/`Needs changes`/`Block`); e **(Parte B) Adaptador SnapIn / Figma Vega**, que parametriza o gate especificamente para o **Playbook do Time** sem transformar o Vega em regra universal e sem instalar dependências.
 - [`FIGMA-COMPONENT-INVENTORY.md`](./FIGMA-COMPONENT-INVENTORY.md) — Inventário técnico completo extraído da sessão autenticada do Figma (`window.figma` + `&view=variables` + inspeção do `Dev Mode` em `node-id=7050-2702`), cobrindo as 25 páginas, 25 `COMPONENT_SET`s, 1.159 variáveis locais (`Tailwind`, `Style`, `Mode`), estilos locais, separação em 4 camadas (`Primitives`, `Components`, `Patterns`, `Screens`), evidência auditável (`[E1-FIGMA-LIVE]`, `[E1-REGISTRY-TSX]`, `[E2-REGISTRY-META]`, `[E3-RECONSTRUCAO-DOMINIO]`), mapeamento Figma → React e ordem de implementação `P0`/`P1`/`P2`.
 - [`COMPONENT-LIBRARY-PLAN.md`](./COMPONENT-LIBRARY-PLAN.md) — Plano arquitetural completo da biblioteca reutilizável em 3 camadas (`Primitives`, `Composed Components` e `Domain Patterns`), prioridades `P0`/`P1`/`P2`, API TypeScript sugerida, anatomia `data-slot`, matriz de estados, acessibilidade, itens fora do escopo e política de dependências/licenças para `apps/web/src/components/`.
 - [`FIGMA-REFERENCE.md`](./FIGMA-REFERENCE.md) — Análise do arquivo público **shadcn UI Kit – shadcncraft – Free Starter Kit (`node-id=7050-2702`)**, cadeia de variáveis v3 (`Tailwind` → `Style` → `Mode`), anatomia `data-slot` 1:1, o que foi adotado, o que foi rejeitado, diagnóstico de login do Figma e comparação visual antes/depois.
@@ -179,7 +187,18 @@ No modo instalado na tela inicial (`display: standalone`), o layout aplica:
 
 ---
 
-## 6. Checklist de Handoff para o Frontend
+## 6. Checklist de Handoff (UX Designer → Frontend)
+
+### 6.0. Pré-Requisito Obrigatório do UX Designer: Aplicar o Design Polish Gate ([`DESIGN-POLISH-GATE.md`](./DESIGN-POLISH-GATE.md))
+
+Antes de entregar qualquer protótipo ou especificação de tela para implementação em `apps/web`, o **UX Designer** deve executar o [`DESIGN-POLISH-GATE.md`](./DESIGN-POLISH-GATE.md) combinando a **Parte A (Gate Genérico independente de template)** com a **Parte B (Adaptador SnapIn / Figma Vega)** e registrar veredito **`Approve`**:
+
+- [x] **Evidências mínimas (`EV-01` a `EV-05`)**: validado nos modos suportados pelo Adaptador (`Vega Light` padrão e `Vega Dark` alternativo), nos viewports `1440×1024` (Desktop) e `390×844` (Mobile com safe-area iOS) com zero overflow horizontal (`scrollWidth <= clientWidth`), nos 4 contextos de papel/subpapel (`jogador`, `head_coach`, `coordenador_ofensivo`, `staff_pendente`), nos 4 estados de tela (`default`, `loading`, `empty`, `error`) e com rastreabilidade Figma (`[E1]`/`[E2]`/`[E3]`).
+- [x] **Tipografia, `tabular-nums` e `text-wrap`**: escala do Adaptador aplicada sem fontes mágicas, `font-size >= 16px` em `<input>`, `<select>` e `<textarea>` no mobile, `font-variant-numeric: tabular-nums` em contadores/prazos/situação/versão, `text-wrap: balance` em títulos e `text-wrap: pretty` em descrições, atribuições e notas.
+- [x] **Superfícies, raios concêntricos e alinhamento óptico**: camadas de superfície distintas em Light e Dark, raios aninhados concêntricos (`R_externo = R_interno + padding`, ex.: `tabs-list` `12px` com `tabs-trigger` `8px`), e ícones/emblemas alinhados ao centro óptico da primeira linha de texto.
+- [x] **Ícones `currentColor`, hit areas `>= 44×44px` e estados de interação**: SVGs com `stroke="currentColor"` e peso consistente (`stroke-width: 2`), todos os alvos interativos `>= 44×44px` (`--touch-min: 44px`), ciclo completo `default / hover / active / focus-visible / disabled / loading / error`, e independência estrita de cor (cor + borda + glifo + texto do `GLOSSARY.md`).
+- [x] **Motion restraint, transições específicas e imagens**: durações curtas (`150ms`/`220ms`), `@media (prefers-reduced-motion: reduce)` ativo, zero ocorrências de `transition: all`, diagramas/imagens com proporção reservada (sem CLS), contorno interno sutil e zoom via `<dialog>` nativo acessível.
+- [x] **Veredito do Gate**: **`Approve`** (`S0 = 0`, `S1 = 0`, `S2 <= 2`), sem introduzir Tailwind, Motion ou dependências externas.
 
 ### 6.1. Como abrir o protótipo navegável
 
