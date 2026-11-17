@@ -4,7 +4,7 @@ import type { Database } from '../db/types.js';
 import type { Role } from '../domain.js';
 import { HttpError } from '../errors.js';
 import type { Mailer } from '../mail/mailer.js';
-import { getTeam, getTeamByCode } from '../team.js';
+import { getTeam, getTeamByCode, normalizeTeamCode } from '../team.js';
 import { findOrCreateUser } from '../users/users.js';
 import type { GoogleClient } from './google.js';
 import { randomToken } from './crypto.js';
@@ -118,7 +118,11 @@ export async function authRoutes(
       const body = req.body;
       if (!isValidEmail(body.email)) throw new HttpError(400, 'e-mail inválido');
 
-      const team = await getTeamByCode(db, body.teamCode);
+      const teamCode = normalizeTeamCode(body.teamCode);
+      // Distinção de contrato: o time que existe no banco mas está desabilitado
+      // — do catálogo ou legado preservado (ex. o antigo NAVIGATORS) — responde
+      // 409 (indisponível); um código inexistente responde 400 (inválido).
+      const team = await getTeamByCode(db, teamCode);
       if (!team) throw new HttpError(400, 'código do time inválido');
       if (!team.enabled) throw new HttpError(409, 'time indisponível para cadastro');
 

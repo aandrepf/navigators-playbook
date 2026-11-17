@@ -92,12 +92,13 @@ paths:
         `sameSite=lax`).
 
         **Times (SnapIn)**: o catálogo semea sete times, mas apenas o
-        habilitado aceita cadastro — `NAVS-2026` (Navigators). Os demais
+        habilitado aceita cadastro — `NAVS-2026` (Navigators). Um código que
+        existe no banco mas está desabilitado — os demais do catálogo
         (`DEVILS-2026`, `BLDS-2026`, `RNGD-2026`, `WARS-2026`, `MUTTS-2026`,
-        `CRSD-2026`) existem no banco e respondem `409` (indisponível); um
-        código desconhecido responde `400` (inválido). O fluxo de time único é
-        preservado: o código de e-mail é sempre emitido contra o time
-        habilitado.
+        `CRSD-2026`) ou um legado preservado (ex. o antigo `NAVIGATORS`) —
+        responde `409` (indisponível); um código inexistente responde `400`
+        (inválido). O fluxo de time único é preservado: o código de e-mail é
+        sempre emitido contra o time habilitado.
       operationId: verifyEmailCode
       requestBody:
         required: true
@@ -144,7 +145,7 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
         '409':
-          description: Time desabilitado para cadastro (código conhecido, mas indisponível)
+          description: Time desabilitado para cadastro (existe no banco, mas indisponível)
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
