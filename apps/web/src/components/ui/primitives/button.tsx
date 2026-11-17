@@ -51,7 +51,10 @@ export function Button({
           className="ui-btn__spinner"
         />
       )}
-      <span className={cn('ui-btn__label', loading && 'ui-btn__label--hidden')}>
+      <span
+        className={cn('ui-btn__label', loading && 'ui-btn__label--hidden')}
+        aria-hidden={loading || undefined}
+      >
         {children}
       </span>
     </button>

@@ -175,7 +175,7 @@ describe('Google login regression', () => {
     const user = userEvent.setup()
     renderWithAuth(<App />, { route: '/login' })
 
-    await user.click(screen.getByRole('button', { name: /entrar com google/i }))
+    await user.click(screen.getByRole('button', { name: /entrar com o google/i }))
 
     const alert = await screen.findByRole('alert', {}, { timeout: 2000 })
     expect(alert).toHaveTextContent(/login com google não configurado/i)
