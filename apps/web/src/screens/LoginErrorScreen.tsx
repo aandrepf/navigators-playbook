@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { ErrorState } from '../components/ErrorState'
+import { AuthMain } from '../components/AuthMain'
 
 export function LoginErrorScreen() {
   const [searchParams] = useSearchParams()
@@ -19,10 +20,10 @@ export function LoginErrorScreen() {
   }, [motivo])
 
   return (
-    <div className="auth-layout">
+    <AuthMain>
       <div className="auth-card" data-slot="card">
         <ErrorState message={message} onRetry={() => navigate('/login')} />
       </div>
-    </div>
+    </AuthMain>
   )
 }
