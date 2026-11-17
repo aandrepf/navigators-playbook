@@ -1,10 +1,11 @@
 import { expect, openAs, test } from '../support/fixtures'
 import { uniqueEmail } from '../support/accounts'
+import { waitForLoginCode } from '../support/mail'
 import { AuthPage } from '../support/pages/auth-page'
 
 /**
  * Regressão da revisão UX 02.1 do cadastro (docs/design/REVIEW-02.1-CADASTRO-UI.md).
- * Cada teste cobre um achado S0/S1 e roda nos projetos mobile e desktop.
+ * Cada teste cobre um achado S0/S1/S2 e roda nos projetos mobile e desktop.
  */
 
 const POSITIONS_OFENSIVA = ['QB', 'RB', 'FB', 'WR', 'TE', 'OL']
@@ -72,7 +73,7 @@ test.describe('Revisão 02.1: papel, erros e voltar (S1-02)', () => {
     await auth.enterCode('123456')
 
     await expect(page.getByRole('heading', { name: 'Como você participa do time?' })).toBeVisible()
-    await page.getByRole('button', { name: 'Voltar', exact: true }).click()
+    await auth.backButton().click()
     await expect(page.getByRole('heading', { name: 'Verifique seu e-mail' })).toBeVisible()
   })
 
@@ -148,6 +149,37 @@ test.describe('Revisão 02.1: código de 6 dígitos incorreto no cadastro', () =
   })
 })
 
+test.describe('Revisão 02.1: reenvio de código (S2-04)', () => {
+  test('clicar em Reenviar código solicita um novo código para o mesmo e-mail', async ({ page }) => {
+    const auth = new AuthPage(page)
+    const email = uniqueEmail('rev021.reenviar')
+    await auth.goto()
+    await auth.startEmailLogin()
+    await auth.requestCode({ email })
+
+    await auth.resendCodeButton().click()
+
+    await expect(page.getByRole('status')).toContainText(/novo código enviado/i)
+
+    // O novo código deve funcionar para concluir o cadastro.
+    await auth.enterCode(await waitForLoginCode(email))
+    await auth.choosePapel('JOGADOR')
+    await auth.submitPlayer({ positions: ['WR'] })
+    await expect(page).toHaveURL('/')
+  })
+
+  test('botão Voltar na etapa do código retorna à etapa de dados', async ({ page }) => {
+    const auth = new AuthPage(page)
+    await auth.goto()
+    await auth.startEmailLogin()
+    await auth.requestCode({ email: uniqueEmail('rev021.voltar.email') })
+
+    await auth.backButton().click()
+    await expect(page.getByRole('heading', { name: 'Criar conta ou entrar' })).toBeVisible()
+    await expect(page.getByLabel(/^e-mail/i)).toHaveValue(/rev021\.voltar\.email/i)
+  })
+})
+
 test.describe('Revisão 02.1: staff pendente (S1-01)', () => {
   test('Home do staff pendente não mostra subpapel vazio e oferece Sair da conta', async ({ page, staffPendente }) => {
     await openAs(page, staffPendente, '/')
@@ -160,10 +192,10 @@ test.describe('Revisão 02.1: staff pendente (S1-01)', () => {
 })
 
 test.describe('Revisão 02.1: landmarks das telas de entrada (S2-03)', () => {
-  // Pendência S2 aberta na revisão: as telas deslogadas usam <div className="auth-layout">,
-  // sem landmark <main>. Mantido como fixme até o web corrigir; não bloqueia o cadastro.
-  test.fixme('tela de entrada expõe landmark main', async ({ page }) => {
+  test('tela de entrada expõe landmark main e skip link', async ({ page }) => {
     await page.goto('/login')
     await expect(page.getByRole('main')).toBeVisible()
+    await expect(page.getByRole('main')).toHaveAttribute('id', 'conteudo-principal')
+    await expect(page.getByRole('link', { name: 'Pular para o conteúdo principal' })).toBeVisible()
   })
 })

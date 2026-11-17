@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { LoadingState } from '../components/LoadingState'
 import { ErrorState } from '../components/ErrorState'
+import { AuthMain } from '../components/AuthMain'
 
 function getGoogleErrorMessage(errorParam: string | null) {
   if (!errorParam) return null
@@ -47,19 +48,19 @@ export function GoogleCallback() {
 
   if (error) {
     return (
-      <div className="auth-layout">
+      <AuthMain>
         <div className="auth-card" data-slot="card">
           <ErrorState message={error} onRetry={() => navigate('/login')} />
         </div>
-      </div>
+      </AuthMain>
     )
   }
 
   return (
-    <div className="auth-layout">
+    <AuthMain>
       <div className="auth-card" data-slot="card">
         <LoadingState label="Confirmando login com Google" />
       </div>
-    </div>
+    </AuthMain>
   )
 }

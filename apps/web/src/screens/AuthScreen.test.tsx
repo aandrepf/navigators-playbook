@@ -272,4 +272,44 @@ describe('AuthScreen', () => {
     const codeInput = screen.getByLabelText(/código de verificação/i)
     expect(codeInput).toHaveClass('mono')
   })
+
+  it('exposes a single main landmark and skip link on the login screen', async () => {
+    renderWithRouter(<AuthScreen />)
+
+    expect(screen.getAllByRole('main')).toHaveLength(1)
+    expect(screen.getByRole('link', { name: /pular para o conteúdo principal/i })).toBeInTheDocument()
+    expect(screen.getByRole('main')).toHaveAttribute('id', 'conteudo-principal')
+  })
+
+  it('resends the verification code and shows a success status', async () => {
+    const user = userEvent.setup()
+    let requestCount = 0
+    server.use(
+      http.post('/auth/email/request', async ({ request }) => {
+        const body = (await request.json()) as { email: string }
+        if (body.email === 'reenviar@navigators.fa') {
+          requestCount++
+        }
+        return new HttpResponse(JSON.stringify({ ok: true }), { status: 200 })
+      }),
+    )
+
+    renderWithRouter(<AuthScreen />)
+
+    await user.click(screen.getByRole('button', { name: /entrar com código por e-mail/i }))
+    await user.type(screen.getByLabelText(/nome completo/i), 'Rafael Costa')
+    await user.type(screen.getByLabelText(/e-mail/i), 'reenviar@navigators.fa')
+    await user.click(screen.getByRole('button', { name: /receber código de 6 dígitos/i }))
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /verifique seu e-mail/i })).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByRole('button', { name: /reenviar código/i }))
+
+    await waitFor(() => {
+      expect(requestCount).toBe(2)
+    })
+    expect(screen.getByRole('status')).toHaveTextContent(/novo código enviado/i)
+  })
 })

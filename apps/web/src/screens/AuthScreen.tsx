@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { api, ApiClientError } from '../api/client'
 import { POSITIONS_BY_UNIT } from '../domain/positions'
+import { AuthMain } from '../components/AuthMain'
 import {
   Button,
   Card,
@@ -55,6 +56,11 @@ type Step =
   | 'player-positions'
   | 'pending'
 
+type ResendStatus =
+  | { type: 'success'; message: string }
+  | { type: 'error'; message: string }
+  | null
+
 export function AuthScreen() {
   const { requestEmailCode, loginWithEmail } = useAuth()
   const navigate = useNavigate()
@@ -71,6 +77,7 @@ export function AuthScreen() {
   const [positions, setPositions] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [resendStatus, setResendStatus] = useState<ResendStatus>(null)
 
   async function handleRequestCode(event: React.FormEvent) {
     event.preventDefault()
@@ -81,6 +88,22 @@ export function AuthScreen() {
       setStep('code')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao solicitar código.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleResendCode() {
+    setLoading(true)
+    setError(null)
+    setResendStatus(null)
+    try {
+      await requestEmailCode(email)
+      setCode('')
+      setResendStatus({ type: 'success', message: `Novo código enviado para ${email}.` })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao reenviar código.'
+      setResendStatus({ type: 'error', message })
     } finally {
       setLoading(false)
     }
@@ -153,7 +176,7 @@ export function AuthScreen() {
 
   if (step === 'welcome') {
     return (
-      <div className="auth-layout">
+      <AuthMain>
         <Card className="auth-card">
           <CardHeader className="auth-card__header">
             <h1 data-slot="card-title" className="auth-card__title ui-card__title">
@@ -185,13 +208,13 @@ export function AuthScreen() {
             Entrar com código por e-mail
           </Button>
         </Card>
-      </div>
+      </AuthMain>
     )
   }
 
   if (step === 'email') {
     return (
-      <div className="auth-layout">
+      <AuthMain>
         <Card className="auth-card">
           <form onSubmit={handleRequestCode}>
             <CardHeader className="auth-card__header">
@@ -286,17 +309,18 @@ export function AuthScreen() {
             </Button>
           </form>
         </Card>
-      </div>
+      </AuthMain>
     )
   }
 
   if (step === 'code') {
     return (
-      <div className="auth-layout">
+      <AuthMain>
         <Card className="auth-card">
           <form
             onSubmit={(e) => {
               e.preventDefault()
+              setResendStatus(null)
               setStep('role')
             }}
           >
@@ -326,6 +350,16 @@ export function AuthScreen() {
                 className="mono"
               />
               {error && <FieldError id="code-error">{error}</FieldError>}
+              {resendStatus?.type === 'success' && (
+                <p role="status" className="auth-resend-status auth-resend-status--success">
+                  {resendStatus.message}
+                </p>
+              )}
+              {resendStatus?.type === 'error' && (
+                <p role="alert" className="auth-resend-status auth-resend-status--error">
+                  {resendStatus.message}
+                </p>
+              )}
             </Field>
 
             <Button
@@ -342,19 +376,33 @@ export function AuthScreen() {
               type="button"
               variant="secondary"
               style={{ width: '100%', marginTop: 'var(--space-3)' }}
-              onClick={() => setStep('email')}
+              loading={loading}
+              loadingLabel="Reenviando..."
+              onClick={() => {
+                setResendStatus(null)
+                void handleResendCode()
+              }}
             >
               Reenviar código
             </Button>
+
+            <Button
+              type="button"
+              variant="ghost"
+              style={{ width: '100%', marginTop: 'var(--space-3)' }}
+              onClick={() => setStep('email')}
+            >
+              Voltar
+            </Button>
           </form>
         </Card>
-      </div>
+      </AuthMain>
     )
   }
 
   if (step === 'role') {
     return (
-      <div className="auth-layout">
+      <AuthMain>
         <Card className="auth-card">
           <CardHeader className="auth-card__header">
             <h1 data-slot="card-title" className="auth-card__title ui-card__title">
@@ -428,13 +476,13 @@ export function AuthScreen() {
             Voltar
           </Button>
         </Card>
-      </div>
+      </AuthMain>
     )
   }
 
   if (step === 'player-positions') {
     return (
-      <div className="auth-layout">
+      <AuthMain>
         <Card className="auth-card">
           <form
             onSubmit={(e) => {
@@ -517,12 +565,12 @@ export function AuthScreen() {
             </Button>
           </form>
         </Card>
-      </div>
+      </AuthMain>
     )
   }
 
   return (
-    <div className="auth-layout">
+    <AuthMain>
       <Card className="auth-card" style={{ textAlign: 'center' }}>
         <CardHeader className="auth-card__header">
           <h1 data-slot="card-title" className="auth-card__title ui-card__title">
@@ -537,6 +585,6 @@ export function AuthScreen() {
           Ir para a tela inicial
         </Button>
       </Card>
-    </div>
+    </AuthMain>
   )
 }

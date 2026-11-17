@@ -81,6 +81,13 @@ test.describe('Landmarks e títulos', () => {
     await expect(page.getByRole('heading', { level: 2, name: 'Playbook' })).toBeVisible()
   })
 
+  test('tela de entrada expõe main, skip link e título h1', async ({ page }) => {
+    await page.goto('/login')
+    await expect(page.getByRole('main')).toBeVisible()
+    await expect(page.getByRole('link', { name: 'Pular para o conteúdo principal' })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: 'SnapIn' })).toBeVisible()
+  })
+
   test('item ativo da navegação expõe aria-current', async ({ page, jogador }) => {
     await openAs(page, jogador)
     await expect(navLink(page, 'Home')).toHaveAttribute('aria-current', 'page')
