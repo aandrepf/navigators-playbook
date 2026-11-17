@@ -1,0 +1,15 @@
+.git
+.github
+.opencode
+.scratch
+node_modules
+**/node_modules
+apps/*/dist
+apps/web/.vite
+e2e/.report
+e2e/.results
+e2e/.runtime
+.env
+.env.*
+!.env.example
+!.env.test.example

@@ -14,6 +14,29 @@ export type ApprovalState = (typeof APPROVAL_STATES)[number];
 export const UNITS = ['ofensiva', 'defesa', 'special_teams'] as const;
 export type Unit = (typeof UNITS)[number];
 
+export const POSITION_CATALOG = {
+  ofensiva: ['QB', 'RB', 'FB', 'WR', 'TE', 'OL'],
+  defesa: ['DL', 'LB', 'CB', 'S'],
+  special_teams: ['K', 'P', 'LS', 'KR/PR', 'Gunner'],
+} as const satisfies Record<Unit, readonly string[]>;
+
+export type PositionApprovalState = 'pendente' | 'aprovada';
+
+export interface PlayerPosition {
+  unit: Unit;
+  position: string;
+  approvalState: PositionApprovalState;
+}
+
+export function unitForPosition(position: string): Unit | null {
+  for (const [unit, positions] of Object.entries(POSITION_CATALOG) as Array<
+    [Unit, readonly string[]]
+  >) {
+    if (positions.includes(position)) return unit;
+  }
+  return null;
+}
+
 export const ROSTER_STATUSES = [
   'disponivel',
   'indisponivel',
@@ -34,28 +57,8 @@ export const STAFF_SUBROLES = [
 ] as const;
 export type StaffSubrole = (typeof STAFF_SUBROLES)[number];
 
-/**
- * Subpapéis que um cadastro pode auto-declarar. Head coach é semeado no seed e
- * concedido por um head coach já aprovado — nunca auto-declarado.
- */
-export const SELF_DECLARABLE_STAFF_SUBROLES = [
-  'coordenador_ofensivo',
-  'coordenador_defensivo',
-  'coordenador_special_teams',
-] as const;
-export type SelfDeclarableStaffSubrole = (typeof SELF_DECLARABLE_STAFF_SUBROLES)[number];
-
 export function isRole(value: unknown): value is Role {
   return typeof value === 'string' && (ROLES as readonly string[]).includes(value);
-}
-
-export function isSelfDeclarableStaffSubrole(
-  value: unknown,
-): value is SelfDeclarableStaffSubrole {
-  return (
-    typeof value === 'string' &&
-    (SELF_DECLARABLE_STAFF_SUBROLES as readonly string[]).includes(value)
-  );
 }
 
 /** Representação pública de um usuário (nunca inclui justificativa nem segredos). */
@@ -63,10 +66,14 @@ export interface PublicUser {
   id: string;
   email: string;
   name: string | null;
+  phone: string | null;
   role: Role;
   approvalState: ApprovalState;
+  isAdmin: boolean;
   /** Subpapéis do staff (vazio para jogador). */
   subRoles: StaffSubrole[];
+  positions: PlayerPosition[];
+  units: Unit[];
 }
 
 /** Cadastro de staff aguardando aprovação, visível só para head coach. */
@@ -74,6 +81,5 @@ export interface PendingStaff {
   id: string;
   email: string;
   name: string | null;
-  requestedSubrole: StaffSubrole;
   createdAt: string;
 }

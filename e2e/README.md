@@ -9,7 +9,8 @@ Pré-requisitos: Node 22, um Postgres dedicado a testes e o Chromium do Playwrig
 
 ```bash
 # 1. Postgres de testes (uma vez). O nome do banco precisa conter "e2e" ou "test".
-docker run -d --name playbook-e2e-pg -p 5432:5432 \
+# Use podman nesta máquina ou docker em outra máquina.
+podman run -d --name playbook-e2e-pg -p 5432:5432 \
   -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=playbook_e2e postgres:17
 
 # 2. Dependências e browser (uma vez)
@@ -25,6 +26,14 @@ Traces e screenshots das falhas ficam em `e2e/.results`.
 
 Para depurar visualmente: `npx playwright test --ui` (com a mesma variável).
 
+Se a porta 5173 (web) ou 3000 (API) já estiver ocupada, por exemplo por um
+`npm run dev` aberto, a suíte falha ao subir os servidores (ela não reaproveita
+servidores existentes). Troque as portas sem editar código:
+
+```bash
+E2E_WEB_PORT=5273 E2E_API_PORT=3100 E2E_DATABASE_URL=... npm run test:e2e
+```
+
 ## O que a suíte faz sozinha
 
 O `playwright.config.ts` sobe dois servidores antes dos testes:
@@ -38,6 +47,10 @@ O `playwright.config.ts` sobe dois servidores antes dos testes:
   `E2E_DATABASE_URL` e deixa as migrações e o seed do head coach rodarem do zero.
   Ele **se recusa** a rodar se o nome do banco não contém `e2e` ou `test`, para não
   apagar um banco de desenvolvimento por engano.
+- **Time de cadastro.** O cadastro usa o código `NAVS-2026` (Navigators), o
+  único habilitado. O usuário não digita o código: a tela já mostra a equipe
+  atual. Os testes de disponibilidade (`times.spec.ts`) chamam a API direta com
+  os códigos desabilitados e um código desconhecido, e esperam `409` e `400`.
 - **Código de acesso sem endpoint de teste.** A API roda com o mailer `console`,
   que escreve o código em log. O script grava esse log em
   `e2e/.runtime/api.log`, e os helpers leem o código de lá. Nenhuma rota fora de
@@ -73,14 +86,15 @@ e2e/
   scripts/start-api.mjs       API de testes (zera o banco, grava o log)
   specs/
     auth.spec.ts              login por e-mail, Google, sessão e logout
-    cadastro.spec.ts          cadastro de jogador e de staff pendente
+    cadastro.spec.ts          jogador com/sem posições, staff sem subpapel, contrato
+    times.spec.ts             Navigators habilitado, códigos indisponíveis e desconhecidos
     autorizacao.spec.ts       jogador, staff pendente, head coach
     acessibilidade.spec.ts    teclado, skip link, landmarks, títulos
     playbook.spec.ts          consulta de jogada (smoke + bloqueados)
     presenca-e-jogo.spec.ts   evento, presença, jogo, game plan (bloqueados)
   support/
     constants.mjs             URLs, portas, e-mails, caminhos
-    accounts.ts               contas via API (signIn, createAccount, apiAs)
+    accounts.ts               contas via API (signIn, createAccount, verifyRaw, apiAs)
     mail.ts                   lê o código de acesso do log da API
     fixtures.ts               fixtures jogador, staffPendente, headCoach
     keyboard.ts               tabUntilFocused (foco só por Tab)
@@ -93,11 +107,15 @@ necessário. Dados vêm da API (`docs/api`), nunca de clique para semear estado.
 
 ## Status atual
 
-32 casos ativos e 17 marcados como `fixme`, cada um executado nos dois projetos.
-O reteste final do card 01 passou duas vezes: 68 execuções verdes e nenhum
-fail, com banco zerado em cada execução. Os `fixme` não são falhas; cada um
-aponta a dependência que falta (ver abaixo). Checagem de tipos:
-`npx tsc -p e2e/tsconfig.json`.
+53 casos ativos e 15 marcados como `fixme`, cada um executado nos dois projetos.
+Na última execução completa (integração `feat/02-cadastro-papel-posicoes` incorporada
+na `qa`, Postgres 17 em Podman, banco `playbook_e2e` zerado): **106 verdes, 0 vermelhos
+e 30 `fixme`** (15 casos × 2 projetos). `times.spec.ts` cobre o Navigators
+(`NAVS-2026`) habilitado e os códigos indisponíveis (`409`) e desconhecidos (`400`).
+Os `fixme` não são falhas; cada um aponta a dependência que falta. Checagem de
+tipos: `npx tsc -p e2e/tsconfig.json`.
+
+Relatórios: `e2e/RELATORIO-QA-01.md` e `e2e/RELATORIO-QA-02.md`.
 
 O card 01 foi aprovado sem E2E específico para manifesto PWA, service worker
 ou deploy no Railway. Esses pontos ficam como melhorias não bloqueantes e
@@ -108,13 +126,16 @@ de fluxos de usuário.
 
 | Área | Motivo |
 | --- | --- |
-| Posições e unidades no cadastro | `POST /auth/email/verify` não recebe nem persiste posições (contrato). |
-| Acúmulo de special teams no cadastro | Contrato aceita um `staffRole`; a tela descarta o checkbox. |
-| Erro do retorno do Google | A tela de entrada não lê `login=erro&motivo=`. |
+| Perfil com posições pendentes e solicitação de alteração | Perfil é o card 04 (stories 10–11). |
+| Não vê justificativa de outro jogador | Eventos e justificativas ainda não estão em `docs/api`. |
 | Consulta de jogada e visibilidade | Sem listagem/detalhe de jogadas em `docs/api`. |
 | Evento, presença e justificativa | Sem rotas de evento e resposta em `docs/api`. |
 | Jogo, marcação e game plan | Sem rotas de jogo e game plan em `docs/api`. |
-| Coordenadores por unidade | Sem aprovação de staff nem atribuição de subpapel em `docs/api`. |
+| Coordenadores por unidade | Sem aprovação de staff nem atribuição de subpapel em `docs/api` (card 06). |
+
+Cadastro com Google (caminho 2 da matriz de cadastro) não tem cena própria:
+o callback exige credenciais externas. A suíte cobre o botão, o 503 e o erro
+de retorno; o onboarding Google é do card 03.
 
 ### Achados de produto
 
@@ -127,6 +148,12 @@ Os três achados do card 01 foram corrigidos e retestados; consulte
 
 O acúmulo de special teams continua como `fixme` de contrato/produto e pertence
 aos cards seguintes.
+
+Na QA-02, o achado de produto abaixo foi corrigido pelo web (commit `96c85ec`,
+integrado na `qa`) e retestado:
+
+4. A tela de entrada (`/login`) tem `h1` como título da página (antes era `h3`).
+   Teste: `acessibilidade.spec.ts` › "tela de entrada tem título h1 e campos com rótulo".
 
 ## Regras da suíte
 

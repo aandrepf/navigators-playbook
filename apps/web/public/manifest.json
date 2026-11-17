@@ -1,7 +1,7 @@
 {
-  "name": "Playbook do Time",
-  "short_name": "Playbook",
-  "description": "Playbook, eventos, presença e status do elenco do seu time.",
+  "name": "SnapIn",
+  "short_name": "SnapIn",
+  "description": "SnapIn: playbook, eventos, presença e status do elenco do seu time.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0B111E",

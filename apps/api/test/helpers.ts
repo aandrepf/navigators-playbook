@@ -4,7 +4,7 @@ import { buildApp } from '../src/app.js';
 import type { Config } from '../src/config.js';
 import { loadConfig } from '../src/config.js';
 import { runMigrations } from '../src/db/migrate.js';
-import { seedHeadCoach } from '../src/db/seed.js';
+import { seedAdmin, seedHeadCoach } from '../src/db/seed.js';
 import type { Database, Queryable } from '../src/db/types.js';
 import type { Mailer } from '../src/mail/mailer.js';
 
@@ -56,15 +56,15 @@ export class RecordingMailer implements Mailer {
   }
 }
 
-export const TEST_TEAM_CODE = 'NAVIGATORS';
+export const TEST_TEAM_CODE = 'NAVS-2026';
 
 export function makeTestConfig(overrides: NodeJS.ProcessEnv = {}): Config {
   return loadConfig({
     NODE_ENV: 'test',
-    TEAM_NAME: 'Navigators',
-    TEAM_CODE: TEST_TEAM_CODE,
     SEED_HEAD_COACH_EMAIL: 'head@example.com',
     SEED_HEAD_COACH_NAME: 'Head Coach',
+    SEED_ADMIN_EMAIL: 'admin@example.com',
+    SEED_ADMIN_NAME: 'Admin Geral',
     LOG_LEVEL: 'silent',
     ...overrides,
   });
@@ -77,6 +77,7 @@ export async function createTestContext(): Promise<TestContext> {
 
   const config = makeTestConfig();
   await seedHeadCoach(db, config);
+  await seedAdmin(db, config);
 
   const mailer = new RecordingMailer();
   const app = await buildApp({ db, config, mailer, google: null, logger: false });
@@ -107,8 +108,9 @@ export function cookieHeader(name: string, value: string): { cookie: string } {
 export interface RegisterOptions {
   email: string;
   name?: string;
+  phone?: string;
   role: 'jogador' | 'staff';
-  staffRole?: string;
+  positions?: string[];
 }
 
 /**
@@ -127,14 +129,15 @@ export async function registerViaEmail(
   const code = ctx.mailer.lastCodeFor(opts.email);
   if (!code) throw new Error(`código não emitido para ${opts.email}`);
 
-  const payload: Record<string, string> = {
+  const payload: Record<string, unknown> = {
     email: opts.email,
     code,
     teamCode: TEST_TEAM_CODE,
     role: opts.role,
   };
   if (opts.name) payload.name = opts.name;
-  if (opts.staffRole) payload.staffRole = opts.staffRole;
+  if (opts.phone) payload.phone = opts.phone;
+  if (opts.positions) payload.positions = opts.positions;
 
   return ctx.app.inject({
     method: 'POST',

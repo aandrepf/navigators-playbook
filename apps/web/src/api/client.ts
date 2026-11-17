@@ -1,5 +1,5 @@
 /**
- * Cliente HTTP único do Playbook do Time.
+ * Cliente HTTP único do SnapIn.
  *
  * Único lugar do frontend que conhece URLs, métodos e formato de erro da API.
  * Todas as chamadas são relative ao mesmo origin pois o backend serve o
@@ -8,27 +8,34 @@
 
 export type ApiError = {
   error: string
+  field?: string
+}
+
+export type PlayerPosition = {
+  unit: 'ofensiva' | 'defesa' | 'special_teams'
+  position: string
+  approvalState: 'pendente' | 'aprovada'
 }
 
 export type User = {
   id: string
   email: string
   name: string | null
+  phone: string | null
   role: 'jogador' | 'staff'
   approvalState: 'ativo' | 'pendente' | 'recusado'
+  isAdmin: boolean
   subRoles: Array<
     'head_coach' | 'coordenador_ofensivo' | 'coordenador_defensivo' | 'coordenador_special_teams'
   >
+  positions: PlayerPosition[]
+  units: Array<'ofensiva' | 'defesa' | 'special_teams'>
 }
 
 export type PendingStaff = {
   id: string
   email: string
   name: string | null
-  requestedSubrole:
-    | 'coordenador_ofensivo'
-    | 'coordenador_defensivo'
-    | 'coordenador_special_teams'
   createdAt: string
 }
 
@@ -92,18 +99,14 @@ export const api = {
       code: string
       teamCode: string
       name?: string
+      phone?: string | null
       role: 'jogador' | 'staff'
-      staffRole?:
-        | 'coordenador_ofensivo'
-        | 'coordenador_defensivo'
-        | 'coordenador_special_teams'
+      positions?: string[]
     }) => request<{ user: User }>('POST', '/auth/email/verify', payload),
 
     getSession: () => request<{ user: User }>('GET', '/auth/session'),
 
     logout: () => request<void>('POST', '/auth/logout'),
-
-    googleLogin: () => request<void>('GET', '/auth/google'),
 
     checkGoogleLogin: async (forceError?: string | null) => {
       const query = forceError ? `?forceError=${forceError}` : ''

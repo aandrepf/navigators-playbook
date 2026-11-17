@@ -1101,6 +1101,17 @@ button {
   margin: 0;
 }
 
+.auth-readonly-value {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-min);
+  padding: 0 var(--space-2);
+  font-size: var(--text-base);
+  color: var(--color-text-primary);
+  background: var(--color-bg-input);
+  border-radius: var(--radius-md);
+}
+
 /* Role selection */
 .role-option {
   width: 100%;
@@ -1524,6 +1535,12 @@ dialog[data-slot='image-zoom-dialog'][open] {
   min-height: 36px;
   padding: var(--space-1) var(--space-3);
   font-size: var(--text-sm);
+}
+
+/* Position toggles keep sm font/padding but meet 44px touch target */
+.position-toggle {
+  min-height: var(--touch-min);
+  min-width: var(--touch-min);
 }
 
 .ui-btn[data-size='lg'] {

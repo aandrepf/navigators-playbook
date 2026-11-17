@@ -56,3 +56,31 @@ Registro das decisões de produto e de interface em que o spec (`.scratch/playbo
   - A história `77` permite ao staff *"registrar um jogador que ainda não se cadastrou no elenco, para o elenco ficar completo antes de todos entrarem"*.
 - **Questão**: O vínculo automático entre o registro prévio de `player` criado pelo staff e o novo `user` criado pelo jogador no auto-cadastro (história 1) ocorre por correspondência exata do **e-mail** informado no pré-cadastro, ou o jogador seleciona seu nome em uma lista de pré-cadastrados?
 - **Adotado no protótipo**: No formulário `"Registrar jogador no elenco"` (tela **Elenco**), o staff informa `Nome`, `E-mail (opcional para vínculo automático)`, `Unidades`, `Posições` e `Status do elenco` inicial.
+
+---
+
+## OQ-07 — Simplificação do cadastro de staff: subpapel removido do onboarding
+
+- **Contexto no spec**:
+  - A issue `02` e o fluxo `cadastro-e-papel.md` determinam que o staff escolhe o subpapel (`head_coach`, `coordenador_ofensivo`, `coordenador_defensivo` e/ou `coordenador_special_teams`) no auto-cadastro e nasce `pendente` até aprovação de um head coach.
+  - A implementação do backend no commit `6457129` removeu o envio de `staffRole` no `POST /auth/email/verify`; staff entra `pendente` sem subpapel auto-declarado e cabe ao head coach atribuir subpapéis posteriormente na tela **Elenco**.
+- **Questão**: O protótipo e o spec devem ser atualizados para refletir que o staff não escolhe subpapel no auto-cadastro, ou o backend deve voltar a aceitar `staffRole` no verify?
+- **Adotado no frontend (branch web)**: O onboarding de staff foi simplificado: ao escolher "Staff", a conta é criada imediatamente no estado `pendente`, sem tela de escolha de subpapel. A mensagem de pendência foi ajustada para "aguardando definição de um Admin ou Head Coach".
+
+---
+
+## OQ-08 — Escolha de unidades removida do cadastro de jogador
+
+- **Contexto no spec**:
+  - O fluxo `cadastro-e-papel.md` mostra o jogador escolhendo primeiro a unidade (`Ofensiva`, `Defesa` ou `Ambas`) e depois as posições, mantendo special teams visível para todo o time.
+  - A implementação do backend no commit `6457129` espera apenas `positions?: string[]` no verify, deriva a unidade a partir da posição e rejeita posições de `special_teams` no cadastro.
+- **Questão**: A interface deve continuar exibindo o seletor de unidades (Ofensiva/Defesa/Ambas) como no protótipo, filtrando as posições, ou pode ir direto para a escolha de posições agrupadas por unidade?
+- **Adotado no frontend (branch web)**: A tela de posições lista diretamente as posições de ofensiva e defesa, agrupadas por unidade, sem seletor de unidades. O jogador pode selecionar zero ou mais posições (incluindo de ambas as unidades) e também pular a etapa.
+
+---
+
+## OQ-09 — Identidade visual do novo nome "SnapIn"
+
+- **Contexto**: a atualização de branding (novembro/2026) definiu o nome visível do produto como **SnapIn** e o título do navegador como **"SnapIn: Gestão de Futebol Americano"**.
+- **Questão**: não há definição de logo, ícone, cor da marca, ilustração de entrada ou diretriz tipográfica para o nome "SnapIn". O manifesto PWA continua apontando para `/icon.svg`, a tela de entrada não possui logotipo e a barra lateral mantém o emoji ⚓ com o nome do time ("Navigators FA").
+- **Adotado**: foram atualizados apenas os textos visíveis do produto. Nenhum elemento gráfico foi criado ou alterado, para não inventar design fora do escopo da decisão de branding.

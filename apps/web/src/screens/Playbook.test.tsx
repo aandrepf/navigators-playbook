@@ -15,7 +15,7 @@ describe('Playbook', () => {
     renderWithRouter(<Playbook />)
 
     await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /playbook do time/i })).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: /playbook/i })).toBeInTheDocument()
     })
 
     expect(screen.getByLabelText(/buscar jogada por nome/i)).toBeInTheDocument()

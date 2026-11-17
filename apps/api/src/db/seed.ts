@@ -1,5 +1,62 @@
 import type { Config } from '../config.js';
 import type { Database } from './types.js';
+import { getActiveTeamCode, TEAM_CATALOG } from '../team.js';
+
+/**
+ * Garante os times do catálogo (idempotente e não destrutivo): insere os sete
+ * times que faltam e sincroniza apenas a habilitação (`enabled`) dos que já
+ * existem no catálogo. Nomes e demais dados já existentes são preservados.
+ *
+ * Regra do produto: somente o time ativo do catálogo (NAVS-2026) pode ficar
+ * habilitado. Times fora do catálogo (dados legados, como o antigo
+ * `NAVIGATORS`) são preservados — nunca removidos nem renomeados —, mas são
+ * desabilitados para que não aceitem cadastro nem sirvam a sessão.
+ */
+export async function seedTeams(db: Database): Promise<void> {
+  for (const team of TEAM_CATALOG) {
+    await db.query(
+      `INSERT INTO team (name, code, enabled) VALUES ($1, $2, $3)
+       ON CONFLICT (code) DO UPDATE
+         SET enabled = EXCLUDED.enabled`,
+      [team.name, team.code, team.enabled],
+    );
+  }
+
+  // Desabilita todo código diferente do ativo: cobre os demais do catálogo e
+  // também qualquer código legado/indisponível que já exista no banco.
+  await db.query('UPDATE team SET enabled = false WHERE code <> $1', [
+    getActiveTeamCode(),
+  ]);
+}
+
+/**
+ * Semeia tudo o que o arranque precisa (idempotente): os times do catálogo, o
+ * primeiro head coach e o admin geral. Usado pelo `server.ts` para que o admin
+ * configurado exista também em produção/deploy sem depender de um `db:seed`
+ * manual, e pelo `seed-cli.ts`.
+ */
+export async function seedAll(db: Database, config: Config): Promise<void> {
+  await seedTeams(db);
+  await seedHeadCoach(db, config);
+  await seedAdmin(db, config);
+}
+
+/**
+ * Devolve o id do único time habilitado do catálogo, lançando se não houver
+ * nenhum. Resolve pelo código ativo (e não por `enabled` + `created_at`) para
+ * nunca devolver um time legado que ainda carregue `enabled` verdadeiro.
+ */
+async function getEnabledTeamId(db: Database): Promise<string> {
+  const team = await db.query<{ id: string }>(
+    'SELECT id FROM team WHERE code = $1 AND enabled = true',
+    [getActiveTeamCode()],
+  );
+  const teamId = team.rows[0]?.id;
+  if (!teamId) {
+    throw new Error('não foi possível encontrar o time habilitado no seed');
+  }
+  return teamId;
+}
 
 /**
  * Garante que o time e o primeiro head coach existam (idempotente).
@@ -9,30 +66,8 @@ import type { Database } from './types.js';
  * head coach inicial.
  */
 export async function seedHeadCoach(db: Database, config: Config): Promise<void> {
-  const team = await db.query<{ id: string }>(
-    'SELECT id FROM team ORDER BY created_at ASC LIMIT 1',
-  );
-  let teamId = team.rows[0]?.id;
-
-  if (!teamId) {
-    const inserted = await db.query<{ id: string }>(
-      `INSERT INTO team (name, code) VALUES ($1, $2)
-       ON CONFLICT (code) DO NOTHING
-       RETURNING id`,
-      [config.team.name, config.team.code],
-    );
-    teamId =
-      inserted.rows[0]?.id ??
-      (
-        await db.query<{ id: string }>('SELECT id FROM team WHERE code = $1', [
-          config.team.code,
-        ])
-      ).rows[0]?.id;
-  }
-
-  if (!teamId) {
-    throw new Error('não foi possível criar o time no seed');
-  }
+  await seedTeams(db);
+  const teamId = await getEnabledTeamId(db);
 
   if (!config.seedHeadCoach.email) {
     console.warn(
@@ -60,4 +95,38 @@ export async function seedHeadCoach(db: Database, config: Config): Promise<void>
       [teamId, user.rows[0].id],
     );
   });
+}
+
+/** Garante um admin geral configurado pelo ambiente para operação e testes. */
+export async function seedAdmin(db: Database, config: Config): Promise<void> {
+  if (!config.seedAdmin.email) {
+    console.warn('[seed] SEED_ADMIN_EMAIL não definido; admin não será semeado.');
+    return;
+  }
+
+  await seedTeams(db);
+  const teamId = await getEnabledTeamId(db);
+
+  const email = config.seedAdmin.email.toLowerCase();
+  const existing = await db.query<{ id: string }>(
+    'SELECT id FROM "user" WHERE team_id = $1 AND email = $2',
+    [teamId, email],
+  );
+
+  if (existing.rows[0]) {
+    await db.query(
+      `UPDATE "user"
+       SET is_admin = true, approval_state = 'ativo', email_verified_at = COALESCE(email_verified_at, now())
+       WHERE id = $1`,
+      [existing.rows[0].id],
+    );
+    return;
+  }
+
+  await db.query(
+    `INSERT INTO "user"
+      (team_id, email, name, role, approval_state, is_admin, email_verified_at)
+     VALUES ($1, $2, $3, 'staff', 'ativo', true, now())`,
+    [teamId, email, config.seedAdmin.name ?? 'Admin'],
+  );
 }

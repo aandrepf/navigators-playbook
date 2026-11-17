@@ -16,7 +16,7 @@ describe('App shell', () => {
 
     renderWithAuth(<App />, { route: '/' })
 
-    expect(await screen.findByRole('heading', { name: /playbook do time/i })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: /snapin/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /entrar com código por e-mail/i })).toBeInTheDocument()
   })
 
@@ -33,6 +33,18 @@ describe('App shell', () => {
     expect(screen.queryByRole('link', { name: /elenco/i })).not.toBeInTheDocument()
   })
 
+  it('identifies the current team as Navigators in the app shell', async () => {
+    renderWithAuth(<App />, { route: '/' })
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /próximos eventos/i })).toBeInTheDocument()
+    })
+
+    const sidebar = screen.getByRole('navigation', { name: /navegação principal desktop/i })
+    expect(sidebar).toHaveTextContent(/Navigators/)
+    expect(sidebar).not.toHaveTextContent(/Navigators FA/)
+  })
+
   it('shows 6 navigation items for staff including Elenco', async () => {
     server.use(
       http.get('/auth/session', () => {
@@ -41,9 +53,13 @@ describe('App shell', () => {
             id: 'usr-2',
             email: 'coach@navigators.fa',
             name: 'Carlos Eduardo',
+            phone: null,
             role: 'staff',
             approvalState: 'ativo',
+            isAdmin: false,
             subRoles: ['head_coach'],
+            positions: [],
+            units: [],
           },
         })
       }),
@@ -76,7 +92,7 @@ describe('Authentication flow', () => {
 
     await user.click(screen.getByRole('button', { name: /entrar com código por e-mail/i }))
 
-    await user.type(screen.getByLabelText(/código do time/i), 'NAVIGATORS-2026')
+    expect(screen.getByText(/navigators/i)).toBeInTheDocument()
     await user.type(screen.getByLabelText(/nome completo/i), 'Rafael Costa')
     await user.type(screen.getByLabelText(/e-mail/i), 'rafael@navigators.fa')
     await user.click(screen.getByRole('button', { name: /receber código de 6 dígitos/i }))
@@ -91,10 +107,9 @@ describe('Authentication flow', () => {
     await user.click(screen.getByRole('button', { name: /jogador/i }))
 
     await waitFor(() => {
-      expect(screen.getByText(/unidades e posições/i)).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: /suas posições/i })).toBeInTheDocument()
     })
 
-    await user.click(screen.getByRole('button', { name: /ofensiva/i }))
     await user.click(screen.getByRole('button', { name: /wr/i }))
     await user.click(screen.getByRole('button', { name: /criar conta/i }))
 
@@ -108,7 +123,7 @@ describe('Authentication flow', () => {
     renderWithAuth(<App />, { route: '/login' })
 
     await user.click(screen.getByRole('button', { name: /entrar com código por e-mail/i }))
-    await user.type(screen.getByLabelText(/código do time/i), 'NAVIGATORS-2026')
+    expect(screen.getByText(/navigators/i)).toBeInTheDocument()
     await user.type(screen.getByLabelText(/nome completo/i), 'Marcos Viana')
     await user.type(screen.getByLabelText(/e-mail/i), 'marcos@navigators.fa')
     await user.click(screen.getByRole('button', { name: /receber código de 6 dígitos/i }))
@@ -117,9 +132,6 @@ describe('Authentication flow', () => {
     await user.click(screen.getByRole('button', { name: /continuar$/i }))
 
     await user.click(screen.getByRole('button', { name: /staff/i }))
-
-    await user.click(screen.getByRole('radio', { name: /coordenador defensivo/i }))
-    await user.click(screen.getByRole('button', { name: /criar conta/i }))
 
     expect(await screen.findByText(/cadastro pendente/i)).toBeInTheDocument()
   })
@@ -163,7 +175,7 @@ describe('Google login regression', () => {
     const user = userEvent.setup()
     renderWithAuth(<App />, { route: '/login' })
 
-    await user.click(screen.getByRole('button', { name: /continuar com google/i }))
+    await user.click(screen.getByRole('button', { name: /entrar com google/i }))
 
     const alert = await screen.findByRole('alert', {}, { timeout: 2000 })
     expect(alert).toHaveTextContent(/login com google não configurado/i)
@@ -219,9 +231,13 @@ describe('Design system data-slot', () => {
             id: 'usr-2',
             email: 'coach@navigators.fa',
             name: 'Carlos Eduardo',
+            phone: null,
             role: 'staff',
             approvalState: 'ativo',
+            isAdmin: false,
             subRoles: ['head_coach'],
+            positions: [],
+            units: [],
           },
         })
       }),
@@ -262,9 +278,13 @@ describe('Design system data-slot', () => {
             id: 'usr-2',
             email: 'coach@navigators.fa',
             name: 'Carlos Eduardo',
+            phone: null,
             role: 'staff',
             approvalState: 'ativo',
+            isAdmin: false,
             subRoles: ['head_coach'],
+            positions: [],
+            units: [],
           },
         })
       }),
@@ -292,9 +312,13 @@ describe('Design system data-slot', () => {
             id: 'usr-2',
             email: 'coach@navigators.fa',
             name: 'Carlos Eduardo',
+            phone: null,
             role: 'staff',
             approvalState: 'ativo',
+            isAdmin: false,
             subRoles: ['head_coach'],
+            positions: [],
+            units: [],
           },
         })
       }),

@@ -4,14 +4,20 @@ info:
   version: 0.1.0
   description: |
     Contrato da fundação do backend do Playbook do Time (Fastify + Postgres).
-    Cobre autenticação por código de e-mail e por Google, sessão por cookie e a
-    leitura da fila de cadastros de staff pendentes.
+    Cobre autenticação por código de e-mail e por Google, sessão por cookie,
+    cadastro com papel e posições e a leitura da fila de cadastros de staff
+    pendentes.
 
     **Regras de autorização** (decididas no servidor, nunca confiadas do cliente):
-    - `jogador` entra com estado `ativo` após confirmar o e-mail.
-    - `staff` entra `pendente` até um `head_coach` aprovar; enquanto pendente lê
-      apenas o próprio estado (`GET /auth/session`) e nada mais.
-    - `GET /staff/pending` exige `head_coach` ativo.
+    - `jogador` entra com estado `ativo` após confirmar o e-mail, mesmo sem
+      posição aprovada; suas posições nascem `pendente` e só posições
+      `aprovada` derivam unidades liberadas para conteúdo.
+    - `staff` entra `pendente` sem subpapel até um admin ou `head_coach`
+      aprovar; enquanto pendente lê apenas o próprio estado
+      (`GET /auth/session`) e nada mais.
+    - `admin` é uma permissão geral (nunca auto-cadastrada) que pode coexistir
+      com o vínculo de staff e administra a fila de pendentes.
+    - `GET /staff/pending` exige admin ou `head_coach` ativo.
 
     Valores de enum são snake_case; as *chaves* do JSON são camelCase.
 servers:
@@ -77,9 +83,22 @@ paths:
       summary: Verifica o código e abre sessão (cria o usuário no primeiro acesso)
       description: |
         Se o e-mail ainda não existe no time, cria o usuário: `jogador` entra
-        `ativo`; `staff` entra `pendente` com o `staffRole` auto-declarado.
+        `ativo`, com posições opcionais (apenas de ofensiva/defesa) que nascem
+        `pendente`; `staff` entra `pendente` sem subpapel e não pode enviar
+        posições. Nesta fatia o callback Google ainda cria apenas um `jogador`
+        `ativo` sem posições; o onboarding de posições no Google chega na
+        próxima fatia.
         A resposta define o cookie de sessão (`httpOnly`, `secure`,
         `sameSite=lax`).
+
+        **Times (SnapIn)**: o catálogo semea sete times, mas apenas o
+        habilitado aceita cadastro — `NAVS-2026` (Navigators). Um código que
+        existe no banco mas está desabilitado — os demais do catálogo
+        (`DEVILS-2026`, `BLDS-2026`, `RNGD-2026`, `WARS-2026`, `MUTTS-2026`,
+        `CRSD-2026`) ou um legado preservado (ex. o antigo `NAVIGATORS`) —
+        responde `409` (indisponível); um código inexistente responde `400`
+        (inválido). O fluxo de time único é preservado: o código de e-mail é
+        sempre emitido contra o time habilitado.
       operationId: verifyEmailCode
       requestBody:
         required: true
@@ -94,10 +113,16 @@ paths:
                 code: { type: string, pattern: '^\d{6}$' }
                 teamCode: { type: string }
                 name: { type: string }
+                phone:
+                  type: [string, 'null']
+                  description: Telefone opcional para futura integração WhatsApp.
                 role: { type: string, enum: [jogador, staff] }
-                staffRole:
-                  type: string
-                  enum: [coordenador_ofensivo, coordenador_defensivo, coordenador_special_teams]
+                positions:
+                  type: array
+                  description: Opcional para jogador; proibido para staff. Aceita apenas posições de ofensiva e defesa (special teams é atribuída depois por staff).
+                  items:
+                    type: string
+                    enum: [QB, RB, FB, WR, TE, OL, DL, LB, CB, S]
       responses:
         '200':
           description: Autenticado; cookie de sessão definido
@@ -115,12 +140,12 @@ paths:
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
-          description: Código inválido/expirado ou código do time inválido
+          description: Código de e-mail inválido ou expirado
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
         '409':
-          description: Subpapel de staff exclusivo já ocupado por outro membro
+          description: Time desabilitado para cadastro (existe no banco, mas indisponível)
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Error' }
@@ -199,7 +224,7 @@ paths:
     get:
       tags: [Staff]
       summary: Lista cadastros de staff aguardando aprovação
-      description: Restrito a `head_coach` ativo. A aprovação/recusa é o próximo item.
+      description: Restrito a admin ou `head_coach` ativo. A aprovação/recusa é o próximo item.
       operationId: listPendingStaff
       security:
         - sessionCookie: []
@@ -230,29 +255,50 @@ components:
   schemas:
     User:
       type: object
-      required: [id, email, name, role, approvalState, subRoles]
+      required: [id, email, name, phone, role, approvalState, subRoles, positions, units, isAdmin]
       properties:
         id: { type: string, format: uuid }
         email: { type: string, format: email }
         name: { type: [string, 'null'] }
+        phone: { type: [string, 'null'] }
         role: { type: string, enum: [jogador, staff] }
         approvalState: { type: string, enum: [ativo, pendente, recusado] }
+        isAdmin:
+          type: boolean
+          description: Permissão administrativa geral, independente do papel esportivo.
         subRoles:
           type: array
           items:
             type: string
             enum: [head_coach, coordenador_ofensivo, coordenador_defensivo, coordenador_special_teams]
+        positions:
+          type: array
+          items: { $ref: '#/components/schemas/PlayerPosition' }
+        units:
+          type: array
+          items:
+            type: string
+            enum: [ofensiva, defesa, special_teams]
+
+    PlayerPosition:
+      type: object
+      required: [unit, position, approvalState]
+      properties:
+        unit:
+          type: string
+          enum: [ofensiva, defesa, special_teams]
+        position: { type: string }
+        approvalState:
+          type: string
+          enum: [pendente, aprovada]
 
     PendingStaff:
       type: object
-      required: [id, email, name, requestedSubrole, createdAt]
+      required: [id, email, name, createdAt]
       properties:
         id: { type: string, format: uuid }
         email: { type: string, format: email }
         name: { type: [string, 'null'] }
-        requestedSubrole:
-          type: string
-          enum: [coordenador_ofensivo, coordenador_defensivo, coordenador_special_teams]
         createdAt: { type: string, format: date-time }
 
     Error:
@@ -260,6 +306,7 @@ components:
       required: [error]
       properties:
         error: { type: string }
+        field: { type: string }
 
   responses:
     BadRequest:

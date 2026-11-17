@@ -1,12 +1,9 @@
 import { expect, type Locator, type Page } from '@playwright/test'
-import { TEAM_CODE } from '../constants.mjs'
-
-export type Unit = 'Ofensiva' | 'Defesa' | 'Special teams'
 
 /**
  * Tela de entrada e cadastro (`/login`). Seleciona por papel e rótulo, como o
  * usuário enxerga. Os passos seguem a ordem do fluxo real: welcome → e-mail →
- * código → papel → unidades/posições (jogador) ou subpapel (staff).
+ * código → papel → posições (jogador) ou pendência (staff).
  */
 export class AuthPage {
   constructor(private readonly page: Page) {}
@@ -20,8 +17,13 @@ export class AuthPage {
     await expect(this.page.getByRole('button', { name: 'Entrar com código por e-mail' })).toBeVisible()
   }
 
+  /**
+   * Botão de login Google. O nome acessível é "Entrar com Google" (aria-label);
+   * o texto visível é "com o Google" ao lado do ícone colorido. Aceitamos os dois
+   * para não depender de qual deles o accessible name expõe.
+   */
   googleButton(): Locator {
-    return this.page.getByRole('button', { name: 'Continuar com Google' })
+    return this.page.getByRole('button', { name: /entrar com google|com o google/i })
   }
 
   emailLoginButton(): Locator {
@@ -33,9 +35,11 @@ export class AuthPage {
     await expect(this.page.getByRole('heading', { name: 'Criar conta ou entrar' })).toBeVisible()
   }
 
-  /** Preenche código do time, nome e e-mail e pede o código. */
-  async requestCode(input: { email: string; name?: string; teamCode?: string }): Promise<void> {
-    await this.page.getByLabel(/código do time/i).fill(input.teamCode ?? TEAM_CODE)
+  /**
+   * Preenche nome e e-mail e pede o código. O time não é digitado: a tela
+   * mostra a equipe atual (Navigators) e o cadastro usa o time habilitado.
+   */
+  async requestCode(input: { email: string; name?: string }): Promise<void> {
     await this.page.getByLabel(/nome completo/i).fill(input.name ?? 'Conta E2E')
     await this.page.getByLabel(/^e-mail/i).fill(input.email)
     await this.page.getByRole('button', { name: 'Receber código de 6 dígitos' }).click()
@@ -50,17 +54,15 @@ export class AuthPage {
   }
 
   async choosePapel(papel: 'JOGADOR' | 'STAFF'): Promise<void> {
-    await this.page.getByRole('button', { name: new RegExp(`^${papel}\\b`) }).click()
+    // Caixa do rótulo não é regra de negócio ("JOGADOR" antigo, "Jogador" atual).
+    await this.page.getByRole('button', { name: new RegExp(`^${papel}\\b`, 'i') }).click()
   }
 
-  /** Marca unidades e posições e envia o cadastro de jogador. */
-  async submitPlayer(input: { units: Unit[]; positions: string[] }): Promise<void> {
-    await expect(this.page.getByRole('heading', { name: 'Unidades e Posições' })).toBeVisible()
-    for (const unit of input.units) {
-      await this.page.getByRole('button', { name: unit, exact: true }).click()
-    }
+  /** Marca posições e envia o cadastro de jogador. */
+  async submitPlayer(input: { positions: string[] }): Promise<void> {
+    await expect(this.page.getByRole('heading', { name: 'Suas posições' })).toBeVisible()
     for (const position of input.positions) {
-      await this.page.getByRole('group', { name: 'Posições' }).getByRole('button', { name: position, exact: true }).click()
+      await this.page.getByRole('button', { name: position, exact: true }).click()
     }
     await this.createAccountButton().click()
   }
@@ -69,11 +71,9 @@ export class AuthPage {
     return this.page.getByRole('button', { name: /^Criar conta$/ })
   }
 
-  /** Marca o subpapel principal do staff e envia o cadastro. */
-  async submitStaff(subRole: 'Coordenador Ofensivo' | 'Coordenador Defensivo'): Promise<void> {
-    await expect(this.page.getByRole('heading', { name: 'Subpapel do Staff' })).toBeVisible()
-    await this.page.getByRole('radio', { name: new RegExp(subRole) }).check()
-    await this.createAccountButton().click()
+  /** Staff é criado diretamente como pendente após escolher o papel. */
+  async submitStaff(): Promise<void> {
+    await expect(this.pendingHeading()).toBeVisible()
   }
 
   pendingHeading(): Locator {

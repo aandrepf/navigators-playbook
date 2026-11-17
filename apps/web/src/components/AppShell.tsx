@@ -1,7 +1,6 @@
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { TopBar } from './TopBar'
-import { RosterStatusBadge } from './RosterStatusBadge'
 import { Badge, Avatar } from './ui'
 
 const PLAYER_NAV = [
@@ -45,7 +44,7 @@ export function AppShell() {
           <div className="sidebar-team-header">
             <div className="sidebar-team-name">
               <span aria-hidden="true">⚓</span>
-              <span>Navigators FA</span>
+              <span>Navigators</span>
             </div>
             <div className="sidebar-user-meta">
               {user ? (
@@ -73,14 +72,6 @@ export function AppShell() {
             ))}
           </ul>
         </div>
-
-        {user && user.role === 'jogador' && (
-          <div className="sidebar-roster-widget">
-            <div className="sidebar-roster-widget__label">Status do elenco</div>
-            <RosterStatusBadge status="disponivel" />
-            <div className="sidebar-roster-widget__meta">Fuso: America/Sao_Paulo</div>
-          </div>
-        )}
 
         {user && (
           <div className="sidebar-profile-card" data-slot="profile-card">

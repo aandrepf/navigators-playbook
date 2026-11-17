@@ -13,13 +13,31 @@ import { fileURLToPath } from 'node:url'
 export const RUN_ID =
   process.env.E2E_RUN_ID ?? (process.env.E2E_RUN_ID = Date.now().toString(36))
 
-export const WEB_PORT = 5173
-export const API_PORT = 3000
+// Portas sobrescrevíveis (E2E_WEB_PORT / E2E_API_PORT) para rodar ao lado de outros serviços locais.
+export const WEB_PORT = Number(process.env.E2E_WEB_PORT ?? 5173)
+export const API_PORT = Number(process.env.E2E_API_PORT ?? 3000)
 export const WEB_URL = `http://127.0.0.1:${WEB_PORT}`
 export const API_URL = `http://127.0.0.1:${API_PORT}`
 
-/** Código do time usado no cadastro (`TEAM_CODE` da API). */
-export const TEAM_CODE = 'NAVIGATORS'
+/**
+ * Código do time habilitado para cadastro (catálogo em `apps/api/src/team.ts`).
+ * O código não é configurável por ambiente: o seed semeia sete times e só o
+ * Navigators aceita cadastro.
+ */
+export const TEAM_CODE = 'NAVS-2026'
+
+/**
+ * Códigos do catálogo que existem no banco mas estão indisponíveis para
+ * cadastro (a API responde 409). Espelha `docs/api/README.md`.
+ */
+export const DISABLED_TEAM_CODES = [
+  'DEVILS-2026',
+  'BLDS-2026',
+  'RNGD-2026',
+  'WARS-2026',
+  'MUTTS-2026',
+  'CRSD-2026',
+]
 
 /**
  * Head coach semeado no início da API (`SEED_HEAD_COACH_EMAIL`). Fixo de propósito:

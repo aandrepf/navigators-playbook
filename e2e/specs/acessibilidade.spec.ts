@@ -4,7 +4,6 @@ import { waitForLoginCode } from '../support/mail'
 import { tabUntilFocused } from '../support/keyboard'
 import { AuthPage } from '../support/pages/auth-page'
 import { navLink } from '../support/shell'
-import { TEAM_CODE } from '../support/constants.mjs'
 
 test.describe('Operação por teclado', () => {
   test('login e cadastro de jogador completos só com teclado', async ({ page }) => {
@@ -14,13 +13,12 @@ test.describe('Operação por teclado', () => {
     await tabUntilFocused(page, page.getByRole('button', { name: 'Entrar com código por e-mail' }))
     await page.keyboard.press('Enter')
 
-    // Após abrir o formulário, o foco parte do topo: Tab até o primeiro campo.
-    const teamCode = page.getByLabel(/código do time/i)
-    await tabUntilFocused(page, teamCode)
-    await page.keyboard.type(TEAM_CODE)
-    await page.keyboard.press('Tab')
+    // Após abrir o formulário, o foco parte do topo: Tab até o primeiro campo
+    // (o time é fixo, não há campo de código do time).
+    await tabUntilFocused(page, page.getByLabel(/nome completo/i))
     await page.keyboard.type('Rafael Costa')
-    await page.keyboard.press('Tab')
+    // Telefone (opcional) fica entre nome e e-mail: o foco vai até o e-mail pela ordem natural.
+    await tabUntilFocused(page, page.getByLabel(/^e-mail/i))
     await page.keyboard.type(email)
     await page.keyboard.press('Enter')
     await expect(page.getByRole('heading', { name: 'Verifique seu e-mail' })).toBeVisible()
@@ -30,14 +28,14 @@ test.describe('Operação por teclado', () => {
     await page.keyboard.press('Enter')
     await expect(page.getByRole('heading', { name: 'Como você participa do time?' })).toBeVisible()
 
-    await tabUntilFocused(page, page.getByRole('button', { name: /^JOGADOR\b/ }))
+    await tabUntilFocused(page, page.getByRole('button', { name: /^JOGADOR\b/i }))
     await page.keyboard.press('Enter')
-    await expect(page.getByRole('heading', { name: 'Unidades e Posições' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Suas posições' })).toBeVisible()
 
-    await tabUntilFocused(page, page.getByRole('button', { name: 'Ofensiva', exact: true }))
+    // Unidade não é escolhida: ela é derivada das posições. Basta marcar uma posição.
+    await tabUntilFocused(page, page.getByRole('button', { name: 'QB', exact: true }))
     await page.keyboard.press('Space')
-    await tabUntilFocused(page, page.getByRole('group', { name: 'Posições' }).getByRole('button', { name: 'QB', exact: true }))
-    await page.keyboard.press('Space')
+    await expect(page.getByRole('button', { name: 'QB', exact: true })).toHaveAttribute('aria-pressed', 'true')
     await tabUntilFocused(page, new AuthPage(page).createAccountButton())
     await page.keyboard.press('Enter')
 
@@ -77,7 +75,8 @@ test.describe('Landmarks e títulos', () => {
     await expect(page.getByRole('banner')).toBeVisible()
     await expect(page.getByRole('main')).toBeVisible()
     await expect(page.getByRole('navigation', { name: /Navegação principal/ })).toBeVisible()
-    await expect(page.getByRole('heading', { level: 1, name: 'Playbook do Time' })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1, name: 'SnapIn' })).toBeVisible()
+    await expect(page.getByRole('heading', { level: 2, name: 'Playbook' })).toBeVisible()
   })
 
   test('item ativo da navegação expõe aria-current', async ({ page, jogador }) => {
@@ -93,13 +92,32 @@ test.describe('Landmarks e títulos', () => {
     })
   }
 
+  test('grupos de posição são rotulados e expõem o estado marcado', async ({ page }) => {
+    const auth = new AuthPage(page)
+    await auth.goto()
+    await auth.startEmailLogin()
+    await auth.requestCode({ email: uniqueEmail('a11y.posicoes') })
+    await auth.enterCode('123456')
+    await auth.choosePapel('JOGADOR')
+
+    const ofensiva = page.getByRole('group', { name: 'Posições de ofensiva' })
+    await expect(ofensiva).toBeVisible()
+    const qb = ofensiva.getByRole('button', { name: 'QB', exact: true })
+    await expect(qb).toHaveAttribute('aria-pressed', 'false')
+    await qb.click()
+    await expect(qb).toHaveAttribute('aria-pressed', 'true')
+    await expect(page.getByRole('group', { name: 'Posições de defesa' })).toBeVisible()
+  })
+
+
+  // Regressão do card 02 (corrigida no web, commit 96c85ec): a tela de entrada
+  // precisa de um h1 como título da página, não de um h3 (CardTitle).
   test('tela de entrada tem título h1 e campos com rótulo', async ({ page }) => {
     const auth = new AuthPage(page)
     await auth.goto()
-    await expect(auth.heading).toHaveText('Playbook do Time')
+    await expect(auth.heading).toHaveText('SnapIn')
 
     await auth.startEmailLogin()
-    await expect(page.getByLabel(/código do time/i)).toBeVisible()
     await expect(page.getByLabel(/nome completo/i)).toBeVisible()
     await expect(page.getByLabel(/^e-mail/i)).toBeVisible()
   })

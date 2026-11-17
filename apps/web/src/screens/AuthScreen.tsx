@@ -2,13 +2,12 @@ import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { api, ApiClientError } from '../api/client'
+import { POSITIONS_BY_UNIT } from '../domain/positions'
 import {
   Button,
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
-  CardTitle,
   Field,
   FieldError,
   FieldHint,
@@ -16,33 +15,47 @@ import {
   Input,
 } from '../components/ui'
 
+const TEAM_CODE = 'NAVS-2026'
+
+function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      role="img"
+      aria-label="Google"
+      {...props}
+    >
+      <path
+        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+        fill="#4285F4"
+      />
+      <path
+        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+        fill="#34A853"
+      />
+      <path
+        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+        fill="#FBBC05"
+      />
+      <path
+        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+        fill="#EA4335"
+      />
+    </svg>
+  )
+}
+
 type Step =
   | 'welcome'
   | 'email'
   | 'code'
   | 'role'
-  | 'player-units'
-  | 'staff-role'
+  | 'player-positions'
   | 'pending'
-
-const POSITIONS_BY_UNIT: Record<string, string[]> = {
-  ofensiva: ['QB', 'RB', 'FB', 'WR', 'TE', 'OL'],
-  defesa: ['DL', 'LB', 'CB', 'S'],
-  special_teams: ['K', 'P', 'LS', 'KR/PR', 'Gunner'],
-}
-
-const STAFF_ROLES = [
-  {
-    value: 'coordenador_ofensivo',
-    label: 'Coordenador Ofensivo',
-    description: 'Edita jogadas da unidade ofensiva.',
-  },
-  {
-    value: 'coordenador_defensivo',
-    label: 'Coordenador Defensivo',
-    description: 'Edita jogadas da unidade defensiva.',
-  },
-] as const
 
 export function AuthScreen() {
   const { requestEmailCode, loginWithEmail } = useAuth()
@@ -54,13 +67,8 @@ export function AuthScreen() {
   const [email, setEmail] = useState('')
   const [code, setCode] = useState('')
   const [name, setName] = useState('')
-  const [teamCode, setTeamCode] = useState('')
+  const [phone, setPhone] = useState('')
   const [role, setRole] = useState<'jogador' | 'staff' | null>(null)
-  const [staffRole, setStaffRole] = useState<
-    'coordenador_ofensivo' | 'coordenador_defensivo' | 'coordenador_special_teams' | ''
-  >('')
-  const [alsoSt, setAlsoSt] = useState(false)
-  const [units, setUnits] = useState<string[]>([])
   const [positions, setPositions] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -79,26 +87,24 @@ export function AuthScreen() {
     }
   }
 
-  async function handleConfirmRole() {
-    if (!role) return
+  async function handleConfirmRole(
+    nextRole = role,
+    nextPositions?: string[],
+  ) {
+    if (!nextRole) return
     setLoading(true)
     setError(null)
 
     const payload: Parameters<typeof loginWithEmail>[0] = {
       email,
       code,
-      teamCode,
+      teamCode: TEAM_CODE,
       name,
-      role,
+      phone: phone || null,
+      role: nextRole,
     }
-
-    if (role === 'staff') {
-      const subRoles: Array<
-        'coordenador_ofensivo' | 'coordenador_defensivo' | 'coordenador_special_teams'
-      > = []
-      if (staffRole) subRoles.push(staffRole)
-      if (alsoSt) subRoles.push('coordenador_special_teams')
-      payload.staffRole = subRoles[0]
+    if (nextRole === 'jogador') {
+      payload.positions = nextPositions ?? positions
     }
 
     try {
@@ -112,6 +118,9 @@ export function AuthScreen() {
       if (err instanceof ApiClientError && err.status === 401) {
         setError('Código inválido ou expirado. Solicite um novo código abaixo.')
         setStep('code')
+      } else if (err instanceof ApiClientError && err.status === 400) {
+        setError(err.message)
+        setStep('email')
       } else {
         setError(err instanceof Error ? err.message : 'Erro ao verificar código.')
       }
@@ -124,20 +133,6 @@ export function AuthScreen() {
     setPositions((prev) =>
       prev.includes(position) ? prev.filter((p) => p !== position) : [...prev, position],
     )
-  }
-
-  function handleUnitChange(unit: string) {
-    setUnits((prev) => {
-      const next = prev.includes(unit) ? prev.filter((u) => u !== unit) : [...prev, unit]
-      setPositions((pos) =>
-        pos.filter((p) =>
-          next.some(
-            (u) => POSITIONS_BY_UNIT[u]?.includes(p) || POSITIONS_BY_UNIT.special_teams.includes(p),
-          ),
-        ),
-      )
-      return next
-    })
   }
 
   async function handleGoogleLogin() {
@@ -162,9 +157,11 @@ export function AuthScreen() {
       <div className="auth-layout">
         <Card className="auth-card">
           <CardHeader className="auth-card__header">
-            <CardTitle className="auth-card__title">Playbook do Time</CardTitle>
+            <h1 data-slot="card-title" className="auth-card__title ui-card__title">
+              SnapIn
+            </h1>
             <CardDescription className="auth-card__subtitle">
-              Acesse o playbook, eventos e status do elenco do seu time.
+              Gestão de Futebol Americano.
             </CardDescription>
           </CardHeader>
 
@@ -178,8 +175,10 @@ export function AuthScreen() {
             onClick={handleGoogleLogin}
             loading={loading}
             loadingLabel="Conectando..."
+            aria-label="Entrar com Google"
           >
-            Continuar com Google
+            <GoogleIcon aria-hidden="true" style={{ marginRight: 'var(--space-2)' }} />
+            com o Google
           </Button>
 
           <div className="or-divider">ou</div>
@@ -198,24 +197,19 @@ export function AuthScreen() {
         <Card className="auth-card">
           <form onSubmit={handleRequestCode}>
             <CardHeader className="auth-card__header">
-              <CardTitle className="auth-card__title">Criar conta ou entrar</CardTitle>
+              <h1 data-slot="card-title" className="auth-card__title ui-card__title">
+                Criar conta ou entrar
+              </h1>
               <CardDescription className="auth-card__subtitle">
-                Informe o código do time, seu nome e e-mail para receber um código de uso único.
+                Complete seus dados para receber um código de uso único.
               </CardDescription>
             </CardHeader>
 
-            <Field>
-              <FieldLabel htmlFor="team-code">Código do time:</FieldLabel>
-              <Input
-                id="team-code"
-                type="text"
-                value={teamCode}
-                onChange={(e) => setTeamCode(e.target.value.toUpperCase())}
-                autoCapitalize="characters"
-                spellCheck="false"
-                required
-                placeholder="NAVIGATORS-2026"
-              />
+            <Field disabled>
+              <FieldLabel>Equipe:</FieldLabel>
+              <span className="auth-readonly-value" aria-label="Equipe atual: Navigators">
+                Navigators
+              </span>
             </Field>
 
             <Field>
@@ -226,6 +220,18 @@ export function AuthScreen() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
+              />
+            </Field>
+
+            <Field>
+              <FieldLabel htmlFor="phone">Telefone (opcional):</FieldLabel>
+              <Input
+                id="phone"
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                autoComplete="tel"
+                placeholder="(11) 91234-5678"
               />
             </Field>
 
@@ -280,7 +286,9 @@ export function AuthScreen() {
             }}
           >
             <CardHeader className="auth-card__header">
-              <CardTitle className="auth-card__title">Verifique seu e-mail</CardTitle>
+              <h1 data-slot="card-title" className="auth-card__title ui-card__title">
+                Verifique seu e-mail
+              </h1>
               <CardDescription className="auth-card__subtitle">
                 Digite o código de 6 dígitos enviado para {email}.
               </CardDescription>
@@ -332,54 +340,62 @@ export function AuthScreen() {
       <div className="auth-layout">
         <Card className="auth-card">
           <CardHeader className="auth-card__header">
-            <CardTitle className="auth-card__title">Como você participa do time?</CardTitle>
+            <h1 data-slot="card-title" className="auth-card__title ui-card__title">
+              Como você participa do time?
+            </h1>
             <CardDescription className="auth-card__subtitle">
               Escolha seu papel para personalizar o acesso.
             </CardDescription>
           </CardHeader>
 
-          <button
-            type="button"
-            className="role-option"
-            aria-pressed={role === 'jogador'}
-            onClick={() => {
-              setRole('jogador')
-              setStep('player-units')
-            }}
-          >
-            <span className="role-option__title">JOGADOR</span>
-            <span className="role-option__desc">
-              Jogo em campo, consulto o playbook e respondo a eventos.
-            </span>
-          </button>
+          <div role="group" aria-label="Escolha de papel">
+            <Button
+              type="button"
+              variant={role === 'jogador' ? 'default' : 'outline'}
+              style={{
+                width: '100%',
+                marginBottom: 'var(--space-3)',
+                minHeight: '72px',
+                justifyContent: 'flex-start',
+                textAlign: 'left',
+              }}
+              aria-pressed={role === 'jogador'}
+              disabled={loading}
+              onClick={() => {
+                setRole('jogador')
+                setStep('player-positions')
+              }}
+            >
+              <strong style={{ display: 'block' }}>Jogador</strong>
+            </Button>
 
-          <button
-            type="button"
-            className="role-option"
-            aria-pressed={role === 'staff'}
-            onClick={() => {
-              setRole('staff')
-              setStep('staff-role')
-            }}
-          >
-            <span className="role-option__title">STAFF</span>
-            <span className="role-option__desc">
-              Faço parte do staff técnico, edito playbook, eventos ou elenco.
-            </span>
-          </button>
+            <Button
+              type="button"
+              variant={role === 'staff' ? 'default' : 'outline'}
+              style={{
+                width: '100%',
+                minHeight: '72px',
+                justifyContent: 'flex-start',
+                textAlign: 'left',
+              }}
+              aria-pressed={role === 'staff'}
+              disabled={loading}
+              loading={loading && role === 'staff'}
+              loadingLabel="Enviando solicitação..."
+              onClick={() => {
+                setRole('staff')
+                void handleConfirmRole('staff')
+              }}
+            >
+              <strong style={{ display: 'block' }}>Staff</strong>
+            </Button>
+          </div>
         </Card>
       </div>
     )
   }
 
-  if (step === 'player-units') {
-    const availableUnits = ['ofensiva', 'defesa', 'special_teams']
-    const availablePositions = Array.from(
-      new Set(
-        units.flatMap((u) => POSITIONS_BY_UNIT[u] || []).concat(POSITIONS_BY_UNIT.special_teams),
-      ),
-    )
-
+  if (step === 'player-positions') {
     return (
       <div className="auth-layout">
         <Card className="auth-card">
@@ -390,9 +406,11 @@ export function AuthScreen() {
             }}
           >
             <CardHeader className="auth-card__header">
-              <CardTitle className="auth-card__title">Unidades e Posições</CardTitle>
+              <h1 data-slot="card-title" className="auth-card__title ui-card__title">
+                Suas posições
+              </h1>
               <CardDescription className="auth-card__subtitle">
-                Escolha onde joga. Special teams é incluída automaticamente.
+                Escolha posições de ofensiva e/ou defesa. Elas serão validadas pelo staff.
               </CardDescription>
             </CardHeader>
 
@@ -400,137 +418,65 @@ export function AuthScreen() {
               <FieldError style={{ marginBottom: 'var(--space-3)' }}>{error}</FieldError>
             )}
 
-            <Field>
-              <FieldLabel>Unidades:</FieldLabel>
-              <div className="chip-bar" role="group" aria-label="Unidades de atuação">
-                {availableUnits.map((unit) => (
-                  <button
-                    key={unit}
-                    type="button"
-                    className="chip"
-                    aria-pressed={units.includes(unit)}
-                    onClick={() => handleUnitChange(unit)}
-                  >
-                    {unit === 'ofensiva' && 'Ofensiva'}
-                    {unit === 'defesa' && 'Defesa'}
-                    {unit === 'special_teams' && 'Special teams'}
-                  </button>
-                ))}
-              </div>
-            </Field>
-
-            {availablePositions.length > 0 && (
-              <Field>
-                <FieldLabel>Posições:</FieldLabel>
-                <div className="chip-bar" role="group" aria-label="Posições">
-                  {availablePositions.map((position) => (
-                    <button
-                      key={position}
-                      type="button"
-                      className="chip"
-                      aria-pressed={positions.includes(position)}
-                      onClick={() => togglePosition(position)}
-                    >
-                      {position}
-                    </button>
-                  ))}
-                </div>
-                {positions.length === 0 && (
-                  <FieldHint>Selecione pelo menos uma posição.</FieldHint>
-                )}
-              </Field>
+            {(Object.entries(POSITIONS_BY_UNIT) as Array<[string, readonly string[]]>).map(
+              ([unit, availablePositions]) => (
+                <Field key={unit}>
+                  <FieldLabel>{unit === 'ofensiva' ? 'Ofensiva' : 'Defesa'}:</FieldLabel>
+                  <div className="btn-row" role="group" aria-label={`Posições de ${unit}`}>
+                    {availablePositions.map((position) => (
+                      <Button
+                        key={position}
+                        type="button"
+                        size="sm"
+                        className="position-toggle"
+                        variant={positions.includes(position) ? 'default' : 'outline'}
+                        aria-pressed={positions.includes(position)}
+                        onClick={() => togglePosition(position)}
+                      >
+                        {position}
+                      </Button>
+                    ))}
+                  </div>
+                </Field>
+              ),
+            )}
+            {positions.length === 0 && (
+              <FieldHint>
+                Você pode pular agora. O staff validará suas posições antes de liberar o Playbook
+                por unidade.
+              </FieldHint>
             )}
 
             <Button
               type="submit"
               variant="default"
               style={{ width: '100%' }}
-              disabled={positions.length === 0 || loading}
+              disabled={loading}
               loading={loading}
               loadingLabel="Criando conta..."
             >
               Criar conta
             </Button>
-          </form>
-        </Card>
-      </div>
-    )
-  }
-
-  if (step === 'staff-role') {
-    return (
-      <div className="auth-layout">
-        <Card className="auth-card">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault()
-              handleConfirmRole()
-            }}
-          >
-            <CardHeader className="auth-card__header">
-              <CardTitle className="auth-card__title">Subpapel do Staff</CardTitle>
-              <CardDescription className="auth-card__subtitle">
-                Escolha sua função no staff.
-              </CardDescription>
-            </CardHeader>
-
-            {error && (
-              <FieldError style={{ marginBottom: 'var(--space-3)' }}>{error}</FieldError>
-            )}
-
-            <Field>
-              <FieldLabel>Subpapel principal:</FieldLabel>
-              {STAFF_ROLES.map((option) => (
-                <label key={option.value} className="role-option" style={{ display: 'block' }}>
-                  <input
-                    type="radio"
-                    name="staff-role"
-                    value={option.value}
-                    checked={staffRole === option.value}
-                    onChange={(e) => setStaffRole(e.target.value as typeof staffRole)}
-                    style={{ marginRight: 'var(--space-2)' }}
-                  />
-                  <span className="role-option__title">{option.label}</span>
-                  <span className="role-option__desc">{option.description}</span>
-                </label>
-              ))}
-            </Field>
-
-            <Field>
-              <label className="role-option" style={{ display: 'flex', alignItems: 'center' }}>
-                <input
-                  type="checkbox"
-                  checked={alsoSt}
-                  onChange={(e) => setAlsoSt(e.target.checked)}
-                  style={{ marginRight: 'var(--space-2)' }}
-                />
-                <span>
-                  <span className="role-option__title">
-                    Acumulo também o subpapel de Coordenador de special teams
-                  </span>
-                </span>
-              </label>
-            </Field>
-
-            <Card
-              variant="warning"
-              style={{ marginBottom: 'var(--space-4)', fontSize: 'var(--text-sm)' }}
-            >
-              <CardContent>
-                Para proteger os dados de saúde, justificativas e sigilo do playbook, cadastros de
-                staff ficam pendentes até aprovação de um Head Coach.
-              </CardContent>
-            </Card>
-
             <Button
-              type="submit"
-              variant="default"
-              style={{ width: '100%' }}
-              disabled={!staffRole || loading}
-              loading={loading}
-              loadingLabel="Criando conta..."
+              type="button"
+              variant="secondary"
+              style={{ width: '100%', marginTop: 'var(--space-3)' }}
+              disabled={loading}
+              onClick={() => {
+                setPositions([])
+                void handleConfirmRole('jogador', [])
+              }}
             >
-              Criar conta
+              Pular posições por agora
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              style={{ width: '100%', marginTop: 'var(--space-3)' }}
+              disabled={loading}
+              onClick={() => setStep('role')}
+            >
+              Voltar
             </Button>
           </form>
         </Card>
@@ -542,10 +488,12 @@ export function AuthScreen() {
     <div className="auth-layout">
       <Card className="auth-card" style={{ textAlign: 'center' }}>
         <CardHeader className="auth-card__header">
-          <CardTitle className="auth-card__title">Cadastro pendente</CardTitle>
+          <h1 data-slot="card-title" className="auth-card__title ui-card__title">
+            Cadastro pendente
+          </h1>
           <CardDescription className="auth-card__subtitle">
-            Seu cadastro como staff está aguardando aprovação de um Head Coach. Você receberá uma
-            notificação quando for liberado.
+            Seu cadastro como staff está aguardando definição de um Admin ou Head Coach. Você
+            receberá uma notificação quando for liberado.
           </CardDescription>
         </CardHeader>
         <Button variant="default" style={{ width: '100%' }} onClick={() => navigate('/')}>

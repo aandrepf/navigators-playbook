@@ -1,10 +1,10 @@
 import type { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import type { Config } from '../config.js';
 import type { Database } from '../db/types.js';
-import type { Role, StaffSubrole } from '../domain.js';
+import type { Role } from '../domain.js';
 import { HttpError } from '../errors.js';
 import type { Mailer } from '../mail/mailer.js';
-import { getTeam, getTeamByCode } from '../team.js';
+import { getTeam, getTeamByCode, normalizeTeamCode } from '../team.js';
 import { findOrCreateUser } from '../users/users.js';
 import type { GoogleClient } from './google.js';
 import { randomToken } from './crypto.js';
@@ -27,8 +27,9 @@ interface VerifyBody {
   code: string;
   teamCode: string;
   name?: string;
+  phone?: string | null;
   role: Role;
-  staffRole?: string;
+  positions?: string[];
 }
 
 function isValidEmail(email: string): boolean {
@@ -64,8 +65,9 @@ const verifySchema = {
       code: { type: 'string' },
       teamCode: { type: 'string' },
       name: { type: 'string' },
+      phone: { type: ['string', 'null'] },
       role: { type: 'string', enum: ['jogador', 'staff'] },
-      staffRole: { type: 'string' },
+      positions: { type: 'array', items: { type: 'string' } },
     },
   },
 } as const;
@@ -116,8 +118,13 @@ export async function authRoutes(
       const body = req.body;
       if (!isValidEmail(body.email)) throw new HttpError(400, 'e-mail inválido');
 
-      const team = await getTeamByCode(db, body.teamCode);
-      if (!team) throw new HttpError(401, 'código do time inválido');
+      const teamCode = normalizeTeamCode(body.teamCode);
+      // Distinção de contrato: o time que existe no banco mas está desabilitado
+      // — do catálogo ou legado preservado (ex. o antigo NAVIGATORS) — responde
+      // 409 (indisponível); um código inexistente responde 400 (inválido).
+      const team = await getTeamByCode(db, teamCode);
+      if (!team) throw new HttpError(400, 'código do time inválido');
+      if (!team.enabled) throw new HttpError(409, 'time indisponível para cadastro');
 
       const consumed = await consumeLoginCode(db, team.id, body.email, body.code);
       if (!consumed) throw new HttpError(401, 'código inválido ou expirado');
@@ -126,8 +133,9 @@ export async function authRoutes(
         teamId: team.id,
         email: body.email,
         name: body.name?.trim() || null,
+        phone: body.phone?.trim() || null,
         role: body.role,
-        staffRole: body.staffRole as StaffSubrole | undefined,
+        positions: body.positions,
       });
 
       const token = await createSession(db, team.id, user.id, config.cookie.maxAgeMs);
@@ -213,6 +221,7 @@ export async function authRoutes(
       teamId: team.id,
       email: profile.email,
       name: profile.name,
+      phone: null,
       role: 'jogador',
     });
     const token = await createSession(db, team.id, user.id, config.cookie.maxAgeMs);

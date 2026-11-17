@@ -20,7 +20,7 @@ abaixo rodam na raiz e delegam para os workspaces.
 
 ```bash
 npm install
-npm run dev        # front em http://localhost:5173
+npm run dev -w @playbook/web -- --host 0.0.0.0   # front em http://localhost:5173
 npm run dev:api    # backend (quando apps/api existir)
 npm run build      # build de todos os workspaces
 npm run preview    # serve o build do front
@@ -28,6 +28,21 @@ npm run lint       # oxlint
 npm test           # testes de todos os workspaces
 npm run test:watch # vitest em modo watch (front)
 ```
+
+### Ambiente Postgres com Podman ou Docker
+
+O ambiente containerizado é portátil entre Podman e Docker. Ele está
+documentado em [`docs/operations/CONTAINERS.md`](docs/operations/CONTAINERS.md).
+
+```bash
+podman machine start
+podman compose up --build -d   # nesta máquina
+# ou: docker compose up --build -d
+curl http://localhost:3000/health
+```
+
+O Compose usa Postgres 17 e executa migrações/seed antes da API iniciar.
+Não use o banco de desenvolvimento para os testes E2E.
 
 ### Testes
 

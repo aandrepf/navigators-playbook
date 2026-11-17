@@ -1453,7 +1453,7 @@
                       Meu Perfil — Rafael Costa
                     </h2>
                     <p data-slot="section-heading-body" class="ui-section-heading__body">
-                      rafael.costa@navigators.com.br • Código do time: <code class="mono">NAVIGATORS-2026</code>
+                      rafael.costa@navigators.com.br • Código do time: <code class="mono">NAVS-2026</code>
                     </p>
                   </div>
                 </header>
@@ -1989,7 +1989,7 @@
       <div class="stack-md">
         <div data-slot="field" class="ui-field" style="margin-bottom: 0;">
           <label for="team-code-input" data-slot="field-label" class="ui-field__label">1. Código do time (História 1):</label>
-          <input type="text" id="team-code-input" data-slot="input" class="ui-input mono" value="NAVIGATORS-2026" autocapitalize="characters" />
+          <input type="text" id="team-code-input" data-slot="input" class="ui-input mono" value="NAVS-2026" autocapitalize="characters" />
         </div>
 
         <div data-slot="field" class="ui-field" style="margin-bottom: 0;">
@@ -2009,33 +2009,33 @@
           <label for="onboarding-role-select" data-slot="field-label" class="ui-field__label">3. Escolha seu Papel no Time (Histórias 4, 5, 7, 8):</label>
           <select id="onboarding-role-select" data-slot="select" class="ui-select" onchange="toggleOnboardingRoleFields(this.value)">
             <option value="jogador">Jogador (escolhe unidades e posições e entra direto)</option>
-            <option value="staff">Staff (escolhe subpapel e fica Pendente até Head Coach aprovar)</option>
+            <option value="staff">Staff (fica Pendente até Admin ou Head Coach definir o acesso)</option>
           </select>
         </div>
 
         <div id="onboarding-jogador-fields" data-slot="card" data-size="sm" class="ui-card" style="background: var(--muted);">
           <strong style="font-size: var(--text-sm);">Configuração de Jogador:</strong>
           <p class="ui-card__description" style="margin: 4px 0 10px 0;">
-            Unidades: Ofensiva, Defesa ou Ambas • Posições múltiplas (ex.: WR + KR).
+            Selecione posições de Ofensiva e Defesa ou pule agora. As posições
+            informadas aguardam validação de um membro autorizado do staff.
           </p>
           <button type="button" data-slot="button" data-variant="default" class="ui-btn ui-btn--block" onclick="setSimRole('jogador'); document.getElementById('onboarding-dialog').close()">
             <span class="ui-btn__label">Concluir cadastro como Jogador &rarr; Ir para Home</span>
           </button>
+          <button type="button" data-slot="button" data-variant="outline" class="ui-btn ui-btn--block" style="margin-top: var(--space-2);" onclick="setSimRole('jogador_sem_posicao'); document.getElementById('onboarding-dialog').close()">
+            <span class="ui-btn__label">Pular posições por agora</span>
+          </button>
         </div>
 
         <div id="onboarding-staff-fields" data-slot="card" data-variant="warning" data-size="sm" class="ui-card" style="display: none;">
-          <strong style="font-size: var(--text-sm);">Configuração de Subpapel do Staff (História 7):</strong>
-          <select data-slot="select" class="ui-select" style="margin: 8px 0;">
-            <option>Coordenador Defensivo</option>
-            <option>Coordenador Ofensivo</option>
-            <option>Head Coach</option>
-            <option>Coordenador de Special Teams (aditivo)</option>
-          </select>
+          <strong style="font-size: var(--text-sm);">Cadastro de Staff:</strong>
           <p class="ui-card__description" style="margin: 0 0 10px 0;">
-            Cadastros de staff nascem no estado <strong>Pendente</strong> até aprovação de um Head Coach (História 8 / ADR-0005).
+            O cadastro não escolhe subpapel. A conta nasce
+            <strong>Pendente</strong> e um Admin ou Head Coach define o acesso
+            posteriormente.
           </p>
           <button type="button" data-slot="button" data-variant="default" class="ui-btn ui-btn--block" onclick="setSimRole('staff_pendente'); document.getElementById('onboarding-dialog').close()">
-            <span class="ui-btn__label">Solicitar cadastro como Staff &rarr; Ver Estado Pendente</span>
+            <span class="ui-btn__label">Solicitar cadastro como Staff &rarr; Ver pendência</span>
           </button>
         </div>
       </div>

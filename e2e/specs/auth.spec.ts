@@ -14,7 +14,7 @@ test.describe('Login por e-mail', () => {
     await auth.requestCode({ email, name: 'Rafael Costa' })
     await auth.enterCode(await waitForLoginCode(email))
     await auth.choosePapel('JOGADOR')
-    await auth.submitPlayer({ units: ['Ofensiva'], positions: ['QB'] })
+    await auth.submitPlayer({ positions: ['QB'] })
 
     await expect(page).toHaveURL('/')
     await expect(page.getByRole('heading', { name: 'Próximos Eventos' })).toBeVisible()
@@ -33,7 +33,7 @@ test.describe('Login por e-mail', () => {
 
     await auth.enterCode(wrong)
     await auth.choosePapel('JOGADOR')
-    await auth.submitPlayer({ units: ['Ofensiva'], positions: ['QB'] })
+    await auth.submitPlayer({ positions: ['QB'] })
 
     await expect(auth.alert()).toContainText('Código inválido ou expirado')
     await expect(page.getByRole('heading', { name: 'Verifique seu e-mail' })).toBeVisible()

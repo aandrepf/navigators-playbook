@@ -35,7 +35,7 @@ export function PwaInstallBanner() {
   return (
     <Banner
       variant="highlight"
-      title="Instale o Playbook na tela inicial para receber avisos push"
+      title="Instale o SnapIn na tela inicial para receber avisos push"
       description="No iPhone/iOS (16.4+), o Web Push exige que o app esteja na Tela de Início (toque em Compartilhar → Adicionar à Tela de Início). Enquanto o push não estiver ativo, os avisos chegam por e-mail."
       aria-label="Instalação do aplicativo na tela inicial"
     >

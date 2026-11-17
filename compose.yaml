@@ -1,0 +1,44 @@
+name: navigators-playbook
+
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-playbook}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - playbook-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-playbook}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Containerfile
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      HOST: 0.0.0.0
+      PORT: 3000
+      DATABASE_URL: postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-playbook}
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-false}
+      SEED_HEAD_COACH_EMAIL: ${SEED_HEAD_COACH_EMAIL:-headcoach@example.com}
+      SEED_HEAD_COACH_NAME: ${SEED_HEAD_COACH_NAME:-Head Coach}
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-admin@example.com}
+      SEED_ADMIN_NAME: ${SEED_ADMIN_NAME:-Admin}
+      MAILER: ${MAILER:-console}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${API_PORT:-3000}:3000"
+    command: ["sh", "-c", "node apps/api/dist/db/migrate-cli.js && node apps/api/dist/db/seed-cli.js && node apps/api/dist/server.js"]
+
+volumes:
+  playbook-postgres-data:
