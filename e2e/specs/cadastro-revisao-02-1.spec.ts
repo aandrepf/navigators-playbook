@@ -159,7 +159,8 @@ test.describe('Revisão 02.1: reenvio de código (S2-04)', () => {
 
     await auth.resendCodeButton().click()
 
-    await expect(page.getByRole('status')).toContainText(/novo código enviado/i)
+    // Spinners dos botões também têm role="status"; filtra pela mensagem de sucesso.
+    await expect(page.getByRole('status').filter({ hasText: /novo código enviado/i })).toBeVisible()
 
     // O novo código deve funcionar para concluir o cadastro.
     await auth.enterCode(await waitForLoginCode(email))

@@ -108,9 +108,10 @@ necessário. Dados vêm da API (`docs/api`), nunca de clique para semear estado.
 
 ## Status atual
 
-Última execução completa da QA final 02.1 (`review/02.1-cadastro-ui` incorporada na
-`qa`, Postgres 17 em Podman, banco `playbook_e2e` zerado): **130 verdes, 0 vermelhos,
-32 `fixme`** (16 casos × 2 projetos). Ver `e2e/RELATORIO-QA-06.md`.
+Última execução completa da QA-07 (`review/02.1-cadastro-ui` em `5b36a3a` incorporada na
+`qa`, Postgres 17 em Podman, banco `playbook_e2e` zerado antes de cada uma de duas
+execuções): **138 verdes, 0 vermelhos, 30 `fixme`** (69 casos ativos × 2 projetos;
+15 `fixme` × 2). Ver `e2e/RELATORIO-QA-07.md`.
 
 `times.spec.ts` cobre o Navigators (`NAVS-2026`) habilitado e os códigos indisponíveis
 (`409`) e desconhecidos (`400`). `cadastro-revisao-02-1.spec.ts` cobre a revisão UX 02.1:
