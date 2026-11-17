@@ -31,10 +31,31 @@ export const TEAM_CATALOG: readonly TeamDefinition[] = [
 
 const TEAM_COLUMNS = 'id, name, code, enabled';
 
-/** O MVP atende um time por vez: devolve o único time habilitado. */
+/** Normaliza o código do time para comparação: caixa alta, sem espaços. */
+export function normalizeTeamCode(code: string): string {
+  return code.trim().toUpperCase();
+}
+
+/** Devolve o código do único time habilitado no catálogo (NAVS-2026). */
+export function getActiveTeamCode(): string {
+  const enabled = TEAM_CATALOG.filter((team) => team.enabled);
+  if (enabled.length !== 1) {
+    throw new Error(
+      'o catálogo de times deve ter exatamente um time habilitado',
+    );
+  }
+  return enabled[0].code;
+}
+
+/**
+ * O MVP atende um time por vez: devolve o time habilitado do catálogo.
+ * Códigos legados fora do catálogo nunca são devolvidos aqui, mesmo que ainda
+ * carreguem `enabled` verdadeiro por deriva de dados antigos.
+ */
 export async function getTeam(db: Database): Promise<TeamRow | null> {
   const result = await db.query<TeamRow>(
-    `SELECT ${TEAM_COLUMNS} FROM team WHERE enabled = true ORDER BY created_at ASC LIMIT 1`,
+    `SELECT ${TEAM_COLUMNS} FROM team WHERE code = $1 AND enabled = true`,
+    [getActiveTeamCode()],
   );
   return result.rows[0] ?? null;
 }
@@ -46,7 +67,7 @@ export async function getTeamByCode(
 ): Promise<TeamRow | null> {
   const result = await db.query<TeamRow>(
     `SELECT ${TEAM_COLUMNS} FROM team WHERE code = $1`,
-    [code.trim().toUpperCase()],
+    [normalizeTeamCode(code)],
   );
   return result.rows[0] ?? null;
 }

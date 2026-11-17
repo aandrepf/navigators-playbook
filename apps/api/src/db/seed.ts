@@ -1,34 +1,55 @@
 import type { Config } from '../config.js';
 import type { Database } from './types.js';
-import { TEAM_CATALOG } from '../team.js';
+import { getActiveTeamCode, TEAM_CATALOG } from '../team.js';
 
 /**
- * Garante os times do catálogo (idempotente): insere os sete times com os
- * códigos e a habilitação corretos e desabilita qualquer time fora do
- * catálogo (ex.: código legado). Apenas o time habilitado aceita cadastro.
+ * Garante os times do catálogo (idempotente e não destrutivo): insere os sete
+ * times que faltam e sincroniza apenas a habilitação (`enabled`) dos que já
+ * existem no catálogo. Nomes e demais dados já existentes são preservados.
+ *
+ * Regra do produto: somente o time ativo do catálogo (NAVS-2026) pode ficar
+ * habilitado. Times fora do catálogo (dados legados, como o antigo
+ * `NAVIGATORS`) são preservados — nunca removidos nem renomeados —, mas são
+ * desabilitados para que não aceitem cadastro nem sirvam a sessão.
  */
 export async function seedTeams(db: Database): Promise<void> {
-  const codes = TEAM_CATALOG.map((team) => team.code);
-
-  await db.query(
-    'UPDATE team SET enabled = false WHERE NOT (code = ANY($1::text[]))',
-    [codes],
-  );
-
   for (const team of TEAM_CATALOG) {
     await db.query(
       `INSERT INTO team (name, code, enabled) VALUES ($1, $2, $3)
        ON CONFLICT (code) DO UPDATE
-         SET name = EXCLUDED.name, enabled = EXCLUDED.enabled`,
+         SET enabled = EXCLUDED.enabled`,
       [team.name, team.code, team.enabled],
     );
   }
+
+  // Desabilita todo código diferente do ativo: cobre os demais do catálogo e
+  // também qualquer código legado/indisponível que já exista no banco.
+  await db.query('UPDATE team SET enabled = false WHERE code <> $1', [
+    getActiveTeamCode(),
+  ]);
 }
 
-/** Devolve o id do único time habilitado, lançando se não houver nenhum. */
+/**
+ * Semeia tudo o que o arranque precisa (idempotente): os times do catálogo, o
+ * primeiro head coach e o admin geral. Usado pelo `server.ts` para que o admin
+ * configurado exista também em produção/deploy sem depender de um `db:seed`
+ * manual, e pelo `seed-cli.ts`.
+ */
+export async function seedAll(db: Database, config: Config): Promise<void> {
+  await seedTeams(db);
+  await seedHeadCoach(db, config);
+  await seedAdmin(db, config);
+}
+
+/**
+ * Devolve o id do único time habilitado do catálogo, lançando se não houver
+ * nenhum. Resolve pelo código ativo (e não por `enabled` + `created_at`) para
+ * nunca devolver um time legado que ainda carregue `enabled` verdadeiro.
+ */
 async function getEnabledTeamId(db: Database): Promise<string> {
   const team = await db.query<{ id: string }>(
-    'SELECT id FROM team WHERE enabled = true ORDER BY created_at ASC LIMIT 1',
+    'SELECT id FROM team WHERE code = $1 AND enabled = true',
+    [getActiveTeamCode()],
   );
   const teamId = team.rows[0]?.id;
   if (!teamId) {
