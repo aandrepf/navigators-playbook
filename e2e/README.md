@@ -87,6 +87,7 @@ e2e/
   specs/
     auth.spec.ts              login por e-mail, Google, sessão e logout
     cadastro.spec.ts          jogador com/sem posições, staff sem subpapel, contrato
+    cadastro-revisao-02-1.spec.ts  revisão UX 02.1: alvos 44px, estados, papel, erros, staff
     times.spec.ts             Navigators habilitado, códigos indisponíveis e desconhecidos
     autorizacao.spec.ts       jogador, staff pendente, head coach
     acessibilidade.spec.ts    teclado, skip link, landmarks, títulos
@@ -107,15 +108,21 @@ necessário. Dados vêm da API (`docs/api`), nunca de clique para semear estado.
 
 ## Status atual
 
-53 casos ativos e 15 marcados como `fixme`, cada um executado nos dois projetos.
-Na última execução completa (integração `feat/02-cadastro-papel-posicoes` incorporada
-na `qa`, Postgres 17 em Podman, banco `playbook_e2e` zerado): **106 verdes, 0 vermelhos
-e 30 `fixme`** (15 casos × 2 projetos). `times.spec.ts` cobre o Navigators
-(`NAVS-2026`) habilitado e os códigos indisponíveis (`409`) e desconhecidos (`400`).
+Última execução completa da QA-07 (`review/02.1-cadastro-ui` em `5b36a3a` incorporada na
+`qa`, Postgres 17 em Podman, banco `playbook_e2e` zerado antes de cada uma de duas
+execuções): **138 verdes, 0 vermelhos, 30 `fixme`** (69 casos ativos × 2 projetos;
+15 `fixme` × 2). Ver `e2e/RELATORIO-QA-07.md`.
+
+`times.spec.ts` cobre o Navigators (`NAVS-2026`) habilitado e os códigos indisponíveis
+(`409`) e desconhecidos (`400`). `cadastro-revisao-02-1.spec.ts` cobre a revisão UX 02.1:
+alvo de toque ≥ 44px nas posições, estado marcado com indicador (`✓`) e fundo distinto,
+Voltar e erro na etapa de papel, código do time e código de 6 dígitos inválidos voltando
+à etapa certa, numerais tabulares, nome acessível do botão Google e Home do staff
+pendente sem `Staff ()`.
 Os `fixme` não são falhas; cada um aponta a dependência que falta. Checagem de
 tipos: `npx tsc -p e2e/tsconfig.json`.
 
-Relatórios: `e2e/RELATORIO-QA-01.md` e `e2e/RELATORIO-QA-02.md`.
+Relatórios: `e2e/RELATORIO-QA-01.md` a `e2e/RELATORIO-QA-06.md`.
 
 O card 01 foi aprovado sem E2E específico para manifesto PWA, service worker
 ou deploy no Railway. Esses pontos ficam como melhorias não bloqueantes e
@@ -132,6 +139,7 @@ de fluxos de usuário.
 | Evento, presença e justificativa | Sem rotas de evento e resposta em `docs/api`. |
 | Jogo, marcação e game plan | Sem rotas de jogo e game plan em `docs/api`. |
 | Coordenadores por unidade | Sem aprovação de staff nem atribuição de subpapel em `docs/api` (card 06). |
+| Landmark `main` nas telas de entrada (S2-03 da revisão 02.1) | `AuthScreen` usa `div.auth-layout`; o web ainda não corrigiu. Não bloqueia o cadastro. |
 
 Cadastro com Google (caminho 2 da matriz de cadastro) não tem cena própria:
 o callback exige credenciais externas. A suíte cobre o botão, o 503 e o erro
