@@ -255,7 +255,7 @@ export function AuthScreen() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 autoComplete="tel"
-                placeholder="(11) 91234-5678"
+                placeholder="+351 912 345 678"
               />
             </Field>
 
