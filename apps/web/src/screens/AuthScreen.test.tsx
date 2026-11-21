@@ -110,10 +110,10 @@ describe('AuthScreen', () => {
     expect(staffButton).toHaveAttribute('aria-pressed', 'false')
 
     expect(
-      screen.getByText(/consulto o playbook e respondo a treinos e jogos/i),
+      screen.getByText(/atleta que pertence ao clube/i),
     ).toBeInTheDocument()
     expect(
-      screen.getByText(/acesso sujeito à aprovação de um admin ou head coach/i),
+      screen.getByText(/coaches, coordenadores e auxiliares do clube/i),
     ).toBeInTheDocument()
   })
 

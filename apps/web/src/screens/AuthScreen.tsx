@@ -423,7 +423,7 @@ export function AuthScreen() {
             >
               <strong style={{ display: 'block' }}>Jogador</strong>
               <span style={{ fontSize: 'var(--text-sm)', fontWeight: 400, display: 'block' }}>
-                Consulto o playbook e respondo a treinos e jogos
+                Atleta que pertence ao clube
               </span>
             </Button>
 
@@ -447,7 +447,7 @@ export function AuthScreen() {
             >
               <strong style={{ display: 'block' }}>Staff</strong>
               <span style={{ fontSize: 'var(--text-sm)', fontWeight: 400, display: 'block' }}>
-                Acesso sujeito à aprovação de um Admin ou Head Coach
+                Coaches, Coordenadores e auxiliares do clube
               </span>
             </Button>
           </div>
