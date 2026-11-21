@@ -2,13 +2,14 @@
 
 ## 1. Visão geral
 
-Qualquer membro do **time** pode criar uma conta ou entrar usando o código do
-time, confirmar sua identidade por código de e-mail ou Google e escolher o
+Qualquer membro do **time** pode criar uma conta ou entrar no time,
+confirmar sua identidade por código de e-mail ou Google e escolher o
 papel `jogador` ou `staff`.
 
 - O cadastro manual exibe **`Time: Navigators`** como informação somente leitura
-  e apresenta o campo editável **`Código do time`** (com `NAVS-2026` como
-  valor/exemplo).
+  (no MVP single-team) e o frontend envia automaticamente
+  `teamCode: "NAVS-2026"` na verificação, sem exibir um campo editável
+  **"Código do time"** na tela.
 - Jogador entra `ativo`, podendo escolher posições de ofensiva e/ou defesa ou
   pular essa etapa (**Pular posições por agora**).
 - Posições informadas pelo jogador ficam com estado `pendente` de validação.
@@ -29,8 +30,8 @@ papel `jogador` ou `staff`.
         │                                           │
         ▼                                           │
 [2. Dados & Time (cadastro manual)]                 │
-   • Time: Navigators (somente leitura)             │
-   • Código do time: [NAVS-2026] (editável)         │
+   • Time: Navigators (somente leitura;             │
+     envia teamCode: "NAVS-2026" automaticamente)   │
    • Nome completo + Telefone (opcional) + E-mail   │
    • Ações: [Receber código de 6 dígitos] / [Voltar]│
         │                                           │
@@ -66,22 +67,24 @@ papel `jogador` ou `staff`.
 
 - **`401` (código de 6 dígitos inválido ou expirado)**: retorna para a etapa
   **3 (`code`)** com mensagem de erro associada ao campo de código, preservando
-  o e-mail, o código do time, o nome e o telefone já preenchidos.
-- **`400` (código do time inválido) ou `409` (time desativado/indisponível)**:
-  retorna para a etapa **2 (`email`)** com mensagem de erro associada ao campo
-  editável **Código do time**, permitindo corrigir o código sem redigitar os
-  demais campos.
+  o e-mail, o nome e o telefone já preenchidos e o vínculo automático com o time
+  (`teamCode: "NAVS-2026"`).
+- **`400` / `409` (time indisponível ou falha de vínculo de time)**: retorna
+  para a etapa **2 (`email`)** exibindo alerta de erro acessível no card, sem
+  exigir campo editável de código do time.
 - **Falha de rede ou erro `5xx` ao confirmar papel `Staff` ou `Jogador`**:
   mantém o usuário na etapa atual (**4 (`role`)** ou **5 (`player-positions`)**)
   e exibe `<FieldError role="alert">` visível no card, sem engolir o erro.
 
 ## 3. Dados coletados
 
-- **Time (somente leitura)**: exibe `Time: Navigators`. Em conformidade estrita
-  com o `GLOSSARY.md`, nunca utiliza o termo proibido *"Equipe"*.
-- **Código do time (editável)**: obrigatório no cadastro manual, com
-  `NAVS-2026` como valor/exemplo padrão. Validado no servidor contra times
-  inexistentes (`400`) ou desativados (`409`).
+- **Time (somente leitura)**: exibe `Time: Navigators` (somente leitura no MVP
+  single-team). Em conformidade estrita com o `GLOSSARY.md`, nunca utiliza o
+  termo proibido *"Equipe"*.
+- **Código do time (`teamCode`, automático)**: vinculado ao time selecionado
+  (`Navigators` → `teamCode: "NAVS-2026"`) e enviado automaticamente pelo
+  frontend no `POST /auth/email/verify`, sem exibir um campo de input editável
+  **"Código do time"** ao usuário.
 - **Nome completo**: obrigatório no cadastro manual; nome disponível do Google
   pode preencher o campo.
 - **Telefone (opcional)**: informado em formato livre (`(11) 91234-5678`) para
@@ -137,16 +140,16 @@ permissões de edição ou leitura protegida.
 
 ## 6. Validação, estados e acessibilidade
 
-1. **Contexto do time e Código do time (etapa `email`)**:
+1. **Contexto do time e envio automático de `teamCode` (etapa `email`)**:
    - **Time somente leitura**: rótulo `Time:` associado semanticamente ao valor
-     `Navigators` (`<input readOnly value="Navigators">` ou grupo rotulado com
-     `aria-labelledby`), sem usar `<Field disabled>` (evitando opacidade
-     reduzida de controle inativo) e sem usar a palavra proibida *"Equipe"*;
-   - **Código do time editável**: obrigatório, valor/exemplo `NAVS-2026`,
-     `autocapitalize="characters"`, `spellcheck="false"`, fonte `--font-mono`;
-   - código inválido (`400`) ou time indisponível (`409`) retorna à etapa
-     `email` e exibe erro específico associado ao campo via `aria-invalid="true"`
-     e `aria-describedby`.
+     `Navigators` (`<output id="team-name" aria-label="Time atual: Navigators">Navigators</output>`
+     ou `<input readOnly value="Navigators">`), sem usar `<Field disabled>`
+     (evitando opacidade reduzida de controle inativo) e sem usar a palavra
+     proibida *"Equipe"*;
+   - **Vínculo automático do código do time**: como apenas o time `Navigators`
+     está ativo no MVP, a UI não exibe um campo editável `"Código do time"`; o
+     frontend envia `teamCode: "NAVS-2026"` automaticamente no payload de
+     `POST /auth/email/verify`.
 2. **Código de verificação de e-mail (etapa `code`)**:
    - `inputmode="numeric"`, `autocomplete="one-time-code"`, `pattern="\d{6}"`;
    - tipografia `--font-mono` com `font-variant-numeric: tabular-nums` para

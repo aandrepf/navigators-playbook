@@ -1973,9 +1973,9 @@
   </div>
 
   <!-- ====================================================================
-       DIALOG 1: FLUXO DE CADASTRO, CÓDIGO DO TIME E ESCOLHA DE PAPEL
+       DIALOG 1: FLUXO DE CADASTRO, VÍNCULO AUTOMÁTICO DO TIME E ESCOLHA DE PAPEL
        Usa a estrutura exata de primitives/dialog.tsx (<dialog data-slot="dialog">)
-       Sincronizado com a Revisão UX 02.1 (Time somente leitura + Código do time editável)
+       Sincronizado com a Revisão UX 02.1 (Time: Navigators somente leitura + envio automático de teamCode: "NAVS-2026")
        ==================================================================== -->
   <dialog id="onboarding-dialog" data-slot="dialog" aria-modal="true" aria-labelledby="onboarding-title" aria-describedby="onboarding-desc" class="ui-dialog" onclick="if(event.target===this)this.close()">
     <div data-slot="dialog-panel" class="ui-dialog__panel">
@@ -1987,7 +1987,7 @@
               SnapIn — Criar conta ou entrar
             </h2>
             <p id="onboarding-desc" data-slot="dialog-description" class="ui-dialog__description">
-              Contexto <strong>Time: Navigators</strong> somente leitura, <strong>Código do time</strong> editável (<code class="mono">NAVS-2026</code>), verificação de 6 dígitos, papel e posições.
+              Contexto <strong>Time: Navigators</strong> somente leitura (envia <code class="mono">teamCode = "NAVS-2026"</code> automaticamente sem campo editável de código do time), verificação de 6 dígitos, papel e posições.
             </p>
           </div>
           <button type="button" data-slot="dialog-close" class="ui-btn" data-variant="ghost" data-size="icon" aria-label="Fechar modal" onclick="document.getElementById('onboarding-dialog').close()">
@@ -1996,7 +1996,7 @@
         </div>
         <div class="btn-row" style="margin-top: var(--space-2);">
           <button type="button" id="btn-toggle-onboarding-errors" data-slot="button" data-variant="outline" data-size="sm" class="ui-btn" aria-pressed="false" onclick="toggleOnboardingErrors()">
-            <span class="ui-btn__label">Simular estados de erro (400 / 409 / 401 / Rede)</span>
+            <span class="ui-btn__label">Simular estados de erro (401 / Rede)</span>
           </button>
         </div>
       </div>
@@ -2009,7 +2009,7 @@
             <button type="button" data-slot="button" data-variant="secondary" data-size="sm" class="ui-btn" onclick="alert('Redirecionando para Google OAuth (/auth/google)...')">
               <span class="ui-btn__label">G Entrar com o Google</span>
             </button>
-            <button type="button" data-slot="button" data-variant="default" data-size="sm" class="ui-btn" onclick="document.getElementById('team-code-input').focus()">
+            <button type="button" data-slot="button" data-variant="default" data-size="sm" class="ui-btn" onclick="document.getElementById('auth-name-input').focus()">
               <span class="ui-btn__label">Entrar com código por e-mail</span>
             </button>
           </div>
@@ -2022,16 +2022,7 @@
           <div data-slot="field" class="ui-field" style="margin-bottom: 0;">
             <label for="team-readonly-input" id="team-readonly-label" data-slot="field-label" class="ui-field__label">Time:</label>
             <input type="text" id="team-readonly-input" data-slot="input" class="ui-input" value="Navigators" readonly aria-readonly="true" aria-label="Time atual: Navigators" style="background: var(--muted); font-weight: 600;" />
-            <p data-slot="field-hint" class="ui-field__hint">Exibe <strong>Time: Navigators</strong> somente leitura (sem opacidade de controle inativo e sem usar o termo proibido "Equipe").</p>
-          </div>
-
-          <div id="field-team-code" data-slot="field" class="ui-field" style="margin-bottom: 0;">
-            <label for="team-code-input" data-slot="field-label" class="ui-field__label">Código do time:</label>
-            <input type="text" id="team-code-input" data-slot="input" class="ui-input mono" style="font-family: var(--font-mono); font-variant-numeric: tabular-nums;" value="NAVS-2026" placeholder="NAVS-2026" autocapitalize="characters" spellcheck="false" required aria-describedby="team-code-hint" />
-            <p id="team-code-hint" data-slot="field-hint" class="ui-field__hint">Campo editável obrigatório com <code class="mono">NAVS-2026</code> como valor/exemplo.</p>
-            <div id="team-code-error" data-slot="field-error" class="ui-field__error" role="alert" style="display: none;">
-              ✕ Código do time inválido (400) ou time indisponível/desativado (409). Confira o código com o staff.
-            </div>
+            <p data-slot="field-hint" class="ui-field__hint">Exibe <strong>Time: Navigators</strong> somente leitura (sem usar o termo proibido "Equipe") e vincula automaticamente <code class="mono">teamCode: "NAVS-2026"</code> ao payload da API, sem input manual de código do time.</p>
           </div>
 
           <div data-slot="field" class="ui-field" style="margin-bottom: 0;">
@@ -2515,26 +2506,18 @@
       btn.setAttribute('aria-pressed', String(showErrors));
       btn.setAttribute('data-variant', showErrors ? 'destructive' : 'outline');
 
-      const teamCodeInput = document.getElementById('team-code-input');
-      const teamCodeError = document.getElementById('team-code-error');
       const authCodeInput = document.getElementById('auth-code-input');
       const authCodeError = document.getElementById('auth-code-error');
       const roleError = document.getElementById('auth-role-error');
       const posError = document.getElementById('auth-positions-error');
 
       if (showErrors) {
-        teamCodeInput.setAttribute('aria-invalid', 'true');
-        teamCodeInput.setAttribute('aria-describedby', 'team-code-hint team-code-error');
-        teamCodeError.style.display = 'flex';
         authCodeInput.setAttribute('aria-invalid', 'true');
         authCodeInput.setAttribute('aria-describedby', 'auth-code-hint auth-code-error');
         authCodeError.style.display = 'flex';
         roleError.style.display = 'flex';
         posError.style.display = 'flex';
       } else {
-        teamCodeInput.removeAttribute('aria-invalid');
-        teamCodeInput.setAttribute('aria-describedby', 'team-code-hint');
-        teamCodeError.style.display = 'none';
         authCodeInput.removeAttribute('aria-invalid');
         authCodeInput.setAttribute('aria-describedby', 'auth-code-hint');
         authCodeError.style.display = 'none';
