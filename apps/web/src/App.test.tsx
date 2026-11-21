@@ -99,7 +99,7 @@ describe('Authentication flow', () => {
 
     expect(await screen.findByText(/verifique seu e-mail/i)).toBeInTheDocument()
 
-    await user.type(screen.getByLabelText(/código de verificação/i), '123456')
+    await user.type(screen.getByLabelText(/dígito 1 do código de verificação/i), '123456')
     await user.click(screen.getByRole('button', { name: /continuar$/i }))
 
     expect(await screen.findByText(/como você participa do time/i)).toBeInTheDocument()
@@ -128,7 +128,7 @@ describe('Authentication flow', () => {
     await user.type(screen.getByLabelText(/e-mail/i), 'marcos@navigators.fa')
     await user.click(screen.getByRole('button', { name: /receber código de 6 dígitos/i }))
 
-    await user.type(screen.getByLabelText(/código de verificação/i), '123456')
+    await user.type(screen.getByLabelText(/dígito 1 do código de verificação/i), '123456')
     await user.click(screen.getByRole('button', { name: /continuar$/i }))
 
     await user.click(screen.getByRole('button', { name: /staff/i }))

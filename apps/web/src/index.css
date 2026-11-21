@@ -1145,6 +1145,22 @@ button {
   color: var(--color-text-error);
 }
 
+/* One-time code inputs */
+.otp-inputs {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: space-between;
+}
+
+.otp-input {
+  flex: 1 1 0;
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
+  padding: var(--space-2);
+  text-align: center;
+  font-size: var(--text-xl);
+}
+
 /* Role selection */
 .role-option {
   width: 100%;

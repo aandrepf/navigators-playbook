@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { api, ApiClientError } from '../api/client'
@@ -77,6 +77,7 @@ export function AuthScreen() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [resendStatus, setResendStatus] = useState<ResendStatus>(null)
+  const codeInputsRef = useRef<Array<HTMLInputElement | null>>([])
 
   async function handleRequestCode(event: React.FormEvent) {
     event.preventDefault()
@@ -154,6 +155,68 @@ export function AuthScreen() {
     setPositions((prev) =>
       prev.includes(position) ? prev.filter((p) => p !== position) : [...prev, position],
     )
+  }
+
+  function focusCodeInput(index: number) {
+    const input = codeInputsRef.current[index]
+    if (input) {
+      input.focus()
+    }
+  }
+
+  function updateCodeValue(index: number, digits: string) {
+    const sanitized = digits.replace(/\D/g, '').slice(0, 6)
+    if (sanitized.length === 0) {
+      const newCode = code.slice(0, index) + code.slice(index + 1)
+      setCode(newCode)
+      return
+    }
+    const before = code.slice(0, index)
+    const after = code.slice(index + sanitized.length)
+    const newCode = (before + sanitized + after).slice(0, 6)
+    setCode(newCode)
+    const nextIndex = Math.min(index + sanitized.length, 5)
+    focusCodeInput(nextIndex)
+  }
+
+  function handleCodeChange(index: number, value: string) {
+    const digits = value.replace(/\D/g, '').slice(0, 6)
+    if (digits.length <= 1) {
+      const newCode = code.slice(0, index) + digits + code.slice(index + 1)
+      setCode(newCode.slice(0, 6))
+      if (digits && index < 5) {
+        focusCodeInput(index + 1)
+      }
+    } else {
+      updateCodeValue(index, digits)
+    }
+  }
+
+  function handleCodeKeyDown(index: number, event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === 'Backspace') {
+      event.preventDefault()
+      if (code[index]) {
+        const newCode = code.slice(0, index) + code.slice(index + 1)
+        setCode(newCode)
+      } else if (index > 0) {
+        const newCode = code.slice(0, index - 1) + code.slice(index)
+        setCode(newCode)
+        focusCodeInput(index - 1)
+      }
+    } else if (event.key === 'ArrowLeft' && index > 0) {
+      event.preventDefault()
+      focusCodeInput(index - 1)
+    } else if (event.key === 'ArrowRight' && index < 5) {
+      event.preventDefault()
+      focusCodeInput(index + 1)
+    }
+  }
+
+  function handleCodePaste(index: number, event: React.ClipboardEvent<HTMLInputElement>) {
+    event.preventDefault()
+    const pasted = event.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6)
+    if (!pasted) return
+    updateCodeValue(index, pasted)
   }
 
   async function handleGoogleLogin() {
@@ -320,21 +383,33 @@ export function AuthScreen() {
             </CardHeader>
 
             <Field>
-              <FieldLabel htmlFor="code">Código de verificação:</FieldLabel>
-              <Input
-                id="code"
-                type="text"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                required
-                pattern="\d{6}"
-                placeholder="000000"
-                error={Boolean(error)}
-                aria-describedby={error ? 'code-error' : undefined}
-                className="mono"
-              />
+              <FieldLabel id="code-label" htmlFor="code">
+                Código de verificação:
+              </FieldLabel>
+              <div className="otp-inputs" role="group" aria-labelledby="code-label">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <input
+                    key={index}
+                    id={index === 0 ? 'code' : `code-${index}`}
+                    ref={(el) => {
+                      codeInputsRef.current[index] = el
+                    }}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="\d"
+                    autoComplete={index === 0 ? 'one-time-code' : 'off'}
+                    value={code[index] ?? ''}
+                    onChange={(e) => handleCodeChange(index, e.target.value)}
+                    onKeyDown={(e) => handleCodeKeyDown(index, e)}
+                    onPaste={(e) => handleCodePaste(index, e)}
+                    aria-label={`Dígito ${index + 1} do código de verificação`}
+                    aria-describedby={error ? 'code-error' : undefined}
+                    aria-invalid={Boolean(error) || undefined}
+                    data-state={error ? 'error' : undefined}
+                    className="ui-input mono otp-input"
+                  />
+                ))}
+              </div>
               {error && <FieldError id="code-error">{error}</FieldError>}
               {resendStatus?.type === 'success' && (
                 <p role="status" className="auth-resend-status auth-resend-status--success">
