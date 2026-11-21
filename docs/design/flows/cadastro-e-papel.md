@@ -37,7 +37,8 @@ papel `jogador` ou `staff`.
         │                                           │
         ▼                                           │
 [3. Verifique seu e-mail (código 6 dígitos)]        │
-   • Código numérico (tabular-nums, --font-mono)    │
+   • 6 inputs individuais de 1 dígito cada          │
+     (.otp-inputs / .otp-digit-input, tabular-nums) │
    • Ações: [Continuar] / [Reenviar código / Voltar]│
         │                                           │
         └───────────────────┬───────────────────────┘
@@ -151,12 +152,22 @@ permissões de edição ou leitura protegida.
      frontend envia `teamCode: "NAVS-2026"` automaticamente no payload de
      `POST /auth/email/verify`.
 2. **Código de verificação de e-mail (etapa `code`)**:
-   - `inputmode="numeric"`, `autocomplete="one-time-code"`, `pattern="\d{6}"`;
-   - tipografia `--font-mono` com `font-variant-numeric: tabular-nums` para
-     evitar oscilação horizontal durante a digitação;
-   - código inválido ou expirado (`401`) associa o `<FieldError>` ao input via
+   - **6 campos individuais por caractere/dígito** (`.otp-inputs` contendo 6
+     inputs `.otp-digit-input` de `maxLength={1}`), agrupados semanticamente com
+     `role="group"` e `aria-labelledby`, e cada campo rotulado individualmente
+     (`aria-label="Dígito 1 de 6 do código de verificação"` .. `"Dígito 6 de 6"`);
+   - `inputmode="numeric"`, `pattern="\d"` e `autocomplete="one-time-code"` no
+     primeiro campo, com **auto-avanço de foco** ao digitar um número, suporte a
+     **`Backspace`** (voltando o foco ao dígito anterior quando vazio), setas
+     horizontais e **colar (`paste`)** o código completo de 6 dígitos
+     distribuindo os caracteres automaticamente pelos 6 inputs;
+   - tipografia `--font-mono` com `font-variant-numeric: tabular-nums`, texto
+     centralizado (`text-align: center`), alvo de toque `>= 44×44px` por campo e
+     layout responsivo (`grid-template-columns: repeat(6, minmax(0, 1fr))`) sem
+     overflow horizontal em `390×844`;
+   - código inválido ou expirado (`401`) associa o `<FieldError>` aos inputs via
      `aria-describedby` e não limpa o e-mail nem os dados preenchidos;
-   - botão secundário permite voltar à etapa `email` ou reenviar o código.
+   - botões secundários permitem reenviar o código ou voltar à etapa `email`.
 3. **Escolha de papel (etapa `role`)**:
    - grupo com `role="group"` e `aria-label="Escolha de papel"`;
    - botões **Jogador** e **Staff** com `min-height: 72px`, `aria-pressed` e
