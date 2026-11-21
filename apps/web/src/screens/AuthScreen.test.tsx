@@ -32,15 +32,15 @@ describe('AuthScreen', () => {
     })
   })
 
-  it('shows editable team code and read-only team name', async () => {
+  it('shows read-only team name and no editable team code', async () => {
     renderWithRouter(<AuthScreen />)
 
     await userEvent.click(screen.getByRole('button', { name: /entrar com código por e-mail/i }))
 
-    expect(screen.getByLabelText(/código do time/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/código do time/i)).toHaveValue('NAVS-2026')
+    expect(screen.queryByLabelText(/código do time/i)).not.toBeInTheDocument()
     expect(screen.getByText(/^Time:$/i)).toBeInTheDocument()
     expect(screen.getByText(/Navigators/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/time atual: navigators/i)).toBeInTheDocument()
   })
 
   it('allows entering name and email', async () => {

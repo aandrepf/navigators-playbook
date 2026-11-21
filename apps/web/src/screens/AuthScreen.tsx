@@ -72,7 +72,6 @@ export function AuthScreen() {
   const [code, setCode] = useState('')
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
-  const [teamCode, setTeamCode] = useState(DEFAULT_TEAM_CODE)
   const [role, setRole] = useState<'jogador' | 'staff' | null>(null)
   const [positions, setPositions] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
@@ -120,7 +119,7 @@ export function AuthScreen() {
     const payload: Parameters<typeof loginWithEmail>[0] = {
       email,
       code,
-      teamCode: teamCode,
+      teamCode: DEFAULT_TEAM_CODE,
       name,
       phone: phone || null,
       role: nextRole,
@@ -225,19 +224,6 @@ export function AuthScreen() {
                 Complete seus dados para receber um código de uso único.
               </CardDescription>
             </CardHeader>
-
-            <Field>
-              <FieldLabel htmlFor="team-code">Código do time:</FieldLabel>
-              <Input
-                id="team-code"
-                type="text"
-                value={teamCode}
-                onChange={(e) => setTeamCode(e.target.value.toUpperCase())}
-                autoComplete="off"
-                placeholder="NAVS-2026"
-                maxLength={16}
-              />
-            </Field>
 
             <Field>
               <FieldLabel htmlFor="team-name">Time:</FieldLabel>
