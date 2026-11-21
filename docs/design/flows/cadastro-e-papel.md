@@ -87,7 +87,7 @@ papel `jogador` ou `staff`.
   **"Código do time"** ao usuário.
 - **Nome completo**: obrigatório no cadastro manual; nome disponível do Google
   pode preencher o campo.
-- **Telefone (opcional)**: informado em formato livre (`(11) 91234-5678`) para
+- **Telefone (opcional)**: informado em formato livre (`+351 912 345 678`) para
   futura comunicação por WhatsApp, sem validação nem envio de mensagem no MVP.
 - **E-mail**: obrigatório e verificado.
 - **Papel**: `jogador` ou `staff`.
@@ -160,8 +160,8 @@ permissões de edição ou leitura protegida.
 3. **Escolha de papel (etapa `role`)**:
    - grupo com `role="group"` e `aria-label="Escolha de papel"`;
    - botões **Jogador** e **Staff** com `min-height: 72px`, `aria-pressed` e
-     descrição curta da consequência de cada escolha (entrada ativa com
-     posições vs. aprovação pendente por Admin ou Head Coach);
+     subtítulos descritivos de cada papel (**Jogador**: `"Atleta que pertence ao clube"`;
+     **Staff**: `"Coaches, Coordenadores e auxiliares do clube"`);
    - renderiza `<FieldError role="alert">` no topo do card caso a requisição de
      confirmação falhe;
    - inclui obrigatoriamente botão **Voltar** para retornar à etapa `code`.
