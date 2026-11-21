@@ -63,7 +63,9 @@ describe('AuthScreen', () => {
 
     await user.click(screen.getByRole('button', { name: /entrar com código por e-mail/i }))
 
-    expect(screen.getByLabelText(/telefone \(opcional\)/i)).toBeInTheDocument()
+    const phoneInput = screen.getByLabelText(/telefone \(opcional\)/i)
+    expect(phoneInput).toBeInTheDocument()
+    expect(phoneInput).toHaveAttribute('placeholder', '+351 912 345 678')
     expect(
       screen.queryByText(/usaremos este dado para futuras notificações/i),
     ).not.toBeInTheDocument()
@@ -110,10 +112,10 @@ describe('AuthScreen', () => {
     expect(staffButton).toHaveAttribute('aria-pressed', 'false')
 
     expect(
-      screen.getByText(/consulto o playbook e respondo a treinos e jogos/i),
+      screen.getByText(/atleta que pertence ao clube/i),
     ).toBeInTheDocument()
     expect(
-      screen.getByText(/acesso sujeito à aprovação de um admin ou head coach/i),
+      screen.getByText(/coaches, coordenadores e auxiliares do clube/i),
     ).toBeInTheDocument()
   })
 
