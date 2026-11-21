@@ -46,9 +46,13 @@ export class AuthPage {
     await expect(this.page.getByRole('heading', { name: 'Verifique seu e-mail' })).toBeVisible()
   }
 
-  /** Digita o código recebido e avança para a escolha de papel. */
+  /**
+   * Digita o código recebido e avança para a escolha de papel. O código são 6
+   * inputs individuais; colar ou preencher os 6 dígitos no primeiro campo os
+   * distribui pelos demais. Não usar /código de verificação/i: casa com os 6.
+   */
   async enterCode(code: string): Promise<void> {
-    await this.page.getByLabel(/código de verificação/i).fill(code)
+    await this.codeInput(1).fill(code)
     await this.page.getByRole('button', { name: 'Continuar' }).click()
     await expect(this.page.getByRole('heading', { name: 'Como você participa do time?' })).toBeVisible()
   }
@@ -69,6 +73,16 @@ export class AuthPage {
 
   createAccountButton(): Locator {
     return this.page.getByRole('button', { name: /^Criar conta$/ })
+  }
+
+  /** Um dos 6 inputs do código de verificação (`position` de 1 a 6). */
+  codeInput(position: number): Locator {
+    return this.page.getByLabel(`Dígito ${position} do código de verificação`, { exact: true })
+  }
+
+  /** Grupo dos 6 inputs do código, rotulado por "Código de verificação". */
+  codeGroup(): Locator {
+    return this.page.getByRole('group', { name: /código de verificação/i })
   }
 
   resendCodeButton(): Locator {
