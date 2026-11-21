@@ -23,7 +23,8 @@ test.describe('Operação por teclado', () => {
     await page.keyboard.press('Enter')
     await expect(page.getByRole('heading', { name: 'Verifique seu e-mail' })).toBeVisible()
 
-    await tabUntilFocused(page, page.getByLabel(/código de verificação/i))
+    // Os 6 dígitos são inputs individuais: o foco entra no primeiro e o auto-avanço leva aos demais.
+    await tabUntilFocused(page, new AuthPage(page).codeInput(1))
     await page.keyboard.type(await waitForLoginCode(email))
     await page.keyboard.press('Enter')
     await expect(page.getByRole('heading', { name: 'Como você participa do time?' })).toBeVisible()

@@ -102,8 +102,23 @@ test.describe('Revisão 02.1: código do time e Google (S0-03, S1-04)', () => {
     await auth.startEmailLogin()
     await auth.requestCode({ email: uniqueEmail('rev021.tabular') })
 
-    const codigo = page.getByLabel(/código de verificação/i)
-    await expect(codigo).toHaveCSS('font-variant-numeric', /tabular-nums/)
+    await expect(auth.codeGroup().getByRole('textbox')).toHaveCount(6)
+    for (let position = 1; position <= 6; position += 1) {
+      await expect(auth.codeInput(position)).toHaveCSS('font-variant-numeric', /tabular-nums/)
+    }
+  })
+
+  test('descrições de Jogador e Staff na escolha de papel', async ({ page }) => {
+    const auth = new AuthPage(page)
+    await auth.goto()
+    await auth.startEmailLogin()
+    await auth.requestCode({ email: uniqueEmail('rev021.microcopy') })
+    await auth.enterCode('123456')
+
+    await expect(page.getByRole('button', { name: /Jogador.*Atleta que pertence ao clube/s })).toBeVisible()
+    await expect(
+      page.getByRole('button', { name: /Staff.*Coaches, Coordenadores e auxiliares do clube/s }),
+    ).toBeVisible()
   })
 
   test('botão Google: texto visível e nome acessível coincidem', async ({ page }) => {
