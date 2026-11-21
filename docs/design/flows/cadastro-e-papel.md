@@ -87,7 +87,7 @@ papel `jogador` ou `staff`.
   **"Código do time"** ao usuário.
 - **Nome completo**: obrigatório no cadastro manual; nome disponível do Google
   pode preencher o campo.
-- **Telefone (opcional)**: informado em formato livre (`(11) 91234-5678`) para
+- **Telefone (opcional)**: informado em formato livre (`+351 912 345 678`) para
   futura comunicação por WhatsApp, sem validação nem envio de mensagem no MVP.
 - **E-mail**: obrigatório e verificado.
 - **Papel**: `jogador` ou `staff`.

@@ -60,7 +60,7 @@ Após a aplicação das correções finais em `apps/web` (`9055124`, `b955761`, 
 3. **Time `Navigators` Somente Leitura e Vínculo Automático de `teamCode = "NAVS-2026"`**:
    - Corrigido (`S0-03`, `S1-05`): a etapa `email` exibe `<FieldLabel htmlFor="team-name">Time:</FieldLabel>` associado a `<output id="team-name" className="auth-readonly-value" aria-label="Time atual: Navigators">Navigators</output>`, eliminando o termo proibido *"Equipe"* (`GLOSSARY.md`) e o estado `disabled` indevido, e vincula automaticamente o código `NAVS-2026` ao time selecionado (`teamCode: "NAVS-2026"` no `POST /auth/email/verify`), sem input manual `"Código do time"` na tela.
 4. **Campo Telefone**:
-   - `<Input id="phone" type="tel" autoComplete="tel" placeholder="(11) 91234-5678" />` com `min-height: 44px` e `font-size: 16px`, sem menção a WhatsApp. Conforme.
+   - `<Input id="phone" type="tel" autoComplete="tel" placeholder="+351 912 345 678" />` com `min-height: 44px` e `font-size: 16px`, sem menção a WhatsApp. Conforme.
 5. **Escolha `Jogador` / `Staff` (`role`)**:
    - Corrigido (`S1-02`, `S2-02`): botões de `72px` incluem os subtítulos descritivos de cada papel (*"Atleta que pertence ao clube"* para **Jogador** e *"Coaches, Coordenadores e auxiliares do clube"* para **Staff**), exibem `<FieldError>` em caso de falha na requisição e contam com botão **`Voltar`** para a etapa `code`.
 6. **Posições, Skip e Voltar (`player-positions`)**:
