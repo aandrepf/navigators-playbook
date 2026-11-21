@@ -89,6 +89,14 @@ export class AuthPage {
     return this.page.getByRole('button', { name: 'Reenviar código' })
   }
 
+  /**
+   * Após o reenvio, o botão entra em cooldown de 60s: o rótulo vira
+   * "Reenviar código (Ns)" e o botão fica desabilitado até zerar.
+   */
+  resendCooldownButton(): Locator {
+    return this.page.getByRole('button', { name: /^Reenviar código \(\d+s\)$/ })
+  }
+
   backButton(): Locator {
     return this.page.getByRole('button', { name: 'Voltar', exact: true })
   }

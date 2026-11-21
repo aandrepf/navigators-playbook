@@ -204,6 +204,10 @@ test.describe('Revisão 02.1: reenvio de código (S2-04)', () => {
     // Spinners dos botões também têm role="status"; filtra pela mensagem de sucesso.
     await expect(page.getByRole('status').filter({ hasText: /novo código enviado/i })).toBeVisible()
 
+    // Cooldown de 60s: o próprio botão mostra a contagem e fica desabilitado.
+    await expect(auth.resendCooldownButton()).toBeDisabled()
+    await expect(auth.resendCooldownButton()).toHaveText(/^Reenviar código \(\d+s\)$/)
+
     // O novo código deve funcionar para concluir o cadastro.
     await auth.enterCode(await waitForLoginCode(email))
     await auth.choosePapel('JOGADOR')
