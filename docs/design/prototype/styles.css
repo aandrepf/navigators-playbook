@@ -1493,6 +1493,26 @@ code,
   box-shadow: 0 0 0 var(--component-input-focus-ring-width) var(--destructive-focus);
 }
 
+/* 4.1. OTP Verification Code Inputs (6 campos individuais por caractere — Etapa 3 do Cadastro) */
+.otp-inputs {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--space-1-5);
+  width: 100%;
+  max-width: 320px;
+}
+
+.otp-digit-input {
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
+  padding: var(--space-2) 0;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
 /* 5. Avatar & AvatarStack (primitives/avatar.tsx — Figma Sets 9892:3711, 3738, 3754) */
 .ui-avatar,
 [data-slot='avatar'] {

@@ -2041,7 +2041,7 @@
           </div>
 
           <div class="btn-row" style="margin-top: var(--space-1);">
-            <button type="button" data-slot="button" data-variant="default" data-size="sm" class="ui-btn" onclick="document.getElementById('auth-code-input').focus()">
+            <button type="button" data-slot="button" data-variant="default" data-size="sm" class="ui-btn" onclick="document.getElementById('auth-code-input-0').focus()">
               <span class="ui-btn__label">Receber código de 6 dígitos</span>
             </button>
             <button type="button" data-slot="button" data-variant="secondary" data-size="sm" class="ui-btn" onclick="document.getElementById('onboarding-dialog').scrollTo({ top: 0, behavior: 'smooth' })">
@@ -2050,13 +2050,20 @@
           </div>
         </div>
 
-        <!-- Etapa 3: Verificação de e-mail (code — 6 dígitos tabular-nums) -->
+        <!-- Etapa 3: Verificação de e-mail (code — 6 campos individuais por caractere, tabular-nums) -->
         <div id="field-auth-code" data-slot="card" data-size="sm" class="ui-card stack-sm">
-          <strong style="font-size: var(--text-sm);">3. Verifique seu e-mail (Código de 6 dígitos):</strong>
+          <strong style="font-size: var(--text-sm);">3. Verifique seu e-mail (Código de 6 dígitos — 6 campos individuais):</strong>
           <div data-slot="field" class="ui-field" style="margin-bottom: 0;">
-            <label for="auth-code-input" data-slot="field-label" class="ui-field__label">Código de verificação:</label>
-            <input type="text" id="auth-code-input" data-slot="input" class="ui-input mono tabular" style="font-family: var(--font-mono); font-variant-numeric: tabular-nums; letter-spacing: 0.12em;" inputmode="numeric" autocomplete="one-time-code" pattern="\d{6}" maxlength="6" placeholder="000000" value="482910" required aria-describedby="auth-code-hint" />
-            <p id="auth-code-hint" data-slot="field-hint" class="ui-field__hint">Digite o código de 6 dígitos enviado para atleta@navigators.com.br (<code class="mono">--font-mono</code> e <code class="mono">tabular-nums</code>).</p>
+            <span id="auth-code-group-label" data-slot="field-label" class="ui-field__label">Código de verificação:</span>
+            <div class="otp-inputs" role="group" aria-labelledby="auth-code-group-label" aria-describedby="auth-code-hint">
+              <input type="text" id="auth-code-input-0" data-slot="input" class="ui-input mono tabular otp-digit-input" inputmode="numeric" autocomplete="one-time-code" pattern="\d" maxlength="1" value="4" aria-label="Dígito 1 de 6 do código de verificação" aria-describedby="auth-code-hint" oninput="handleOtpInput(event, 0)" onkeydown="handleOtpKeydown(event, 0)" onpaste="handleOtpPaste(event)" required />
+              <input type="text" id="auth-code-input-1" data-slot="input" class="ui-input mono tabular otp-digit-input" inputmode="numeric" pattern="\d" maxlength="1" value="8" aria-label="Dígito 2 de 6 do código de verificação" aria-describedby="auth-code-hint" oninput="handleOtpInput(event, 1)" onkeydown="handleOtpKeydown(event, 1)" onpaste="handleOtpPaste(event)" required />
+              <input type="text" id="auth-code-input-2" data-slot="input" class="ui-input mono tabular otp-digit-input" inputmode="numeric" pattern="\d" maxlength="1" value="2" aria-label="Dígito 3 de 6 do código de verificação" aria-describedby="auth-code-hint" oninput="handleOtpInput(event, 2)" onkeydown="handleOtpKeydown(event, 2)" onpaste="handleOtpPaste(event)" required />
+              <input type="text" id="auth-code-input-3" data-slot="input" class="ui-input mono tabular otp-digit-input" inputmode="numeric" pattern="\d" maxlength="1" value="9" aria-label="Dígito 4 de 6 do código de verificação" aria-describedby="auth-code-hint" oninput="handleOtpInput(event, 3)" onkeydown="handleOtpKeydown(event, 3)" onpaste="handleOtpPaste(event)" required />
+              <input type="text" id="auth-code-input-4" data-slot="input" class="ui-input mono tabular otp-digit-input" inputmode="numeric" pattern="\d" maxlength="1" value="1" aria-label="Dígito 5 de 6 do código de verificação" aria-describedby="auth-code-hint" oninput="handleOtpInput(event, 4)" onkeydown="handleOtpKeydown(event, 4)" onpaste="handleOtpPaste(event)" required />
+              <input type="text" id="auth-code-input-5" data-slot="input" class="ui-input mono tabular otp-digit-input" inputmode="numeric" pattern="\d" maxlength="1" value="0" aria-label="Dígito 6 de 6 do código de verificação" aria-describedby="auth-code-hint" oninput="handleOtpInput(event, 5)" onkeydown="handleOtpKeydown(event, 5)" onpaste="handleOtpPaste(event)" required />
+            </div>
+            <p id="auth-code-hint" data-slot="field-hint" class="ui-field__hint">Digite ou cole os 6 dígitos enviados para atleta@navigators.com.br (6 campos individuais <code class="mono">&gt;= 44×44px</code> com <code class="mono">--font-mono</code> e <code class="mono">tabular-nums</code>).</p>
             <div id="auth-code-error" data-slot="field-error" class="ui-field__error" role="alert" style="display: none;">
               ✕ Código inválido ou expirado (401). Solicite um novo código abaixo sem perder o e-mail informado.
             </div>
@@ -2103,7 +2110,7 @@
           </div>
 
           <div class="btn-row">
-            <button type="button" data-slot="button" data-variant="ghost" data-size="sm" class="ui-btn" onclick="document.getElementById('auth-code-input').focus()">
+            <button type="button" data-slot="button" data-variant="ghost" data-size="sm" class="ui-btn" onclick="document.getElementById('auth-code-input-0').focus()">
               <span class="ui-btn__label">Voltar para verificação de código</span>
             </button>
           </div>
@@ -2500,26 +2507,70 @@
       }
     }
 
+    function handleOtpInput(e, index) {
+      const input = e.target;
+      const digits = (input.value || '').replace(/\D/g, '');
+      input.value = digits.slice(-1);
+      if (input.value && index < 5) {
+        const next = document.getElementById('auth-code-input-' + (index + 1));
+        if (next) next.focus();
+      }
+    }
+
+    function handleOtpKeydown(e, index) {
+      const input = e.target;
+      if (e.key === 'Backspace' && !input.value && index > 0) {
+        const prev = document.getElementById('auth-code-input-' + (index - 1));
+        if (prev) {
+          prev.focus();
+          prev.select();
+        }
+      } else if (e.key === 'ArrowLeft' && index > 0) {
+        e.preventDefault();
+        document.getElementById('auth-code-input-' + (index - 1)).focus();
+      } else if (e.key === 'ArrowRight' && index < 5) {
+        e.preventDefault();
+        document.getElementById('auth-code-input-' + (index + 1)).focus();
+      }
+    }
+
+    function handleOtpPaste(e) {
+      const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
+      if (!pasted) return;
+      e.preventDefault();
+      for (let i = 0; i < 6; i++) {
+        const el = document.getElementById('auth-code-input-' + i);
+        if (el) el.value = pasted[i] || '';
+      }
+      const focusIdx = Math.min(pasted.length, 5);
+      const target = document.getElementById('auth-code-input-' + focusIdx);
+      if (target) target.focus();
+    }
+
     function toggleOnboardingErrors() {
       const btn = document.getElementById('btn-toggle-onboarding-errors');
       const showErrors = btn.getAttribute('aria-pressed') !== 'true';
       btn.setAttribute('aria-pressed', String(showErrors));
       btn.setAttribute('data-variant', showErrors ? 'destructive' : 'outline');
 
-      const authCodeInput = document.getElementById('auth-code-input');
+      const otpInputs = document.querySelectorAll('#field-auth-code .otp-digit-input');
       const authCodeError = document.getElementById('auth-code-error');
       const roleError = document.getElementById('auth-role-error');
       const posError = document.getElementById('auth-positions-error');
 
       if (showErrors) {
-        authCodeInput.setAttribute('aria-invalid', 'true');
-        authCodeInput.setAttribute('aria-describedby', 'auth-code-hint auth-code-error');
+        otpInputs.forEach((input) => {
+          input.setAttribute('aria-invalid', 'true');
+          input.setAttribute('aria-describedby', 'auth-code-hint auth-code-error');
+        });
         authCodeError.style.display = 'flex';
         roleError.style.display = 'flex';
         posError.style.display = 'flex';
       } else {
-        authCodeInput.removeAttribute('aria-invalid');
-        authCodeInput.setAttribute('aria-describedby', 'auth-code-hint');
+        otpInputs.forEach((input) => {
+          input.removeAttribute('aria-invalid');
+          input.setAttribute('aria-describedby', 'auth-code-hint');
+        });
         authCodeError.style.display = 'none';
         roleError.style.display = 'none';
         posError.style.display = 'none';
