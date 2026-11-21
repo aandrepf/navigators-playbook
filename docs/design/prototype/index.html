@@ -2067,13 +2067,19 @@
             <div id="auth-code-error" data-slot="field-error" class="ui-field__error" role="alert" style="display: none;">
               ✕ Código inválido ou expirado (401). Solicite um novo código abaixo sem perder o e-mail informado.
             </div>
+            <p id="auth-resend-status" data-slot="field-hint" class="ui-field__hint" role="status" aria-live="polite" style="display: none; color: var(--color-status-available); font-weight: 500;">
+              ✓ Novo código enviado para atleta@navigators.com.br.
+            </p>
           </div>
           <div class="btn-row">
             <button type="button" data-slot="button" data-variant="default" data-size="sm" class="ui-btn" onclick="document.getElementById('btn-role-jogador').focus()">
               <span class="ui-btn__label">Continuar</span>
             </button>
-            <button type="button" data-slot="button" data-variant="secondary" data-size="sm" class="ui-btn" onclick="document.getElementById('auth-email-input').focus()">
-              <span class="ui-btn__label">Alterar e-mail ou reenviar código</span>
+            <button type="button" id="btn-resend-code" data-slot="button" data-variant="secondary" data-size="sm" class="ui-btn tabular" style="font-variant-numeric: tabular-nums;" onclick="handlePrototypeResendCode()">
+              <span id="btn-resend-code-label" class="ui-btn__label" style="font-variant-numeric: tabular-nums;">Reenviar código</span>
+            </button>
+            <button type="button" data-slot="button" data-variant="ghost" data-size="sm" class="ui-btn" onclick="document.getElementById('auth-email-input').focus()">
+              <span class="ui-btn__label">Voltar</span>
             </button>
           </div>
         </div>
@@ -2545,6 +2551,47 @@
       const focusIdx = Math.min(pasted.length, 5);
       const target = document.getElementById('auth-code-input-' + focusIdx);
       if (target) target.focus();
+    }
+
+    let resendCooldownTimer = null;
+
+    function handlePrototypeResendCode() {
+      const btn = document.getElementById('btn-resend-code');
+      const label = document.getElementById('btn-resend-code-label');
+      const statusEl = document.getElementById('auth-resend-status');
+      const emailEl = document.getElementById('auth-email-input');
+      if (!btn || btn.disabled) return;
+
+      document.querySelectorAll('#field-auth-code .otp-digit-input').forEach((input) => {
+        input.value = '';
+      });
+      const firstInput = document.getElementById('auth-code-input-0');
+      if (firstInput) firstInput.focus();
+
+      if (statusEl) {
+        const emailVal = (emailEl && emailEl.value) ? emailEl.value : 'atleta@navigators.com.br';
+        statusEl.textContent = '✓ Novo código enviado para ' + emailVal + '.';
+        statusEl.style.display = 'block';
+      }
+
+      let remaining = 60;
+      btn.disabled = true;
+      btn.setAttribute('aria-disabled', 'true');
+      if (label) label.textContent = 'Reenviar código (' + remaining + 's)';
+
+      if (resendCooldownTimer) clearInterval(resendCooldownTimer);
+      resendCooldownTimer = setInterval(() => {
+        remaining -= 1;
+        if (remaining > 0) {
+          if (label) label.textContent = 'Reenviar código (' + remaining + 's)';
+        } else {
+          clearInterval(resendCooldownTimer);
+          resendCooldownTimer = null;
+          btn.disabled = false;
+          btn.removeAttribute('aria-disabled');
+          if (label) label.textContent = 'Reenviar código';
+        }
+      }, 1000);
     }
 
     function toggleOnboardingErrors() {

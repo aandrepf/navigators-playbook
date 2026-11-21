@@ -39,7 +39,8 @@ papel `jogador` ou `staff`.
 [3. Verifique seu e-mail (código 6 dígitos)]        │
    • 6 inputs individuais de 1 dígito cada          │
      (.otp-inputs / .otp-digit-input, tabular-nums) │
-   • Ações: [Continuar] / [Reenviar código / Voltar]│
+   • Ações: [Continuar] / [Reenviar código (60s)]   │
+            / [Voltar]                              │
         │                                           │
         └───────────────────┬───────────────────────┘
                             ▼
@@ -167,7 +168,15 @@ permissões de edição ou leitura protegida.
      overflow horizontal em `390×844`;
    - código inválido ou expirado (`401`) associa o `<FieldError>` aos inputs via
      `aria-describedby` e não limpa o e-mail nem os dados preenchidos;
-   - botões secundários permitem reenviar o código ou voltar à etapa `email`.
+   - **reenvio com cooldown de 60 segundos (`1 minuto`)**: ao clicar em
+     **Reenviar código**, um novo código é solicitado para o mesmo e-mail, os 6
+     campos são limpos, é exibido feedback `role="status"` (`"Novo código enviado para <e-mail>."`)
+     e o botão **Reenviar código** fica desabilitado (`disabled`) por **60
+     segundos**, exibindo a contagem regressiva dentro do próprio rótulo do
+     botão (`"Reenviar código (60s)"` → `"Reenviar código (59s)"` ... →
+     `"Reenviar código"`, com `font-variant-numeric: tabular-nums`) até liberar
+     um novo reenvio; o botão **Voltar** permanece separado e ativo para
+     retornar à etapa `email`.
 3. **Escolha de papel (etapa `role`)**:
    - grupo com `role="group"` e `aria-label="Escolha de papel"`;
    - botões **Jogador** e **Staff** com `min-height: 72px`, `aria-pressed` e
