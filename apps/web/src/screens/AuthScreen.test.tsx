@@ -1,6 +1,6 @@
-import { screen, waitFor } from '@testing-library/react'
+import { act, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 import { AuthScreen } from './AuthScreen'
 import { renderWithAuth, server } from '../test/test-utils'
@@ -402,5 +402,48 @@ describe('AuthScreen', () => {
       expect(requestCount).toBe(2)
     })
     expect(screen.getByRole('status')).toHaveTextContent(/novo código enviado/i)
+  })
+
+  it('disables resend button and shows countdown after resending code', async () => {
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] })
+    const user = userEvent.setup()
+
+    server.use(
+      http.post('/auth/email/request', () => {
+        return new HttpResponse(JSON.stringify({ ok: true }), { status: 200 })
+      }),
+    )
+
+    renderWithRouter(<AuthScreen />)
+
+    await user.click(screen.getByRole('button', { name: /entrar com código por e-mail/i }))
+    await user.type(screen.getByLabelText(/nome completo/i), 'Rafael Costa')
+    await user.type(screen.getByLabelText(/e-mail/i), 'cooldown@navigators.fa')
+    await user.click(screen.getByRole('button', { name: /receber código de 6 dígitos/i }))
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: /verifique seu e-mail/i })).toBeInTheDocument()
+    })
+
+    const resendButton = screen.getByRole('button', { name: /reenviar código$/i })
+    expect(resendButton).not.toBeDisabled()
+
+    await user.click(resendButton)
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /reenviar código \(60s\)/i })).toBeDisabled()
+    })
+
+    act(() => {
+      vi.advanceTimersByTime(1000)
+    })
+    expect(screen.getByRole('button', { name: /reenviar código \(59s\)/i })).toBeDisabled()
+
+    act(() => {
+      vi.advanceTimersByTime(59000)
+    })
+    expect(screen.getByRole('button', { name: /reenviar código$/i })).not.toBeDisabled()
+
+    vi.useRealTimers()
   })
 })

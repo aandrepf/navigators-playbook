@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { api, ApiClientError } from '../api/client'
@@ -77,7 +77,16 @@ export function AuthScreen() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [resendStatus, setResendStatus] = useState<ResendStatus>(null)
+  const [resendCooldown, setResendCooldown] = useState(0)
   const codeInputsRef = useRef<Array<HTMLInputElement | null>>([])
+
+  useEffect(() => {
+    if (resendCooldown === 0) return
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => (prev > 0 ? prev - 1 : 0))
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [resendCooldown])
 
   async function handleRequestCode(event: React.FormEvent) {
     event.preventDefault()
@@ -100,6 +109,7 @@ export function AuthScreen() {
     try {
       await requestEmailCode(email)
       setCode('')
+      setResendCooldown(60)
       setResendStatus({ type: 'success', message: `Novo código enviado para ${email}.` })
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Erro ao reenviar código.'
@@ -439,19 +449,24 @@ export function AuthScreen() {
               style={{ width: '100%', marginTop: 'var(--space-3)' }}
               loading={loading}
               loadingLabel="Reenviando..."
+              disabled={loading || resendCooldown > 0}
+              className="tabular"
               onClick={() => {
                 setResendStatus(null)
                 void handleResendCode()
               }}
             >
-              Reenviar código
+              {resendCooldown > 0 ? `Reenviar código (${resendCooldown}s)` : 'Reenviar código'}
             </Button>
 
             <Button
               type="button"
               variant="ghost"
               style={{ width: '100%', marginTop: 'var(--space-3)' }}
-              onClick={() => setStep('email')}
+              onClick={() => {
+                setResendCooldown(0)
+                setStep('email')
+              }}
             >
               Voltar
             </Button>

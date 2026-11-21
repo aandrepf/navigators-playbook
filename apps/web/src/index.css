@@ -724,6 +724,10 @@ button {
   letter-spacing: 0.12em;
 }
 
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
 .or-divider {
   text-align: center;
   margin: var(--space-4) 0;
