@@ -35,9 +35,9 @@ export class AuthPage {
   }
 
   /**
-   * Preenche nome e e-mail e pede o código. O time não é digitado: a tela
-   * mostra o Time (Navigators, somente leitura) e o Código do time já preenchido com
-   * NAVS-2026, que pode ser editado.
+   * Preenche nome e e-mail e pede o código. Não há campo de time nem de código:
+   * a tela mostra "Time atual: Navigators" (somente leitura) e o frontend envia
+   * teamCode NAVS-2026 automaticamente no POST /auth/email/verify.
    */
   async requestCode(input: { email: string; name?: string }): Promise<void> {
     await this.page.getByLabel(/nome completo/i).fill(input.name ?? 'Conta E2E')
