@@ -114,22 +114,49 @@ test.describe('Revisão 02.1: código do time e Google (S0-03, S1-04)', () => {
   })
 })
 
-test.describe('Revisão 02.1: código do time inválido (S0-03)', () => {
-  test('código do time inválido volta à etapa de dados com o erro e o campo editável', async ({ page }) => {
+test.describe('Revisão 02.1: time atual e vocabulário (S0-03)', () => {
+  test('a tela não tem campo de código do time e envia NAVS-2026 automaticamente', async ({ page }) => {
     const auth = new AuthPage(page)
     await auth.goto()
     await auth.startEmailLogin()
-    await page.getByLabel(/código do time/i).fill('XXXX-0000')
+
+    await expect(page.getByLabel('Time atual: Navigators')).toBeVisible()
+    await expect(page.getByLabel(/código do time/i)).toHaveCount(0)
+
     await auth.requestCode({ email: uniqueEmail('rev021.codigo') })
     await auth.enterCode('123456')
     await auth.choosePapel('JOGADOR')
+
+    // Captura o corpo do cadastro sem depender da API: o time vai fixo como NAVS-2026.
+    const verify = page.waitForRequest((req) => req.url().endsWith('/auth/email/verify') && req.method() === 'POST')
+    await page.getByRole('button', { name: 'QB', exact: true }).click()
+    await auth.createAccountButton().click()
+    expect((await verify).postDataJSON()).toMatchObject({ teamCode: 'NAVS-2026' })
+    await expect(page).toHaveURL('/')
+  })
+
+  test('erro de time vindo da API volta à etapa de dados com alerta acessível', async ({ page }) => {
+    const auth = new AuthPage(page)
+    await auth.goto()
+    await auth.startEmailLogin()
+    await auth.requestCode({ email: uniqueEmail('rev021.codigo.api') })
+    await auth.enterCode('123456')
+    await auth.choosePapel('JOGADOR')
+
+    // Simula a resposta 400 da API para um time indisponível; a tela não permite digitar outro código.
+    await page.route('**/auth/email/verify', (route) =>
+      route.fulfill({
+        status: 400,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'código do time inválido' }),
+      }),
+    )
     await page.getByRole('button', { name: 'QB', exact: true }).click()
     await auth.createAccountButton().click()
 
-    // A validação do time ocorre no servidor ao concluir; o erro volta para a etapa de dados.
     await expect(page.getByRole('heading', { name: 'Criar conta ou entrar' })).toBeVisible()
     await expect(auth.alert()).toContainText(/código do time inválido/i)
-    await expect(page.getByLabel(/código do time/i)).toHaveValue('XXXX-0000')
+    await expect(page.getByLabel(/código do time/i)).toHaveCount(0)
   })
 })
 

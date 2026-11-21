@@ -13,9 +13,8 @@ test.describe('Operação por teclado', () => {
     await tabUntilFocused(page, page.getByRole('button', { name: 'Entrar com código por e-mail' }))
     await page.keyboard.press('Enter')
 
-    // Após abrir o formulário, o foco parte do topo: Tab até o código do time
-    // (já preenchido com NAVS-2026) e depois até o nome.
-    await tabUntilFocused(page, page.getByLabel(/código do time/i))
+    // Após abrir o formulário, o foco parte do topo. O time é só exibição (não
+    // focável), então o primeiro campo alcançável é o nome.
     await tabUntilFocused(page, page.getByLabel(/nome completo/i))
     await page.keyboard.type('Rafael Costa')
     // Telefone (opcional) fica entre nome e e-mail: o foco vai até o e-mail pela ordem natural.

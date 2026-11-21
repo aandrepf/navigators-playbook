@@ -18,16 +18,14 @@ async function sessionUser(page: import('@playwright/test').Page): Promise<Sessi
 }
 
 test.describe('Cadastro: time e código do time', () => {
-  test('mostra o Time somente leitura e o Código do time editável com NAVS-2026', async ({ page }) => {
+  test('mostra apenas o Time Navigators e não tem campo de código do time', async ({ page }) => {
     const auth = new AuthPage(page)
     await auth.goto()
     await auth.startEmailLogin()
 
     await expect(page.getByLabel('Time atual: Navigators')).toBeVisible()
     await expect(page.getByLabel(/^Equipe/)).toHaveCount(0)
-    const codigo = page.getByLabel(/código do time/i)
-    await expect(codigo).toHaveValue('NAVS-2026')
-    await expect(codigo).toBeEditable()
+    await expect(page.getByLabel(/código do time/i)).toHaveCount(0)
   })
 })
 
