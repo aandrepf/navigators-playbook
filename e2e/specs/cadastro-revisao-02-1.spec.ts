@@ -108,6 +108,14 @@ test.describe('Revisão 02.1: código do time e Google (S0-03, S1-04)', () => {
     }
   })
 
+  test('telefone opcional usa o exemplo de Portugal como placeholder', async ({ page }) => {
+    const auth = new AuthPage(page)
+    await auth.goto()
+    await auth.startEmailLogin()
+
+    await expect(page.getByLabel(/telefone \(opcional\)/i)).toHaveAttribute('placeholder', '+351 912 345 678')
+  })
+
   test('descrições de Jogador e Staff na escolha de papel', async ({ page }) => {
     const auth = new AuthPage(page)
     await auth.goto()
@@ -132,14 +140,15 @@ test.describe('Revisão 02.1: código do time e Google (S0-03, S1-04)', () => {
 test.describe('Revisão 02.1: time atual e vocabulário (S0-03)', () => {
   test('a tela não tem campo de código do time e envia NAVS-2026 automaticamente', async ({ page }) => {
     const auth = new AuthPage(page)
+    const email = uniqueEmail('rev021.codigo')
     await auth.goto()
     await auth.startEmailLogin()
 
     await expect(page.getByLabel('Time atual: Navigators')).toBeVisible()
     await expect(page.getByLabel(/código do time/i)).toHaveCount(0)
 
-    await auth.requestCode({ email: uniqueEmail('rev021.codigo') })
-    await auth.enterCode('123456')
+    await auth.requestCode({ email })
+    await auth.enterCode(await waitForLoginCode(email))
     await auth.choosePapel('JOGADOR')
 
     // Captura o corpo do cadastro sem depender da API: o time vai fixo como NAVS-2026.

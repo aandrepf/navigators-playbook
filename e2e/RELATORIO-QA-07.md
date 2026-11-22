@@ -9,6 +9,36 @@ e `7e8c7b4`, e a aprovação de UX `af13d68`/`5b36a3a`.
 corrigidos e verificados). Uma pendência de registro não bloqueia o gate: o
 `docs/design/REVIEW-02.1-CADASTRO-UI.md` ainda diz que S2-03 e S2-04 estão pendentes (ver seção 4).
 
+## 0. Execução final (2026-11-22, após os ajustes de 6 dígitos OTP e cooldown)
+
+Escopo: mudanças finais de `web` e `ux` já incorporadas na `qa` (`0f814a4`). Postgres 17 em
+Podman, banco `playbook_e2e`, portas dedicadas (`E2E_API_PORT=3100`, `E2E_WEB_PORT=5273`), com
+os dev servers do usuário em 3000/5173 intactos.
+
+| Execução | Verdes | Vermelhos | `fixme` (skipped) |
+| --- | --- | --- | --- |
+| A (primeira, com teste novo de S0-03 ainda com OTP fixo) | 140 | 2 | 30 |
+| B (correção do teste: código lido do e-mail) | 142 | 0 | 30 |
+| C (final, com teste de telefone de Portugal) | **144** | **0** | 30 |
+
+A execução A falhou por erro do teste escrito nesta rodada: o teste de S0-03 usava o código
+fixo `123456` em vez do código lido do log (`waitForLoginCode`). Corrigido em `e2e/specs/`. O
+produto não tinha defeito.
+
+Verificação em navegador real das mudanças finais (cada uma tem teste ativo nos dois projetos):
+
+- Time somente leitura `Time atual: Navigators`, sem `Equipe` e sem `Código do time`; o
+  frontend envia `teamCode: 'NAVS-2026'` no `POST /auth/email/verify` (interceptado no teste).
+- Descrições de papel: `Jogador` = `Atleta que pertence ao clube`; `Staff` = `Coaches, Coordenadores
+  e auxiliares do clube`.
+- Telefone opcional com placeholder de Portugal `+351 912 345 678` (teste novo nesta rodada).
+- Código de verificação em 6 campos individuais (`Dígito 1..6 do código de verificação`), grupo
+  com 6 campos e numerais tabulares.
+- Reenvio com cooldown de 60s: após `Novo código enviado`, o botão vira `Reenviar código (Ns)` e
+  fica `disabled`.
+
+Gates: `tsc -p e2e/tsconfig.json --noEmit` verde; `npm test` e `npm run build` verdes (ver seção 2).
+
 ## 1. Conflitos da incorporação
 
 Três arquivos em conflito, resolvidos assim:
