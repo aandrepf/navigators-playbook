@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../hooks/useAuth'
 import { api, ApiClientError } from '../api/client'
 import { POSITIONS_BY_UNIT } from '../domain/positions'
+import { AuthMain } from '../components/AuthMain'
 import {
   Button,
   Card,
@@ -15,7 +16,7 @@ import {
   Input,
 } from '../components/ui'
 
-const TEAM_CODE = 'NAVS-2026'
+const DEFAULT_TEAM_CODE = 'NAVS-2026'
 
 function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
@@ -25,8 +26,6 @@ function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
       viewBox="0 0 24 24"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      role="img"
-      aria-label="Google"
       {...props}
     >
       <path
@@ -57,6 +56,11 @@ type Step =
   | 'player-positions'
   | 'pending'
 
+type ResendStatus =
+  | { type: 'success'; message: string }
+  | { type: 'error'; message: string }
+  | null
+
 export function AuthScreen() {
   const { requestEmailCode, loginWithEmail } = useAuth()
   const navigate = useNavigate()
@@ -72,6 +76,17 @@ export function AuthScreen() {
   const [positions, setPositions] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [resendStatus, setResendStatus] = useState<ResendStatus>(null)
+  const [resendCooldown, setResendCooldown] = useState(0)
+  const codeInputsRef = useRef<Array<HTMLInputElement | null>>([])
+
+  useEffect(() => {
+    if (resendCooldown === 0) return
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => (prev > 0 ? prev - 1 : 0))
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [resendCooldown])
 
   async function handleRequestCode(event: React.FormEvent) {
     event.preventDefault()
@@ -82,6 +97,23 @@ export function AuthScreen() {
       setStep('code')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao solicitar código.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleResendCode() {
+    setLoading(true)
+    setError(null)
+    setResendStatus(null)
+    try {
+      await requestEmailCode(email)
+      setCode('')
+      setResendCooldown(60)
+      setResendStatus({ type: 'success', message: `Novo código enviado para ${email}.` })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Erro ao reenviar código.'
+      setResendStatus({ type: 'error', message })
     } finally {
       setLoading(false)
     }
@@ -98,7 +130,7 @@ export function AuthScreen() {
     const payload: Parameters<typeof loginWithEmail>[0] = {
       email,
       code,
-      teamCode: TEAM_CODE,
+      teamCode: DEFAULT_TEAM_CODE,
       name,
       phone: phone || null,
       role: nextRole,
@@ -135,6 +167,68 @@ export function AuthScreen() {
     )
   }
 
+  function focusCodeInput(index: number) {
+    const input = codeInputsRef.current[index]
+    if (input) {
+      input.focus()
+    }
+  }
+
+  function updateCodeValue(index: number, digits: string) {
+    const sanitized = digits.replace(/\D/g, '').slice(0, 6)
+    if (sanitized.length === 0) {
+      const newCode = code.slice(0, index) + code.slice(index + 1)
+      setCode(newCode)
+      return
+    }
+    const before = code.slice(0, index)
+    const after = code.slice(index + sanitized.length)
+    const newCode = (before + sanitized + after).slice(0, 6)
+    setCode(newCode)
+    const nextIndex = Math.min(index + sanitized.length, 5)
+    focusCodeInput(nextIndex)
+  }
+
+  function handleCodeChange(index: number, value: string) {
+    const digits = value.replace(/\D/g, '').slice(0, 6)
+    if (digits.length <= 1) {
+      const newCode = code.slice(0, index) + digits + code.slice(index + 1)
+      setCode(newCode.slice(0, 6))
+      if (digits && index < 5) {
+        focusCodeInput(index + 1)
+      }
+    } else {
+      updateCodeValue(index, digits)
+    }
+  }
+
+  function handleCodeKeyDown(index: number, event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === 'Backspace') {
+      event.preventDefault()
+      if (code[index]) {
+        const newCode = code.slice(0, index) + code.slice(index + 1)
+        setCode(newCode)
+      } else if (index > 0) {
+        const newCode = code.slice(0, index - 1) + code.slice(index)
+        setCode(newCode)
+        focusCodeInput(index - 1)
+      }
+    } else if (event.key === 'ArrowLeft' && index > 0) {
+      event.preventDefault()
+      focusCodeInput(index - 1)
+    } else if (event.key === 'ArrowRight' && index < 5) {
+      event.preventDefault()
+      focusCodeInput(index + 1)
+    }
+  }
+
+  function handleCodePaste(index: number, event: React.ClipboardEvent<HTMLInputElement>) {
+    event.preventDefault()
+    const pasted = event.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6)
+    if (!pasted) return
+    updateCodeValue(index, pasted)
+  }
+
   async function handleGoogleLogin() {
     setLoading(true)
     setError(null)
@@ -154,7 +248,7 @@ export function AuthScreen() {
 
   if (step === 'welcome') {
     return (
-      <div className="auth-layout">
+      <AuthMain>
         <Card className="auth-card">
           <CardHeader className="auth-card__header">
             <h1 data-slot="card-title" className="auth-card__title ui-card__title">
@@ -175,10 +269,9 @@ export function AuthScreen() {
             onClick={handleGoogleLogin}
             loading={loading}
             loadingLabel="Conectando..."
-            aria-label="Entrar com Google"
           >
             <GoogleIcon aria-hidden="true" style={{ marginRight: 'var(--space-2)' }} />
-            com o Google
+            Entrar com o Google
           </Button>
 
           <div className="or-divider">ou</div>
@@ -187,13 +280,13 @@ export function AuthScreen() {
             Entrar com código por e-mail
           </Button>
         </Card>
-      </div>
+      </AuthMain>
     )
   }
 
   if (step === 'email') {
     return (
-      <div className="auth-layout">
+      <AuthMain>
         <Card className="auth-card">
           <form onSubmit={handleRequestCode}>
             <CardHeader className="auth-card__header">
@@ -205,11 +298,15 @@ export function AuthScreen() {
               </CardDescription>
             </CardHeader>
 
-            <Field disabled>
-              <FieldLabel>Equipe:</FieldLabel>
-              <span className="auth-readonly-value" aria-label="Equipe atual: Navigators">
+            <Field>
+              <FieldLabel htmlFor="team-name">Time:</FieldLabel>
+              <output
+                id="team-name"
+                className="auth-readonly-value"
+                aria-label="Time atual: Navigators"
+              >
                 Navigators
-              </span>
+              </output>
             </Field>
 
             <Field>
@@ -231,7 +328,7 @@ export function AuthScreen() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 autoComplete="tel"
-                placeholder="(11) 91234-5678"
+                placeholder="+351 912 345 678"
               />
             </Field>
 
@@ -271,17 +368,18 @@ export function AuthScreen() {
             </Button>
           </form>
         </Card>
-      </div>
+      </AuthMain>
     )
   }
 
   if (step === 'code') {
     return (
-      <div className="auth-layout">
+      <AuthMain>
         <Card className="auth-card">
           <form
             onSubmit={(e) => {
               e.preventDefault()
+              setResendStatus(null)
               setStep('role')
             }}
           >
@@ -295,20 +393,44 @@ export function AuthScreen() {
             </CardHeader>
 
             <Field>
-              <FieldLabel htmlFor="code">Código de verificação:</FieldLabel>
-              <Input
-                id="code"
-                type="text"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                value={code}
-                onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                required
-                pattern="\d{6}"
-                placeholder="000000"
-                error={Boolean(error)}
-              />
-              {error && <FieldError>{error}</FieldError>}
+              <FieldLabel id="code-label" htmlFor="code">
+                Código de verificação:
+              </FieldLabel>
+              <div className="otp-inputs" role="group" aria-labelledby="code-label">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <input
+                    key={index}
+                    id={index === 0 ? 'code' : `code-${index}`}
+                    ref={(el) => {
+                      codeInputsRef.current[index] = el
+                    }}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="\d"
+                    autoComplete={index === 0 ? 'one-time-code' : 'off'}
+                    value={code[index] ?? ''}
+                    onChange={(e) => handleCodeChange(index, e.target.value)}
+                    onKeyDown={(e) => handleCodeKeyDown(index, e)}
+                    onPaste={(e) => handleCodePaste(index, e)}
+                    aria-label={`Dígito ${index + 1} do código de verificação`}
+                    aria-describedby={error ? 'code-error' : undefined}
+                    aria-invalid={Boolean(error) || undefined}
+                    data-state={error ? 'error' : undefined}
+                    className="ui-input mono otp-input"
+                  />
+                ))}
+              </div>
+              {error && <FieldError id="code-error">{error}</FieldError>}
+              {resendStatus?.type === 'success' && (
+                <p role="status" className="auth-resend-status auth-resend-status--success">
+                  {resendStatus.message}
+                </p>
+              )}
+              {resendStatus?.type === 'error' && (
+                <p role="alert" className="auth-resend-status auth-resend-status--error">
+                  {resendStatus.message}
+                </p>
+              )}
             </Field>
 
             <Button
@@ -325,19 +447,38 @@ export function AuthScreen() {
               type="button"
               variant="secondary"
               style={{ width: '100%', marginTop: 'var(--space-3)' }}
-              onClick={() => setStep('email')}
+              loading={loading}
+              loadingLabel="Reenviando..."
+              disabled={loading || resendCooldown > 0}
+              className="tabular"
+              onClick={() => {
+                setResendStatus(null)
+                void handleResendCode()
+              }}
             >
-              Reenviar código
+              {resendCooldown > 0 ? `Reenviar código (${resendCooldown}s)` : 'Reenviar código'}
+            </Button>
+
+            <Button
+              type="button"
+              variant="ghost"
+              style={{ width: '100%', marginTop: 'var(--space-3)' }}
+              onClick={() => {
+                setResendCooldown(0)
+                setStep('email')
+              }}
+            >
+              Voltar
             </Button>
           </form>
         </Card>
-      </div>
+      </AuthMain>
     )
   }
 
   if (step === 'role') {
     return (
-      <div className="auth-layout">
+      <AuthMain>
         <Card className="auth-card">
           <CardHeader className="auth-card__header">
             <h1 data-slot="card-title" className="auth-card__title ui-card__title">
@@ -347,6 +488,10 @@ export function AuthScreen() {
               Escolha seu papel para personalizar o acesso.
             </CardDescription>
           </CardHeader>
+
+          {error && (
+            <FieldError style={{ marginBottom: 'var(--space-3)' }}>{error}</FieldError>
+          )}
 
           <div role="group" aria-label="Escolha de papel">
             <Button
@@ -367,6 +512,9 @@ export function AuthScreen() {
               }}
             >
               <strong style={{ display: 'block' }}>Jogador</strong>
+              <span style={{ fontSize: 'var(--text-sm)', fontWeight: 400, display: 'block' }}>
+                Atleta que pertence ao clube
+              </span>
             </Button>
 
             <Button
@@ -388,16 +536,29 @@ export function AuthScreen() {
               }}
             >
               <strong style={{ display: 'block' }}>Staff</strong>
+              <span style={{ fontSize: 'var(--text-sm)', fontWeight: 400, display: 'block' }}>
+                Coaches, Coordenadores e auxiliares do clube
+              </span>
             </Button>
           </div>
+
+          <Button
+            type="button"
+            variant="ghost"
+            style={{ width: '100%', marginTop: 'var(--space-3)' }}
+            disabled={loading}
+            onClick={() => setStep('code')}
+          >
+            Voltar
+          </Button>
         </Card>
-      </div>
+      </AuthMain>
     )
   }
 
   if (step === 'player-positions') {
     return (
-      <div className="auth-layout">
+      <AuthMain>
         <Card className="auth-card">
           <form
             onSubmit={(e) => {
@@ -433,7 +594,7 @@ export function AuthScreen() {
                         aria-pressed={positions.includes(position)}
                         onClick={() => togglePosition(position)}
                       >
-                        {position}
+                        {positions.includes(position) ? `✓ ${position}` : position}
                       </Button>
                     ))}
                   </div>
@@ -480,12 +641,12 @@ export function AuthScreen() {
             </Button>
           </form>
         </Card>
-      </div>
+      </AuthMain>
     )
   }
 
   return (
-    <div className="auth-layout">
+    <AuthMain>
       <Card className="auth-card" style={{ textAlign: 'center' }}>
         <CardHeader className="auth-card__header">
           <h1 data-slot="card-title" className="auth-card__title ui-card__title">
@@ -500,6 +661,6 @@ export function AuthScreen() {
           Ir para a tela inicial
         </Button>
       </Card>
-    </div>
+    </AuthMain>
   )
 }

@@ -87,6 +87,7 @@ e2e/
   specs/
     auth.spec.ts              login por e-mail, Google, sessão e logout
     cadastro.spec.ts          jogador com/sem posições, staff sem subpapel, contrato
+    cadastro-revisao-02-1.spec.ts  revisão UX 02.1: alvos 44px, estados, papel, erros, staff
     times.spec.ts             Navigators habilitado, códigos indisponíveis e desconhecidos
     autorizacao.spec.ts       jogador, staff pendente, head coach
     acessibilidade.spec.ts    teclado, skip link, landmarks, títulos
@@ -107,15 +108,22 @@ necessário. Dados vêm da API (`docs/api`), nunca de clique para semear estado.
 
 ## Status atual
 
-53 casos ativos e 15 marcados como `fixme`, cada um executado nos dois projetos.
-Na última execução completa (integração `feat/02-cadastro-papel-posicoes` incorporada
-na `qa`, Postgres 17 em Podman, banco `playbook_e2e` zerado): **106 verdes, 0 vermelhos
-e 30 `fixme`** (15 casos × 2 projetos). `times.spec.ts` cobre o Navigators
-(`NAVS-2026`) habilitado e os códigos indisponíveis (`409`) e desconhecidos (`400`).
+Última execução completa (2026-11-22, Postgres 17 em Podman, banco `playbook_e2e`, portas
+`E2E_API_PORT=3100`/`E2E_WEB_PORT=5273`): **144 verdes, 0 vermelhos, 30 `fixme`** (72 casos ativos ×
+2 projetos; 15 `fixme` × 2). Ver `e2e/RELATORIO-QA-07.md`, seção 0.
+
+`times.spec.ts` cobre o Navigators (`NAVS-2026`) habilitado e os códigos indisponíveis
+(`409`) e desconhecidos (`400`). `cadastro-revisao-02-1.spec.ts` cobre a revisão UX 02.1:
+alvo de toque ≥ 44px nas posições, estado marcado com indicador (`✓`) e fundo distinto,
+Voltar e erro na etapa de papel, código do time e código de 6 dígitos inválidos voltando
+à etapa certa, numerais tabulares, nome acessível do botão Google e Home do staff
+pendente sem `Staff ()`, time fixo Navigators sem campo de código (`NAVS-2026` automático),
+seis campos individuais do código, descrições de Jogador/Staff, telefone de Portugal como placeholder
+e cooldown de 60s no botão `Reenviar código`.
 Os `fixme` não são falhas; cada um aponta a dependência que falta. Checagem de
 tipos: `npx tsc -p e2e/tsconfig.json`.
 
-Relatórios: `e2e/RELATORIO-QA-01.md` e `e2e/RELATORIO-QA-02.md`.
+Relatórios: `e2e/RELATORIO-QA-01.md` a `e2e/RELATORIO-QA-06.md`.
 
 O card 01 foi aprovado sem E2E específico para manifesto PWA, service worker
 ou deploy no Railway. Esses pontos ficam como melhorias não bloqueantes e

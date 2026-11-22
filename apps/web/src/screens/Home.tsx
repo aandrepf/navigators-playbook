@@ -124,25 +124,31 @@ export function Home() {
 
 function PendingStaffHome({ user }: { user: User }) {
   const navigate = useNavigate()
+  const { logout } = useAuth()
+  const subRolesLabel = formatSubRoles(user.subRoles)
 
   return (
     <Card variant="warning" aria-labelledby="pending-staff-heading">
       <CardContent>
         <div className="badge-row" style={{ marginBottom: 'var(--space-3)' }}>
-          <Badge variant="unavailable">Aguardando aprovação do Head Coach</Badge>
+          <Badge variant="unavailable">Aguardando aprovação</Badge>
         </div>
         <h2 id="pending-staff-heading" className="section-title" data-slot="section-heading-title">
           Seu cadastro como Staff está pendente
         </h2>
         <p style={{ marginTop: 'var(--space-2)', fontSize: 'var(--text-base)' }}>
-          Você solicitou acesso no papel de <strong>Staff ({formatSubRoles(user.subRoles)})</strong>.
-          Por segurança do playbook e proteção das justificativas e status de lesão do elenco, seu
-          acesso de edição e leitura restrita será liberado assim que um{' '}
-          <strong>Head Coach</strong> aprovar sua conta.
+          Você solicitou acesso no papel de{' '}
+          <strong>Staff{subRolesLabel ? ` (${subRolesLabel})` : ''}</strong>. Por segurança do
+          playbook e proteção das justificativas e status de lesão do elenco, seu acesso de edição e
+          leitura restrita será liberado assim que um <strong>Admin ou Head Coach</strong> aprovar
+          sua conta.
         </p>
         <div className="btn-row" style={{ marginTop: 'var(--space-4)' }}>
           <Button variant="secondary" onClick={() => navigate('/perfil')}>
             Falar com o staff
+          </Button>
+          <Button variant="ghost" onClick={() => void logout()}>
+            Sair da conta
           </Button>
         </div>
       </CardContent>

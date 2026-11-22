@@ -18,12 +18,11 @@ export class AuthPage {
   }
 
   /**
-   * Botão de login Google. O nome acessível é "Entrar com Google" (aria-label);
-   * o texto visível é "com o Google" ao lado do ícone colorido. Aceitamos os dois
-   * para não depender de qual deles o accessible name expõe.
+   * Botão de login Google. O nome acessível e o texto visível coincidem em
+   * "Entrar com o Google".
    */
   googleButton(): Locator {
-    return this.page.getByRole('button', { name: /entrar com google|com o google/i })
+    return this.page.getByRole('button', { name: 'Entrar com o Google', exact: true })
   }
 
   emailLoginButton(): Locator {
@@ -36,8 +35,9 @@ export class AuthPage {
   }
 
   /**
-   * Preenche nome e e-mail e pede o código. O time não é digitado: a tela
-   * mostra a equipe atual (Navigators) e o cadastro usa o time habilitado.
+   * Preenche nome e e-mail e pede o código. Não há campo de time nem de código:
+   * a tela mostra "Time atual: Navigators" (somente leitura) e o frontend envia
+   * teamCode NAVS-2026 automaticamente no POST /auth/email/verify.
    */
   async requestCode(input: { email: string; name?: string }): Promise<void> {
     await this.page.getByLabel(/nome completo/i).fill(input.name ?? 'Conta E2E')
@@ -46,9 +46,13 @@ export class AuthPage {
     await expect(this.page.getByRole('heading', { name: 'Verifique seu e-mail' })).toBeVisible()
   }
 
-  /** Digita o código recebido e avança para a escolha de papel. */
+  /**
+   * Digita o código recebido e avança para a escolha de papel. O código são 6
+   * inputs individuais; colar ou preencher os 6 dígitos no primeiro campo os
+   * distribui pelos demais. Não usar /código de verificação/i: casa com os 6.
+   */
   async enterCode(code: string): Promise<void> {
-    await this.page.getByLabel(/código de verificação/i).fill(code)
+    await this.codeInput(1).fill(code)
     await this.page.getByRole('button', { name: 'Continuar' }).click()
     await expect(this.page.getByRole('heading', { name: 'Como você participa do time?' })).toBeVisible()
   }
@@ -69,6 +73,32 @@ export class AuthPage {
 
   createAccountButton(): Locator {
     return this.page.getByRole('button', { name: /^Criar conta$/ })
+  }
+
+  /** Um dos 6 inputs do código de verificação (`position` de 1 a 6). */
+  codeInput(position: number): Locator {
+    return this.page.getByLabel(`Dígito ${position} do código de verificação`, { exact: true })
+  }
+
+  /** Grupo dos 6 inputs do código, rotulado por "Código de verificação". */
+  codeGroup(): Locator {
+    return this.page.getByRole('group', { name: /código de verificação/i })
+  }
+
+  resendCodeButton(): Locator {
+    return this.page.getByRole('button', { name: 'Reenviar código' })
+  }
+
+  /**
+   * Após o reenvio, o botão entra em cooldown de 60s: o rótulo vira
+   * "Reenviar código (Ns)" e o botão fica desabilitado até zerar.
+   */
+  resendCooldownButton(): Locator {
+    return this.page.getByRole('button', { name: /^Reenviar código \(\d+s\)$/ })
+  }
+
+  backButton(): Locator {
+    return this.page.getByRole('button', { name: 'Voltar', exact: true })
   }
 
   /** Staff é criado diretamente como pendente após escolher o papel. */
